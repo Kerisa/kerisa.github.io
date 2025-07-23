@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kerisa.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="分析 C++ 程序时，要是能从一个二进制文件中识别出 C++ 程序的结构，并且能标识出一些主要的类和它们的关系是非常有帮助的。而其中为了实现运行时类型识别而生成的运行时类型信息（Runtime type information，RTTI）也能在程序分析上提供方便。 注意，文中讨论的 C++ 可执行文件仅限于使用 MSVC 编译器编译出的 C++ 可执行文件。 ●识别类及其构造函数">
+<meta property="og:type" content="article">
+<meta property="og:title" content="C++ 程序的逆向分析以及 RTTI 信息检索">
+<meta property="og:url" content="https://kerisa.github.io/845/index.html">
+<meta property="og:site_name" content="Re: Memory (mirror)">
+<meta property="og:description" content="分析 C++ 程序时，要是能从一个二进制文件中识别出 C++ 程序的结构，并且能标识出一些主要的类和它们的关系是非常有帮助的。而其中为了实现运行时类型识别而生成的运行时类型信息（Runtime type information，RTTI）也能在程序分析上提供方便。 注意，文中讨论的 C++ 可执行文件仅限于使用 MSVC 编译器编译出的 C++ 可执行文件。 ●识别类及其构造函数">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-06-28T15:20:34.000Z">
+<meta property="article:modified_time" content="2025-07-22T18:55:46.780Z">
+<meta property="article:author" content="flandre">
+<meta property="article:tag" content="c++">
+<meta property="article:tag" content="MSVC">
+<meta property="article:tag" content="RTTI">
+<meta property="article:tag" content="windows">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://flandre-scarlet.moe/blog/845/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>C++ 程序的逆向分析以及 RTTI 信息检索 | Re: Memory (mirror)</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Re: Memory (mirror)</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/845/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/sys-imgs/42553027_1.png">
+      <meta itemprop="name" content="flandre">
+      <meta itemprop="description" content="This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Re: Memory (mirror)">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          C++ 程序的逆向分析以及 RTTI 信息检索
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-06-28 23:20:34" itemprop="dateCreated datePublished" datetime="2019-06-28T23:20:34+08:00">2019-06-28</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-07-23 02:55:46" itemprop="dateModified" datetime="2025-07-23T02:55:46+08:00">2025-07-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/programs/" itemprop="url" rel="index"><span itemprop="name">programs</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/programs/%E9%80%86%E5%90%91/" itemprop="url" rel="index"><span itemprop="name">逆向</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5.8k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>5 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>分析 C++ 程序时，要是能从一个二进制文件中识别出 C++ 程序的结构，并且能标识出一些主要的类和它们的关系是非常有帮助的。而其中为了实现运行时类型识别而生成的运行时类型信息（Runtime type information，RTTI）也能在程序分析上提供方便。</p>
+<p>注意，文中讨论的 C++ 可执行文件仅限于使用 MSVC 编译器编译出的 C++ 可执行文件。</p>
+<h1 id="●识别类及其构造函数"><a href="#●识别类及其构造函数" class="headerlink" title="●识别类及其构造函数"></a>●识别类及其构造函数</h1><span id="more"></span>
+<ol>
+<li><p>函数中多处使用 ecx 寄存器相对寻址（this 指针，也可能会有将 ecx 存至 ebx 等其他寄存器后再引用的，视具体情况），可能是在读写类的成员变量，不过这一点并不是特别准确，特别当读写栈上的局部类实例时，经过优化的代码不太容易直接看出几个内存变量之间的相关性。</p>
+</li>
+<li><p>通过 thiscall 的调用约定。thiscall 使用 ecx 传递 this 指针，因此碰到有为 ecx 赋值后紧接着调用函数的情况，基本确定是在调用某个类成员函数，当然也有可能是个 fastcall 的函数；特别的，如果发现 ecx 引用了一个未初始化过的地址，比如说栈上的，那调用的很有可能就是局部类变量的构造函数。同样，new 返回后的 eax 直接扔给 ecx 再调用函数，也极有可能是在调用构造函数。</p>
+</li>
+<li><p>通过间接函数调用，遇到形如</p>
+<pre><code>mov  eax,dword ptr \[ecx\]
+mov  eax,dword ptr \[eax+18h\]
+call eax
+</code></pre>
+<p>三连的话基本也可以确定是在调用类的虚函数。遇到虚函数的话，只能通过 this 指针找到虚表然后确定实际调用的函数了，显然无法进行静态分析。</p>
+</li>
+<li><p>多态类在调用了基类的构造函数后，执行后续代码前会设置该类自己的虚表，即引用一个位于 .rdata 段里的全局地址，常会有形如</p>
+<p>mov dword ptr [eax], offset 72C20C</p>
+<p>这样的代码出现，后者是一个只读的地址，就可能是在设置虚表。当然，查看该地址中的每个指针应当都是指向到代码段中的。析构函数中也会出现类似操作。</p>
+</li>
+</ol>
+<h1 id="●类的内存布局"><a href="#●类的内存布局" class="headerlink" title="●类的内存布局"></a>●类的内存布局</h1><p>关于类继承布局在我之前的一篇<a href="/452">文章</a>里也提到过。</p>
+<p>熟悉布局后可以方便我们确定类与类间的关系和类里的成员，使用 MSVC 的 <em>-d1reportSingleClassLayoutXXX</em> 或 -d1reportAllClassLayout 命令参数可以显示代码中单个或所有类的布局（将 XXX 替换成类名，不插入空格，编译器会显示出包含关键字 XXX 的所有类）。实际项目中虚继承我想应该不会太多（也可能只是我见的少……），但是接口多继承还是很常见的。贴几个不同类型的类布局信息。</p>
+<p>[cpp]class Animal_01 { public: virtual void fff01() {} }; class Animal_02 { public: virtual void fff02() {} }; class Animal_11 { public: virtual void fff11() {} }; class Animal_0 : public Animal_01, public Animal_02 { public: virtual ~Animal_0() {} }; class Animal_1 : public Animal_11 { public: virtual void A1() {} }; class Animal : virtual public Animal_1, virtual public Animal_0 { public: virtual ~Animal(void) {} };[&#x2F;cpp]</p>
+<h3 id="单继承"><a href="#单继承" class="headerlink" title="单继承"></a>单继承</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Animal</span>\_1 : <span class="keyword">public</span> Animal\_11</span><br></pre></td></tr></table></figure>
+
+<p> class Animal_1size(4):<br>+—<br> 0 +— (base class Animal_11)<br> 0  {vfptr}<br> +—<br>+—</p>
+<p>Animal_1::$vftable@:<br> &amp;Animal_1_meta<br>  0<br> 0 &amp;Animal_11::fff11<br> 1 &amp;Animal_1::A1</p>
+<h3 id="多继承"><a href="#多继承" class="headerlink" title="多继承"></a>多继承</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Animal</span>\_0 : <span class="keyword">public</span> Animal\_01, <span class="keyword">public</span> Animal\_02</span><br></pre></td></tr></table></figure>
+
+<p> class Animal_0size(8):<br>+—<br> 0 +— (base class Animal_01)<br> 0  {vfptr}<br> +—<br> 4 +— (base class Animal_02)<br> 4  {vfptr}<br> +—<br>+—</p>
+<p>Animal_0::$vftable@Animal_01@:<br> &amp;Animal_0_meta<br>  0<br> 0 &amp;Animal_01::fff01<br> 1 &amp;Animal_0::{dtor}</p>
+<p>Animal_0::$vftable@Animal_02@:<br> -4<br> 0 &amp;Animal_02::fff02</p>
+<h3 id="虚继承"><a href="#虚继承" class="headerlink" title="虚继承"></a>虚继承</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Animal</span> : <span class="keyword">virtual</span> <span class="keyword">public</span> Animal\_1, <span class="keyword">virtual</span> <span class="keyword">public</span> Animal\_0</span><br></pre></td></tr></table></figure>
+
+<p> class Animalsize(16):<br>+—<br> 0 {vbptr}<br>+—<br>+— (virtual base Animal_1)<br> 4 +— (base class Animal_11)<br> 4  {vfptr}<br> +—<br>+—<br>+— (virtual base Animal_0)<br> 8 +— (base class Animal_01)<br> 8  {vfptr}<br> +—<br>12 +— (base class Animal_02)<br>12  {vfptr}<br> +—<br>+—</p>
+<p>Animal::$vbtable@:<br> 0 0<br> 1 4 (Animald(Animal+0)Animal_1)<br> 2 8 (Animald(Animal+0)Animal_0)</p>
+<p>Animal::$vftable@:<br> -4<br> 0 &amp;Animal_11::fff11<br> 1 &amp;Animal_1::A1</p>
+<p>Animal::$vftable@Animal_01@:<br> -8<br> 0 &amp;Animal_01::fff01<br> 1 &amp;Animal::{dtor}</p>
+<p>Animal::$vftable@Animal_02@:<br> -12<br> 0 &amp;Animal_02::fff02</p>
+<h1 id="●利用-RTTI-信息识别-C-类"><a href="#●利用-RTTI-信息识别-C-类" class="headerlink" title="●利用 RTTI 信息识别 C++ 类"></a>●利用 RTTI 信息识别 C++ 类</h1><p>RTTI 对于识别多态类能提供很多帮助，可以了解到类名、类的继承关系等信息，当然非多态的类是没有这东西的。VS 编译 C++ 代码时默认启用 RTTI，其设置项在“项目属性-C++-语言-启用运行时类型识别”选项中，将其关闭后也就无法再使用 typeid 和 dynamic_cast 了。</p>
+<p>下面介绍一下相关的结构。</p>
+<ol>
+<li><p>RTTICompleteObjectLocator<br>该结构是从 this 指针找到的第一个结构，后续的结构均可从它引出。内部包含了两个指针，分别指向自身的类信息和类的继承信息。</p>
+<p>+0  unsigned long                 signature;       &#x2F;&#x2F; 似乎都是 0<br>+4  unsigned long                 offset;          &#x2F;&#x2F; 虚表偏移<br>+8  unsigned long                 cdOffset;        &#x2F;&#x2F; ?<br>+c  TypeDescriptor*               pTypeDescriptor; &#x2F;&#x2F; 自身类信息<br>+10 RTTIClassHierarchyDescriptor* pClassHierarchyDescriptor; &#x2F;&#x2F; 类的继承信息</p>
+<p>查找的时候先通过 this 指针找到虚表，然后虚表往前移动一个 uint32_t 就是指向该结构的指针了。即： <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">RTTICompleteObjectLocator\* ptr = (RTTICompleteObjectLocator\*)(\*(uint32\<span class="type">_t</span>\*\*)<span class="keyword">this</span>)\[<span class="number">-1</span>\];</span><br></pre></td></tr></table></figure> 但是在复杂继承情况下该表达式中的 this 需要经过调整后才能正常工作，比如同时虚继承了两个类，那么此时 this 指向的第一个 uint32_t 是虚基类表指针。</p>
+</li>
+<li><p>TypeDescriptor<br>该结构包含了类自身的信息，最主要就是里面的字符串类名称</p>
+<p>+0  void*           pVFTable;   &#x2F;&#x2F; 指向 type_info 的虚表<br>+4  unsigned long   spare;      &#x2F;&#x2F; 保留<br>+8  char[1]         name;       &#x2F;&#x2F; 类名</p>
+</li>
+<li><p>RTTIClassHierarchyDescriptor<br>该结构为类的继承信息，里面含有从当前类开始的其所有父类</p>
+<p>+0  unsigned long       signature;       &#x2F;&#x2F; 似乎都是 0<br>+4  unsigned long       attributes;      &#x2F;&#x2F; 第0位置1表示多继承，<br>                                     &#x2F;&#x2F; 第1位置1表示虚继承<br>+8  unsigned long       numBaseClasses;  &#x2F;&#x2F; 父类数量，包括自己在内，所以数量加1<br>+c  RTTIBaseClassArray* pBaseClassArray; &#x2F;&#x2F; 父类的数组</p>
+<p>这个数组中多继承的类也会一并列出，项的顺序是按继承树以深度优先的方式展示，如 C 同时继承了 A 和 B，AB 又分别继承自 A1、A2、B1、B2，那么数组中就会有 EAA1A2BB1B2 七项，后面的例子中也能看到。 RTTIBaseClassArray 这个结构里面是单纯的包含一个 RTTIBaseClassDescriptor* 数组</p>
+<p>+0 RTTIBaseClassDescriptor* arrayOfBaseClassDescriptors[]</p>
+</li>
+<li><p>RTTIBaseClassDescriptor<br>该结构记录了相应父类的信息</p>
+<p>+0  TypeDescriptor *pTypeDescriptor; &#x2F;&#x2F; 父类自身的信息<br>+4  unsigned long numContainedBases; &#x2F;&#x2F; 父类的父类数量<br>+8  PMD where;<br>+0  unsigned long mdisp;         &#x2F;&#x2F; 成员偏移<br>+4  unsigned long pdisp;         &#x2F;&#x2F; 虚基类表在类中的偏移，<br>                                 &#x2F;&#x2F; 如果是 -1 说明该类不是其虚基类<br>+8  unsigned long vdisp;         &#x2F;&#x2F; 基类在虚基类表中的偏移<br>+14 unsigned long attributes;        &#x2F;&#x2F;<br>+18 RTTIClassHierarchyDescriptor* pClassDescriptor; &#x2F;&#x2F; 父类的继承信息</p>
+<p>PMD 中几个值主要用于计算该父类在其子类中的偏移位置，计算方式如下： <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">size\<span class="type">_t</span> offset = <span class="number">0</span>; <span class="keyword">if</span> (pmd.pdisp &gt;= <span class="number">0</span>) &#123; <span class="comment">// 为 -1 则跳过 offset = pmd.pdisp; offset += \*(\_\_int32\*)((char\*)\*(size\_t\*)((char\*)pThis + offset) + pmd.vdisp); // 在虚基类表中找到 vdisp 偏移值 &#125; offset += pmd.mdisp;</span></span><br></pre></td></tr></table></figure></p>
+</li>
+</ol>
+<p>举个例子，比如前面的<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Animal</span> : <span class="keyword">virtual</span> <span class="keyword">public</span> Animal1, <span class="keyword">virtual</span> <span class="keyword">public</span> Animal2</span><br></pre></td></tr></table></figure>的继承布局，同时得到 Animal1 的 PMD 为 { mdisp:0, pdisp:0, vdisp:4 }，那么通过 Animal 类的 this 得到 Animal1 的步骤为</p>
+<ol>
+<li>(size_t)this + pdisp 得到虚基类表地址 vbt</li>
+<li>*(size_t*)(*(size_t*)vbt + vdisp) 再获得虚基类表中第二项 Animal1 的偏移 offset</li>
+<li>最后 (size_t)this + offset</li>
+</ol>
+<p>得到最终 offset 的值为 4。下面的布局和前面展示的虚继承布局是一样的，这里重新贴一份。</p>
+<p>class Animalsize(16):<br>    +—<br> 0   {vbptr}<br>    +—<br>    +— (virtual base Animal_1)<br> 4   +— (base class Animal_11)<br> 4    {vfptr}<br>     +—<br>    +—<br>    +— (virtual base Animal_0)<br> 8   +— (base class Animal_01)<br> 8    {vfptr}<br>     +—<br>12   +— (base class Animal_02)<br>12    {vfptr}<br>     +—<br>    +—</p>
+<p>Animal::$vbtable@:<br> 0   0<br> 1   4 (Animald(Animal+0)Animal_1)<br> 2   8 (Animald(Animal+0)Animal_0)</p>
+<h1 id="●从可执行文件中提取-RTTI-信息"><a href="#●从可执行文件中提取-RTTI-信息" class="headerlink" title="●从可执行文件中提取 RTTI 信息"></a>●从可执行文件中提取 RTTI 信息</h1><p>通过以上的 RTTI 解析，我写了个可以找出 exe 中多态类信息的程序，简单列出了类名、继承关系以及在构造函数中被引用的 RVA 地址。程序主要通过匹配字符串 “.?AV” 来找到类名，并识别出相应的 RTTI 信息，最后定位出引用了对应虚表的函数的 RVA 地址。代码放在<a target="_blank" rel="noopener" href="https://github.com/Kerisa/TraversalCppRtti">这里</a>。 贴一部分输出结果（同样使用上面的 Animal* 继承结构） <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--------------------------------- .?AVAnimal\_11@@: base classes: .?AVAnimal\_11@@, reference in ctors(next instruction): 13c9c, --------------------------------- .?AVAnimal\_0@@: base classes: .?AVAnimal\_0@@, .?AVAnimal\_01@@, .?AVAnimal\_02@@, reference in ctors(next instruction): 13c2f, 1436c, 13c39, 14376, --------------------------------- .?AVAnimal\_1@@: base classes: .?AVAnimal\_1@@, .?AVAnimal\_11@@, reference in ctors(next instruction): 13cf4, --------------------------------- .?AVAnimal@@: base classes: .?AVAnimal@@, .?AVAnimal\_1@@, .?AVAnimal\_11@@, .?AVAnimal\_0@@, .?AVAnimal\_01@@, .?AVAnimal\_02@@, reference in ctors(next instruction): 13adb, 142f7, 13aed, 1430b, 13b00, 1431f,</span><br></pre></td></tr></table></figure> 看到 Animal 类的虚表有 6 处引用，而 Animal 中因为继承关系含有 3 个虚表，所以分别就是构造、析构函数各引用了 3 次。而 Animal_11 和 Animal_1 类没有定义虚基类，所以只有构造函数中引用的 1 次。</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>flandre
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://kerisa.github.io/845/" title="C++ 程序的逆向分析以及 RTTI 信息检索">https://kerisa.github.io/845/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/c/" rel="tag"># c++</a>
+              <a href="/tags/MSVC/" rel="tag"># MSVC</a>
+              <a href="/tags/RTTI/" rel="tag"># RTTI</a>
+              <a href="/tags/windows/" rel="tag"># windows</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/723/" rel="prev" title="使用 CMake 编译 vc90 版 libphonenumber">
+      <i class="fa fa-chevron-left"></i> 使用 CMake 编译 vc90 版 libphonenumber
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/890/" rel="next" title="自建 KMS 激活服务">
+      自建 KMS 激活服务 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E2%97%8F%E8%AF%86%E5%88%AB%E7%B1%BB%E5%8F%8A%E5%85%B6%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0"><span class="nav-number">1.</span> <span class="nav-text">●识别类及其构造函数</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E2%97%8F%E7%B1%BB%E7%9A%84%E5%86%85%E5%AD%98%E5%B8%83%E5%B1%80"><span class="nav-number">2.</span> <span class="nav-text">●类的内存布局</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%95%E7%BB%A7%E6%89%BF"><span class="nav-number">2.0.1.</span> <span class="nav-text">单继承</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%9A%E7%BB%A7%E6%89%BF"><span class="nav-number">2.0.2.</span> <span class="nav-text">多继承</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%99%9A%E7%BB%A7%E6%89%BF"><span class="nav-number">2.0.3.</span> <span class="nav-text">虚继承</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E2%97%8F%E5%88%A9%E7%94%A8-RTTI-%E4%BF%A1%E6%81%AF%E8%AF%86%E5%88%AB-C-%E7%B1%BB"><span class="nav-number">3.</span> <span class="nav-text">●利用 RTTI 信息识别 C++ 类</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E2%97%8F%E4%BB%8E%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6%E4%B8%AD%E6%8F%90%E5%8F%96-RTTI-%E4%BF%A1%E6%81%AF"><span class="nav-number">4.</span> <span class="nav-text">●从可执行文件中提取 RTTI 信息</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt=""
+      src="/sys-imgs/42553027_1.png">
+  <p class="site-author-name" itemprop="name"></p>
+  <div class="site-description" itemprop="description">This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">247</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">flandre</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">328k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">4:58</span>
+</div>
+  <div class="powered-by">Powered by love
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

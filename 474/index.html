@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kerisa.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="最近公司买了个扫描枪，要给设备二维码做扫描录入工作。原来跟我说的是串口的扫描枪，没想到后来买到的是 usb 的，似乎是考虑到 usb 的比较普遍。果然串口还是没 usb 来得方便啊，在使用上。 以前没搞过 usb 的，一开始还以为不能工作，后来开了个记事本发现能正常录入了。。。 上网确认了一下果然是通过类似键盘事件进行输入的，那这样就上键盘钩子吧。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="获取 USB 扫描枪输入">
+<meta property="og:url" content="https://kerisa.github.io/474/index.html">
+<meta property="og:site_name" content="Re: Memory (mirror)">
+<meta property="og:description" content="最近公司买了个扫描枪，要给设备二维码做扫描录入工作。原来跟我说的是串口的扫描枪，没想到后来买到的是 usb 的，似乎是考虑到 usb 的比较普遍。果然串口还是没 usb 来得方便啊，在使用上。 以前没搞过 usb 的，一开始还以为不能工作，后来开了个记事本发现能正常录入了。。。 上网确认了一下果然是通过类似键盘事件进行输入的，那这样就上键盘钩子吧。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-06-26T13:05:47.000Z">
+<meta property="article:modified_time" content="2025-07-21T18:42:00.759Z">
+<meta property="article:author" content="flandre">
+<meta property="article:tag" content="windows">
+<meta property="article:tag" content="USB">
+<meta property="article:tag" content="扫描枪">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://flandre-scarlet.moe/blog/474/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>获取 USB 扫描枪输入 | Re: Memory (mirror)</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Re: Memory (mirror)</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/474/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/sys-imgs/42553027_1.png">
+      <meta itemprop="name" content="flandre">
+      <meta itemprop="description" content="This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Re: Memory (mirror)">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          获取 USB 扫描枪输入
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-06-26 21:05:47" itemprop="dateCreated datePublished" datetime="2018-06-26T21:05:47+08:00">2018-06-26</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-07-22 02:42:00" itemprop="dateModified" datetime="2025-07-22T02:42:00+08:00">2025-07-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%A8%8B%E5%BA%8F/" itemprop="url" rel="index"><span itemprop="name">程序</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近公司买了个扫描枪，要给设备二维码做扫描录入工作。原来跟我说的是串口的扫描枪，没想到后来买到的是 usb 的，似乎是考虑到 usb 的比较普遍。果然串口还是没 usb 来得方便啊，在使用上。</p>
+<p>以前没搞过 usb 的，一开始还以为不能工作，后来开了个记事本发现能正常录入了。。。</p>
+<p>上网确认了一下果然是通过类似键盘事件进行输入的，那这样就上键盘钩子吧。</p>
+<span id="more"></span>
+<p>因为要实现无输入焦点监听任意键盘输入，所以这里使用了 WH_KEYBOARD_LL 类型的钩子。另外 <a target="_blank" rel="noopener" href="https://msdn.microsoft.com/en-us/library/windows/desktop/ms644985(v=vs.85).aspx">MSDN</a> 里提到可以使用 Raw Input 代替 WH_KEYBOARD_LL 这个钩子，因为 RawInput 是异步监视的，不像 LL 钩子要切换进程空间，可以获得更好的性能。</p>
+<p>下面是处理输入字符逻辑的代码</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> UsbScanner::UsbScannerImpl2::<span class="built_in">SaveChar</span>(uint16\<span class="type">_t</span> vkey, uint16\<span class="type">_t</span> scancode, <span class="type">bool</span> keydown) &#123; <span class="keyword">auto</span> diff = chrono::steady\_clock::<span class="built_in">now</span>() - mLastReceiveTime; <span class="keyword">if</span> (!mDataBuffer.<span class="built_in">empty</span>() &amp;&amp; diff &gt; chrono::<span class="built_in">milliseconds</span>(mTimeoutThreshold)) &#123; <span class="built_in">Flush</span>(); &#125; <span class="type">char</span> name\[<span class="number">255</span>\] = &#123; <span class="number">0</span> &#125;; <span class="keyword">if</span> (<span class="built_in">GetKeyNameTextA</span>(scancode &lt;&lt; <span class="number">16</span>, name, \_countof(name)) == <span class="number">0</span>) <span class="keyword">return</span>; <span class="keyword">if</span> (vkey == VK\_SPACE) name\[<span class="number">0</span>\] = <span class="string">&#x27; &#x27;</span>; <span class="keyword">else</span> <span class="keyword">if</span> (vkey == VK\_RETURN) name\[<span class="number">0</span>\] = <span class="string">&#x27;\\n&#x27;</span>; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">strlen</span>(name) &gt; <span class="number">1</span>) <span class="keyword">return</span>; <span class="type">bool</span> cap2 = !!(<span class="built_in">GetKeyState</span>(VK\_CAPITAL) &amp; <span class="number">1</span>); <span class="type">bool</span> shift2 = !!(<span class="built_in">GetKeyState</span>(VK\_LSHIFT) &amp; <span class="number">0x8000</span>) !!(<span class="built_in">GetKeyState</span>(VK\_RSHIFT) &amp; <span class="number">0x8000</span>); <span class="comment">// GetKeyNameText 返回的是大写字母 name\[0\] = cap2 ? toupper(name\[0\]) : tolower(name\[0\]); if (shift2) &#123; if (islower(name\[0\])) name\[0\] -= 32; else if (isupper(name\[0\])) name\[0\] += 32; else &#123; string l = &quot;\`1234567890-=\[\];&#x27;,./\\\\&quot;; string u = &quot;~!@#$%^&amp;\*()\_+&#123;&#125;:\\&quot;&lt;&gt;?&quot;; size\_t pos = l.find\_first\_of(name\[0\]); if (pos != string::npos) name\[0\] = u\[pos\]; &#125; &#125; if (keydown) &#123; mLastReceiveTime = chrono::steady\_clock::now(); mDataBuffer.push\_back(name\[0\]); &#125; &#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>钩子的设置和钩子函数参数的意义参考 msdn。主要的处理都在这里面了，对于每个键盘输入取出按键对应的字符，并查看当前的 shift 和 capital 状态将输入进行适当的转换。如果在指定的超时时间内，则认为是同一批输入，将其存放到缓存里。除此之外还有一个线程进行定期的检查，如果超时时间内没有输入则自动将缓存的数据发送给设置的回调函数。</p>
+<p>另外因为钩子需要消息循环的支持，所以在初始化过程中创建了一个隐藏的窗口并进行消息队列的处理。</p>
+<p>下面是 RawInput 版的初始化代码</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">bool</span> UsbScanner::UsbScannerImpl2::<span class="built_in">Start</span>(std::function&lt;<span class="built_in">void</span>(<span class="type">const</span> string &amp;)&gt; receiver, <span class="type">int</span> timeoutThreshold, <span class="type">unsigned</span> <span class="type">long</span> tid) &#123; <span class="keyword">if</span> (!mStop) <span class="keyword">return</span> <span class="literal">false</span>; <span class="built_in">assert</span>(tid == <span class="number">0</span>); mTimeoutThreshold = timeoutThreshold; mReceiver = receiver; mStop = <span class="literal">false</span>; mReady = <span class="literal">false</span>; mProcess = std::<span class="built_in">thread</span>(\[<span class="keyword">this</span>, tid\]() &#123; WNDCLASSEXW wcex; wcex.cbSize = <span class="built_in">sizeof</span>(WNDCLASSEX); wcex.style = CS\_HREDRAW CS\_VREDRAW; wcex.lpfnWndProc = DefWindowProc; wcex.cbClsExtra = <span class="number">0</span>; wcex.cbWndExtra = <span class="number">0</span>; wcex.hInstance = <span class="built_in">GetModuleHandle</span>(<span class="literal">NULL</span>); wcex.hIcon = <span class="literal">NULL</span>; wcex.hCursor = <span class="built_in">LoadCursor</span>(<span class="literal">nullptr</span>, IDC\_ARROW); wcex.hbrBackground = <span class="literal">NULL</span>; wcex.lpszMenuName = <span class="literal">NULL</span>; wcex.lpszClassName = Detail::WndClassName; wcex.hIconSm = <span class="literal">NULL</span>; <span class="built_in">RegisterClassExW</span>(&amp;wcex); mWnd = <span class="built_in">CreateWindowW</span>(Detail::WndClassName, <span class="string">L&quot;&quot;</span>, WS\_OVERLAPPEDWINDOW, <span class="number">1</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="literal">nullptr</span>, <span class="literal">nullptr</span>, <span class="built_in">GetModuleHandle</span>(<span class="literal">NULL</span>), <span class="literal">nullptr</span>); <span class="keyword">if</span> (mWnd != <span class="literal">NULL</span>) &#123; <span class="built_in">UpdateWindow</span>(mWnd); <span class="built_in">ShowWindow</span>(mWnd, SW\_HIDE); RAWINPUTDEVICE Rid\[<span class="number">1</span>\]; Rid\[<span class="number">0</span>\].usUsagePage = <span class="number">0x01</span>; Rid\[<span class="number">0</span>\].usUsage = <span class="number">0x06</span>; Rid\[<span class="number">0</span>\].dwFlags = RIDEV\_INPUTSINK; Rid\[<span class="number">0</span>\].hwndTarget = mWnd; <span class="keyword">if</span> (<span class="built_in">RegisterRawInputDevices</span>(Rid, <span class="number">1</span>, <span class="built_in">sizeof</span>(Rid\[<span class="number">0</span>\])) == FALSE) mStop = <span class="literal">true</span>; <span class="keyword">else</span> mReady = <span class="literal">true</span>; &#125; <span class="keyword">else</span> &#123; mStop = <span class="literal">true</span>; &#125; &#123; std::unique\_lock&lt;std::mutex&gt; <span class="built_in">lock</span>(mConditionLock); mCondition.notify\_one(); &#125; MSG msg; <span class="keyword">while</span> (!mStop) &#123; <span class="keyword">if</span> (<span class="built_in">PeekMessage</span>(&amp;msg, mWnd, <span class="literal">NULL</span>, <span class="literal">NULL</span>, PM\_NOREMOVE) == <span class="number">0</span>) &#123; <span class="keyword">if</span> (!mDataBuffer.<span class="built_in">empty</span>() &amp;&amp; chrono::steady\_clock::<span class="built_in">now</span>() - mLastReceiveTime &gt; chrono::<span class="built_in">milliseconds</span>(mTimeoutThreshold)) &#123; <span class="built_in">Flush</span>(); &#125; <span class="keyword">else</span> &#123; <span class="keyword">this</span>\_thread::sleep\_for(chrono::<span class="built_in">milliseconds</span>(<span class="number">1</span>)); &#125; &#125; <span class="keyword">else</span> &#123; <span class="built_in">GetMessage</span>(&amp;msg, mWnd, <span class="literal">NULL</span>, <span class="literal">NULL</span>); <span class="keyword">if</span> (msg.message != WM\_INPUT) &#123; <span class="built_in">TranslateMessage</span>(&amp;msg); <span class="built_in">DispatchMessage</span>(&amp;msg); &#125; <span class="keyword">else</span> &#123; UINT dwSize; <span class="built_in">GetRawInputData</span>((HRAWINPUT)msg.lParam, RID\_INPUT, <span class="literal">NULL</span>, &amp;dwSize, <span class="built_in">sizeof</span>(RAWINPUTHEADER)); vector&lt;BYTE&gt; lpb; lpb.<span class="built_in">resize</span>(dwSize); <span class="keyword">if</span> (<span class="built_in">GetRawInputData</span>((HRAWINPUT)msg.lParam, RID\_INPUT, lpb.<span class="built_in">data</span>(), &amp;dwSize, <span class="built_in">sizeof</span>(RAWINPUTHEADER)) != dwSize) <span class="keyword">throw</span> <span class="built_in">exception</span>(<span class="string">&quot;GetRawInputData does not return correct size !\\n&quot;</span>); RAWINPUT\* raw = (RAWINPUT\*)lpb.<span class="built_in">data</span>(); <span class="keyword">if</span> (raw-&gt;header.dwType == RIM\_TYPEKEYBOARD) &#123; <span class="built_in">SaveChar</span>( raw-&gt;data.keyboard.VKey, raw-&gt;data.keyboard.MakeCode, raw-&gt;data.keyboard.Flags == RI\_KEY\_MAKE ); &#125; &#125; &#125; &#125; &#125;); std::unique\<span class="function">_lock&lt;std::mutex&gt; <span class="title">lock</span><span class="params">(mConditionLock)</span></span>; mCondition.<span class="built_in">wait</span>(lock, \[<span class="keyword">this</span>\] &#123; <span class="keyword">return</span> mReady mStop; &#125;); <span class="keyword">if</span> (mStop) &#123; mProcess.<span class="built_in">detach</span>(); <span class="keyword">return</span> <span class="literal">false</span>; &#125; <span class="keyword">return</span> <span class="literal">true</span>; &#125;</span><br></pre></td></tr></table></figure>
+
+<p>除去一些线程同步的代码外，基本的流程就是创建窗口，然后调用 RegisterRawInputDevices 进行注册，随后等待 WM_INPUT 事件即可。按键的处理逻辑都是一样的。</p>
+<p>完整代码<a target="_blank" rel="noopener" href="https://github.com/Kerisa/Utility/tree/master/src">见此</a>，里面也包含有使用钩子版的，选择一个使用即可。</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>flandre
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://kerisa.github.io/474/" title="获取 USB 扫描枪输入">https://kerisa.github.io/474/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/windows/" rel="tag"># windows</a>
+              <a href="/tags/USB/" rel="tag"># USB</a>
+              <a href="/tags/%E6%89%AB%E6%8F%8F%E6%9E%AA/" rel="tag"># 扫描枪</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/452/" rel="prev" title="菱形继承的内存布局">
+      <i class="fa fa-chevron-left"></i> 菱形继承的内存布局
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/481/" rel="next" title="sse 指令中 xmm 寄存器复制到内存出现异常">
+      sse 指令中 xmm 寄存器复制到内存出现异常 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt=""
+      src="/sys-imgs/42553027_1.png">
+  <p class="site-author-name" itemprop="name"></p>
+  <div class="site-description" itemprop="description">This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">247</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">flandre</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">328k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">4:58</span>
+</div>
+  <div class="powered-by">Powered by love
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

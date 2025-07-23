@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kerisa.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="菱形继承来自于多重继承，是为了解决具有歧义的组合而产生的一个结果。通过引入虚继承，使得多个由虚基类直接或间接派生的类拥有一个共同的基类实例。实现上相当于派生类绕过了父类直接继承了祖父类(虚基类)。 下面我们通过 MSC 14 编译器（VS2015）来看一下菱形继承的实现细节。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="菱形继承的内存布局">
+<meta property="og:url" content="https://kerisa.github.io/452/index.html">
+<meta property="og:site_name" content="Re: Memory (mirror)">
+<meta property="og:description" content="菱形继承来自于多重继承，是为了解决具有歧义的组合而产生的一个结果。通过引入虚继承，使得多个由虚基类直接或间接派生的类拥有一个共同的基类实例。实现上相当于派生类绕过了父类直接继承了祖父类(虚基类)。 下面我们通过 MSC 14 编译器（VS2015）来看一下菱形继承的实现细节。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-06-17T09:53:42.000Z">
+<meta property="article:modified_time" content="2025-07-21T18:42:00.767Z">
+<meta property="article:author" content="flandre">
+<meta property="article:tag" content="c++">
+<meta property="article:tag" content="继承">
+<meta property="article:tag" content="菱形继承">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://flandre-scarlet.moe/blog/452/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>菱形继承的内存布局 | Re: Memory (mirror)</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Re: Memory (mirror)</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/452/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/sys-imgs/42553027_1.png">
+      <meta itemprop="name" content="flandre">
+      <meta itemprop="description" content="This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Re: Memory (mirror)">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          菱形继承的内存布局
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-06-17 17:53:42" itemprop="dateCreated datePublished" datetime="2018-06-17T17:53:42+08:00">2018-06-17</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-07-22 02:42:00" itemprop="dateModified" datetime="2025-07-22T02:42:00+08:00">2025-07-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%A8%8B%E5%BA%8F/" itemprop="url" rel="index"><span itemprop="name">程序</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>6.5k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>6 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>菱形继承来自于多重继承，是为了解决具有歧义的组合而产生的一个结果。通过引入虚继承，使得多个由虚基类直接或间接派生的类拥有一个共同的基类实例。实现上相当于派生类绕过了父类直接继承了祖父类(虚基类)。 下面我们通过 MSC 14 编译器（VS2015）来看一下菱形继承的实现细节。</p>
+<span id="more"></span>
+<p>类继承结构如下所示： <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">A0</span> &#123; <span class="keyword">public</span>: <span class="keyword">virtual</span> ~<span class="built_in">A0</span>() &#123; &#125; <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">f</span><span class="params">()</span> </span>= <span class="number">0</span>; <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">f2</span><span class="params">()</span> </span>= <span class="number">0</span>; <span class="type">int</span> ma0; &#125;; <span class="keyword">class</span> <span class="title class_">A1</span> &#123; <span class="keyword">public</span>: <span class="keyword">virtual</span> ~<span class="built_in">A1</span>() &#123; <span class="built_in">printf</span>(<span class="string">&quot;%d&quot;</span>, ma1); &#125; <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">g</span><span class="params">()</span> </span>= <span class="number">0</span>; <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">g2</span><span class="params">()</span> </span>= <span class="number">0</span>; <span class="type">int</span> ma1; &#125;; <span class="keyword">class</span> <span class="title class_">B</span> : <span class="keyword">virtual</span> <span class="keyword">public</span> A0, <span class="keyword">virtual</span> <span class="keyword">public</span> A1 &#123; <span class="keyword">public</span>: <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">f</span><span class="params">()</span> </span>&#123; <span class="built_in">printf</span>(<span class="string">&quot;B::f&quot;</span>); &#125; <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">b</span><span class="params">()</span> </span>&#123; <span class="built_in">printf</span>(<span class="string">&quot;B::b&quot;</span>); &#125; <span class="type">int</span> mb; &#125;; <span class="keyword">class</span> <span class="title class_">C</span> : <span class="keyword">virtual</span> <span class="keyword">public</span> A0, <span class="keyword">virtual</span> <span class="keyword">public</span> A1 &#123; <span class="keyword">public</span>: <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">f</span><span class="params">()</span> </span>&#123; <span class="built_in">printf</span>(<span class="string">&quot;C::f&quot;</span>); &#125; <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">c</span><span class="params">()</span> </span>&#123; <span class="built_in">printf</span>(<span class="string">&quot;C::c&quot;</span>); &#125; <span class="type">int</span> mc; &#125;; <span class="keyword">class</span> <span class="title class_">D</span> : <span class="keyword">public</span> B, <span class="keyword">public</span> C &#123; <span class="keyword">public</span>: <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">f</span><span class="params">()</span> </span>&#123; <span class="built_in">printf</span>(<span class="string">&quot;D::f&quot;</span>); &#125; <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">f2</span><span class="params">()</span> </span>&#123; <span class="built_in">printf</span>(<span class="string">&quot;D::f2&quot;</span>); &#125; <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">g</span><span class="params">()</span> </span>&#123; <span class="built_in">printf</span>(<span class="string">&quot;D::g&quot;</span>); &#125; <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">g2</span><span class="params">()</span> </span>&#123; <span class="built_in">printf</span>(<span class="string">&quot;D::g2&quot;</span>); &#125; <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">b</span><span class="params">()</span> </span>&#123; <span class="built_in">printf</span>(<span class="string">&quot;D::b&quot;</span>); &#125; <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">c</span><span class="params">()</span> </span>&#123; <span class="built_in">printf</span>(<span class="string">&quot;D::c&quot;</span>); &#125; <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">d</span><span class="params">()</span> </span>&#123; <span class="built_in">printf</span>(<span class="string">&quot;D::d&quot;</span>); &#125; <span class="type">int</span> md; &#125;;</span><br></pre></td></tr></table></figure> 首先使用 -d1reportAllClassLayout 编译选项查看一下所有类的内存布局： <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">class</span> A0 <span class="title">size</span><span class="params">(<span class="number">8</span>)</span>:class A1 size(<span class="number">8</span>): +---+--- <span class="number">0</span> &#123;</span>vfptr&#125; <span class="number">0</span> &#123;vfptr&#125;<span class="comment">// A0、A1 的虚表指针 4 ma0 4 ma1// A0、A1 的成员 +---+--- A0::$vftable@:A1::$vftable@: 0 &amp;A0::&#123;dtor&#125; 0 &amp;A1::&#123;dtor&#125;// 各自的虚表以及函数的偏移 1 &amp;A0::f 1 &amp;A1::g 2 &amp;A0::f2 2 &amp;A1::g2 class B size(28):B::$vftable@B@:// B 自身的虚表 +--- 0 &amp;B::b 0 &#123;vfptr&#125; 4 &#123;vbptr&#125;B::$vbtable@:// B 的虚基类表，由偏移 4 处 8 mb// 的 vbptr 指向 +--- 0 -4// 第一项为自身(B) 相对 +--- (virtual base A0)// 于 vbptr 的偏移，即为 0 12 &#123;vfptr&#125; 1 8 (Bd(B+4)A0)// 第一个虚基类 A0 的偏移，12 16 ma0 2 16 (Bd(B+4)A1)// A1 的偏移，20 +--- +--- (virtual base A1)B::$vftable@A0@:// B 中来自于 A0 的虚函数 20 &#123;vfptr&#125; 0 &amp;B::&#123;dtor&#125; 24 ma1 1 &amp;B::f +--- 2 &amp;A0::f2 B::$vftable@A1@:// B 中来自于 A1 的虚函数 0 &amp;thunk: this-=8; goto B::&#123;dtor&#125; 1 &amp;A1::g 2 &amp;A1::g2 // C 同 B class C size(28):C::$vftable@C@: +--- 0 &amp;C::c 0 &#123;vfptr&#125; 4 &#123;vbptr&#125;C::$vbtable@: 8 mc 0 -4 +--- 1 8 (Cd(C+4)A0) +--- (virtual base A0) 2 16 (Cd(C+4)A1) 12 &#123;vfptr&#125; 16 ma0C::$vftable@A0@: +--- 0 &amp;C::&#123;dtor&#125; +--- (virtual base A1) 1 &amp;C::f 20 &#123;vfptr&#125; 2 &amp;A0::f2 24 ma1 +---C::$vftable@A1@: 0 &amp;thunk: this-=8; goto C::&#123;dtor&#125; 1 &amp;A1::g 2 &amp;A1::g2 class D size(44):D::$vftable@B@:// 来自 B 的虚函数 +--- 0 &amp;D::b 0 +--- (base class B) 0 &#123;vfptr&#125;D::$vftable@C@:// 来自 C 的虚函数 4 &#123;vbptr&#125; 0 &amp;D::c 8 mb +---D::$vbtable@B@:// B 的虚基类表 12 +--- (base class C) 0 -4 12 &#123;vfptr&#125; 1 24 (Dd(B+4)A0) 16 &#123;vbptr&#125; 2 32 (Dd(B+4)A1) 20 mc +---D::$vbtable@C@:// C 的虚基类表 24 md 0 -4 +--- 1 12 (Dd(C+4)A0)// 计算得到的 A0、A1 +--- (virtual base A0) 2 20 (Dd(C+4)A1)// 偏移与 B 中相同 28 &#123;vfptr&#125; 32 ma0D::$vftable@A0@:// 来自 A0 的虚函数 +--- 0 &amp;D::&#123;dtor&#125; +--- (virtual base A1) 1 &amp;D::f 36 &#123;vfptr&#125; 2 &amp;D::f2 40 ma1 +---D::$vftable@A1@:// 来自 A1 的虚函数 0 &amp;thunk: this-=8; goto D::&#123;dtor&#125; 1 &amp;D::g 2 &amp;D::g2</span></span><br></pre></td></tr></table></figure> 对各个类的内存布局有了大致的了解后，接下来来看一下类 D 的构造和析构的情况。</p>
+<h1 id="·构造"><a href="#·构造" class="headerlink" title="·构造"></a>·构造</h1><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">01392527 push 1; 传入 1 01392529 mov ecx,dword ptr \[ebp-0D4h\] 0139252F call D::D (013911B8h) D::D: ....; 省略函数入口代码 01391B2F pop ecx; this 指针 01391B30 mov dword ptr \[this\],ecx 01391B33 mov dword ptr \[ebp-0D4h\],0 01391B3D cmp dword ptr \[ebp+8\],0; 为 0 跳过，防止重复构造虚基类 01391B41 je D::D+6Bh (01391B7Bh) 01391B43 mov eax,dword ptr \[this\]; 设置 vbtable\_B 01391B46 mov dword ptr \[eax+4\],offset D::\`vbtable&#x27; (01397C20h) 01391B4D mov eax,dword ptr \[this\]; 设置 vbtable\_C 01391B50 mov dword ptr \[eax+10h\],offset D::\`vbtable&#x27; (01397C30h) 01391B57 mov ecx,dword ptr \[this\] 01391B5A add ecx,1Ch; 修正偏移后调用构造函数 01391B5D call A0::A0 (01391087h) 01391B62 or dword ptr \[ebp-0D4h\],1 01391B69 mov ecx,dword ptr \[this\] 01391B6C add ecx,24h 01391B6F call A1::A1 (0139143Dh) 01391B74 or dword ptr \[ebp-0D4h\],2 01391B7B push 0; 传入 0，防止重复构造 01391B7D mov ecx,dword ptr \[this\] 01391B80 call B::B (0139142Eh) 01391B85 push 0 01391B87 mov ecx,dword ptr \[this\] 01391B8A add ecx,0Ch 01391B8D call C::C (01391082h) 01391B92 mov eax,dword ptr \[this\]; &lt;开始 D 自身的构造&gt; 设置 vftable\_B 01391B95 mov dword ptr \[eax\],offset D::\`vftable&#x27; (01397BE4h) 01391B9B mov eax,dword ptr \[this\]; 设置 vftable\_C 01391B9E mov dword ptr \[eax+0Ch\],offset D::\`vftable&#x27; (01397BF0h) 01391BA5 mov eax,dword ptr \[this\] 01391BA8 mov ecx,dword ptr \[eax+4\] 01391BAB mov edx,dword ptr \[ecx+4\] 01391BAE mov eax,dword ptr \[this\]; 由 B 的 vbptr 取得 A0 的虚表指针并赋值 01391BB1 mov dword ptr \[eax+edx+4\],offset D::\`vftable&#x27; (01397BFCh) 01391BB9 mov eax,dword ptr \[this\] 01391BBC mov ecx,dword ptr \[eax+4\] 01391BBF mov edx,dword ptr \[ecx+8\] 01391BC2 mov eax,dword ptr \[this\]; 由 B 的 vbptr 取得 A1 的虚表指针并赋值 01391BC5 mov dword ptr \[eax+edx+4\],offset D::\`vftable&#x27; (01397C10h) 01391BCD mov eax,dword ptr \[this\]; 返回 this ....; 省略函数出口代码</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，D 中保存了 4 个类各自的虚表，有了这些虚表，可以方便的将 D 类转换为对应的父类指针，而且在转为父类时，子类继承自其它父类的虚函数被屏蔽，无法调用。<br>另外在调用 D 的构造函数中传入了一个隐含的标志参数，用来决定是否进行虚基类的构造，以此避免重复构造的问题。由此也可以知道，类中的虚表指针，以及类的虚表并不是唯一的，需要确认它的继承体系。如果 D 有非继承的虚函数，那么它将会被记录到 D 的 vftable_B 中。</p>
+<h1 id="·析构"><a href="#·析构" class="headerlink" title="·析构"></a>·析构</h1><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">D::\`vector deleting destructor&#x27;: ....; 省略函数入口代码 01342010 mov dword ptr \[this\],ecx 01342013 mov ecx,dword ptr \[this\] 01342016 sub ecx,1Ch; 将 this 从 A0 调整为 D 01342019 call D::\`vbase destructor&#x27; (013410D7h) 0134201E mov eax,dword ptr \[ebp+8\] 01342021 and eax,1 01342024 je D::\`scalar deleting destructor&#x27;+47h (01342037h) 01342026 push 2Ch 01342028 mov eax,dword ptr \[this\] 0134202B sub eax,1Ch 0134202E push eax 0134202F call operator delete (01341055h) 01342034 add esp,8 01342037 mov eax,dword ptr \[this\] ....; 省略函数出口代码 D::\`vbase destructor&#x27;: ....; 省略函数入口代码 01341DA0 mov dword ptr \[this\],ecx 01341DA3 mov ecx,dword ptr \[this\] 01341DA6 add ecx,1Ch; this 改为 A0 01341DA9 call D::~D (0134146Ah) 01341DAE mov ecx,dword ptr \[this\] 01341DB1 add ecx,24h 01341DB4 call A1::~A1 (013410A0h) 01341DB9 mov ecx,dword ptr \[this\] 01341DBC add ecx,1Ch 01341DBF call A0::~A0 (01341456h) ....; 省略函数出口代码 D::~D: ....; 省略函数入口代码 01341D40 mov dword ptr \[this\],ecx 01341D43 mov ecx,dword ptr \[this\] 01341D46 sub ecx,4 01341D49 call C::~C (0134132Ah) 01341D4E mov ecx,dword ptr \[this\] 01341D51 sub ecx,10h 01341D54 call B::~B (013411D6h) ....; 省略函数出口代码</span><br></pre></td></tr></table></figure>
+
+<p>析构过程中直接将虚基类的调用放在了最后，依次执行父类的析构之后，再调用虚基类的析构。而不是将其包含在父类中，再像构造的时候用标志位区分是否构造。自然，B、C 的析构函数就不再含有对 AX::~AX 的调用了。</p>
+<p>有趣的是，当给 C 加上析构函数时，类的布局会发生变化。编译器会分别在原先的基础上，在 A0、A1 前加上 4 字节的 vtordisp 填充，变为</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">1&gt;class D size(52): 1&gt;+--- 1&gt; 0 +--- (base class B) 1&gt; 0 &#123;vfptr&#125; 1&gt; 4 &#123;vbptr&#125; 1&gt; 8 mb 1&gt; +--- 1&gt;12 +--- (base class C) 1&gt;12 &#123;vfptr&#125; 1&gt;16 &#123;vbptr&#125; 1&gt;20 mc 1&gt; +--- 1&gt;24 md 1&gt;+--- 1&gt;28 (vtordisp for vbase A0)&lt;--- 1&gt;+--- (virtual base A0) 1&gt;32 &#123;vfptr&#125; 1&gt;36 ma0 1&gt;+--- 1&gt;40 (vtordisp for vbase A1)&lt;--- 1&gt;+--- (virtual base A1) 1&gt;44 &#123;vfptr&#125; 1&gt;48 ma1 1&gt;+---</span><br></pre></td></tr></table></figure>
+
+<p>查看了一下似乎是在析构函数中，具体来说是在 D::<del>D 中（此时的 this 为 A0）调用 C::</del>C 前将 ecx 设置为 vtordisp for vbase A0，随后将其视为 this 进行 vptr 以及成员的定位。</p>
+<p><a target="_blank" rel="noopener" href="https://msdn.microsoft.com/en-us/library/ms879782.aspx">微软的解释</a>是重写了虚函数并在构造&#x2F;析构函数里调用了重写的函数时会插入这个字段，定义了 D（或 B、C）的析构函数满足了这个要求，而编译器自动生成的析构函数似乎不算在内。</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>flandre
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://kerisa.github.io/452/" title="菱形继承的内存布局">https://kerisa.github.io/452/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/c/" rel="tag"># c++</a>
+              <a href="/tags/%E7%BB%A7%E6%89%BF/" rel="tag"># 继承</a>
+              <a href="/tags/%E8%8F%B1%E5%BD%A2%E7%BB%A7%E6%89%BF/" rel="tag"># 菱形继承</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/432/" rel="prev" title="东方弹幕全明星　～ Touhou Barrage All Star.">
+      <i class="fa fa-chevron-left"></i> 东方弹幕全明星　～ Touhou Barrage All Star.
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/474/" rel="next" title="获取 USB 扫描枪输入">
+      获取 USB 扫描枪输入 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%C2%B7%E6%9E%84%E9%80%A0"><span class="nav-number">1.</span> <span class="nav-text">·构造</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%C2%B7%E6%9E%90%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">·析构</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt=""
+      src="/sys-imgs/42553027_1.png">
+  <p class="site-author-name" itemprop="name"></p>
+  <div class="site-description" itemprop="description">This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">247</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">flandre</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">328k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">4:58</span>
+</div>
+  <div class="powered-by">Powered by love
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

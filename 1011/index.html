@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kerisa.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="先前买了台红米，到手后刷完国际版仍然觉得不尽如人意，后来就找到了 Pixel Experience。嗯 PE 用着感觉就顺手多了。然后比较神经病的是这红米每次刷完机之后就再也进不去 twrp，按住音量上也只是停留在 twrp 的 logo 界面到天荒地老。。。也不知道是不是我操作有误还是机子有问题。这样子我更新系统就比较麻烦了（因为进不去 recovery），所以每次更新这能按下面的步骤重新刷。好">
+<meta property="og:type" content="article">
+<meta property="og:title" content="红米 Note 7 Pro 刷 Pixel Experience">
+<meta property="og:url" content="https://kerisa.github.io/1011/index.html">
+<meta property="og:site_name" content="Re: Memory (mirror)">
+<meta property="og:description" content="先前买了台红米，到手后刷完国际版仍然觉得不尽如人意，后来就找到了 Pixel Experience。嗯 PE 用着感觉就顺手多了。然后比较神经病的是这红米每次刷完机之后就再也进不去 twrp，按住音量上也只是停留在 twrp 的 logo 界面到天荒地老。。。也不知道是不是我操作有误还是机子有问题。这样子我更新系统就比较麻烦了（因为进不去 recovery），所以每次更新这能按下面的步骤重新刷。好">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-10-27T04:35:19.000Z">
+<meta property="article:modified_time" content="2025-07-21T17:32:47.103Z">
+<meta property="article:author" content="flandre">
+<meta property="article:tag" content="Note 7 Pro">
+<meta property="article:tag" content="Pixel Experience">
+<meta property="article:tag" content="Redmi">
+<meta property="article:tag" content="twrp">
+<meta property="article:tag" content="violet">
+<meta property="article:tag" content="刷机">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://flandre-scarlet.moe/blog/1011/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>红米 Note 7 Pro 刷 Pixel Experience | Re: Memory (mirror)</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Re: Memory (mirror)</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/1011/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/sys-imgs/42553027_1.png">
+      <meta itemprop="name" content="flandre">
+      <meta itemprop="description" content="This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Re: Memory (mirror)">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          红米 Note 7 Pro 刷 Pixel Experience
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-10-27 12:35:19" itemprop="dateCreated datePublished" datetime="2019-10-27T12:35:19+08:00">2019-10-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-07-22 01:32:47" itemprop="dateModified" datetime="2025-07-22T01:32:47+08:00">2025-07-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%A8%8B%E5%BA%8F/" itemprop="url" rel="index"><span itemprop="name">程序</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.7k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>先前买了台红米，到手后刷完国际版仍然觉得不尽如人意，后来就找到了 <a target="_blank" rel="noopener" href="https://download.pixelexperience.org/">Pixel Experience</a>。嗯 PE 用着感觉就顺手多了。然后比较神经病的是这红米每次刷完机之后就再也进不去 twrp，按住音量上也只是停留在 twrp 的 logo 界面到天荒地老。。。也不知道是不是我操作有误还是机子有问题。<br>这样子我更新系统就比较麻烦了（因为进不去 recovery），所以每次更新这能按下面的步骤重新刷。好在手机上的东西不多，升级系统后最麻烦的还是需要各个 app 登录一遍账号，重新修改一些系统设置，和 app 的通知行为等等。</p>
+<span id="more"></span>
+<p>※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※<br>文章内容可能已经过时，建议参考 PE 最新的安装教程<br><a target="_blank" rel="noopener" href="https://wiki.pixelexperience.org/devices/violet/install/">https://wiki.pixelexperience.org/devices/violet/install/</a><br>※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※</p>
+<h2 id="方案一"><a href="#方案一" class="headerlink" title="方案一"></a>方案一</h2><p>下载 PE 固件时可以同时下载配套的 recovery，可以用它直接升级系统。</p>
+<ol>
+<li><p>手机连接 PC，进入 fastboot 模式后用</p>
+<p>fastboot flash recovery recovery.img</p>
+<p>刷入，并重启进入 PE 的 recovery 模式</p>
+</li>
+<li><p>选择 Apply update -&gt; Apply from ADB</p>
+</li>
+<li><p>在 PC 上输入命令</p>
+<p>adb sideload &lt;文件路径&gt;</p>
+<p>将固件安装到手机（adb 会在 47% 的时候结束并显示“adb: failed to read command: No error”，这个据说是 adb 的一个 bug，实际上已经成功刷完了）</p>
+</li>
+<li><p>手机从 PC 断开连接，然后在 recovery 主界面选择重启即可</p>
+</li>
+</ol>
+<p>PS: 我第一次刷的时候碰到重启后一直在开机界面刷进度条开不了机，后来就重新刷 twrp，然后走老路用 twrp 刷好了。但不管怎么说，可以不用再做重新刷回 MIUI 这样的麻烦事了……</p>
+<h2 id="方案二"><a href="#方案二" class="headerlink" title="方案二"></a>方案二</h2><p>前 4 步是为了能进 twrp 而绕的远路。备份好数据后就开始吧：</p>
+<ol>
+<li><p>进入 fastboot 模式后用 MiFlash 刷入原版 violet_images_V10.3.9.0.PFHCNXM_20190703.0000.00_9.0_cn，右下角不要选 lock，省得再解锁</p>
+</li>
+<li><p>登录小米账号开启 usb 调试</p>
+</li>
+<li><p>重启进入原厂的 recovery 模式删除所有数据</p>
+</li>
+<li><p>直接重启到 fastboot 模式刷入 twrp：</p>
+<p>fastboot flash recovery twrp.img</p>
+<p>，再次重启即可进入 twrp</p>
+</li>
+<li><p>选择 Wipe - Advance Wipe - 选上 System, Data, Dalvik, Cache 四个擦除</p>
+</li>
+<li><p>向手机复制 firmware 和固件</p>
+<ul>
+<li>fw_violet_miui_VIOLET_9.9.3_79d3ccd33b_9.0.zip</li>
+<li>PixelExperience_violet-10.0-20191021-1744-BETA-OFFICIAL.zip</li>
+</ul>
+</li>
+<li><p>转到 twrp 的 Install 菜单先后安装这三个。如果安装固件时提示需要新版本的 firmware 则可以去<a target="_blank" rel="noopener" href="https://xiaomifirmwareupdater.com/">这里</a>下载所需版本</p>
+</li>
+<li><p>重启，搞定</p>
+</li>
+</ol>
+<p>关于首次设置连谷歌的问题：在一开始设置 pixel 时语言改成英语，然后到无线设置页面左下角 skip 直接跳过，进入系统后就可以为所欲为了。赶紧体验一波 Android Q &#x3D;͟͟͞͞ ٩( ๑╹ ꇴ╹)۶</p>
+<h2 id="附：generate-204"><a href="#附：generate-204" class="headerlink" title="附：generate_204"></a>附：generate_204</h2><ul>
+<li>adb shell “settings put global captive_portal_http_url <a target="_blank" rel="noopener" href="http://captive.v2ex.co/generate/_204">http://captive.v2ex.co/generate\_204</a>“;</li>
+<li>adb shell “settings put global captive_portal_https_url <a target="_blank" rel="noopener" href="https://captive.v2ex.co/generate/_204">https://captive.v2ex.co/generate\_204</a>“;</li>
+</ul>
+<h2 id="下载"><a href="#下载" class="headerlink" title="下载"></a>下载</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://download.pixelexperience.org/violet">Pixel Experience 固件（violet）</a></li>
+<li><a target="_blank" rel="noopener" href="https://xiaomifirmwareupdater.com/firmware/violet/">小米 Firmware（violet）</a></li>
+<li><a target="_blank" rel="noopener" href="https://dl.twrp.me/violet/">TWRP</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.xiaomiflash.com/download/">Xiaomi Flash Tool</a></li>
+<li><a target="_blank" rel="noopener" href="https://en.miui.com/unlock/download_en.html">Mi Unlock</a></li>
+<li><a target="_blank" rel="noopener" href="https://developer.android.com/studio/releases/platform-tools">Android Debug Bridge</a></li>
+<li><a target="_blank" rel="noopener" href="https://xiaomirom.com/rom/redmi-note-7-pro-violet-china-fastboot-recovery-rom/">红米 Note 7 Pro Fastboot 线刷包稳定版</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>flandre
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://kerisa.github.io/1011/" title="红米 Note 7 Pro 刷 Pixel Experience">https://kerisa.github.io/1011/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Note-7-Pro/" rel="tag"># Note 7 Pro</a>
+              <a href="/tags/Pixel-Experience/" rel="tag"># Pixel Experience</a>
+              <a href="/tags/Redmi/" rel="tag"># Redmi</a>
+              <a href="/tags/twrp/" rel="tag"># twrp</a>
+              <a href="/tags/violet/" rel="tag"># violet</a>
+              <a href="/tags/%E5%88%B7%E6%9C%BA/" rel="tag"># 刷机</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/959/" rel="prev" title="時計仕掛けのレイライン 感想">
+      <i class="fa fa-chevron-left"></i> 時計仕掛けのレイライン 感想
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/1030/" rel="next" title="相州戦神館學園 八命陣 感想">
+      相州戦神館學園 八命陣 感想 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B9%E6%A1%88%E4%B8%80"><span class="nav-number">1.</span> <span class="nav-text">方案一</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B9%E6%A1%88%E4%BA%8C"><span class="nav-number">2.</span> <span class="nav-text">方案二</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%EF%BC%9Agenerate-204"><span class="nav-number">3.</span> <span class="nav-text">附：generate_204</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8B%E8%BD%BD"><span class="nav-number">4.</span> <span class="nav-text">下载</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt=""
+      src="/sys-imgs/42553027_1.png">
+  <p class="site-author-name" itemprop="name"></p>
+  <div class="site-description" itemprop="description">This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">247</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">flandre</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">328k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">4:58</span>
+</div>
+  <div class="powered-by">Powered by love
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

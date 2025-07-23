@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kerisa.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="以前在学校里用的是移动网，每人都有公网ip（真是美滋滋）。现在换了电信网后反而只能得到一个内网ip了，比如我现在的网络中除了我自己的路由器，外面还夹着两个路由，过了这两个路由才是电信的路由，然后才到外网∠( ᐛ 」∠)＿ 。这种状况想要正常地获得 eMule 的 HighID 实在困难。另外 easyMule 貌似是有 lowID 互相通讯的打洞功能，但是 easyMule 名声不好不想用。。正好">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用 OpenVPN 将内网 eMule LowID 转换为 HighID">
+<meta property="og:url" content="https://kerisa.github.io/304/index.html">
+<meta property="og:site_name" content="Re: Memory (mirror)">
+<meta property="og:description" content="以前在学校里用的是移动网，每人都有公网ip（真是美滋滋）。现在换了电信网后反而只能得到一个内网ip了，比如我现在的网络中除了我自己的路由器，外面还夹着两个路由，过了这两个路由才是电信的路由，然后才到外网∠( ᐛ 」∠)＿ 。这种状况想要正常地获得 eMule 的 HighID 实在困难。另外 easyMule 貌似是有 lowID 互相通讯的打洞功能，但是 easyMule 名声不好不想用。。正好">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-01-06T12:46:01.000Z">
+<meta property="article:modified_time" content="2025-07-21T18:42:00.668Z">
+<meta property="article:author" content="flandre">
+<meta property="article:tag" content="eMule">
+<meta property="article:tag" content="HighID">
+<meta property="article:tag" content="LowID">
+<meta property="article:tag" content="openVPN">
+<meta property="article:tag" content="内网穿透">
+<meta property="article:tag" content="端口映射">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://flandre-scarlet.moe/blog/304/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>使用 OpenVPN 将内网 eMule LowID 转换为 HighID | Re: Memory (mirror)</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Re: Memory (mirror)</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/304/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/sys-imgs/42553027_1.png">
+      <meta itemprop="name" content="flandre">
+      <meta itemprop="description" content="This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Re: Memory (mirror)">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          使用 OpenVPN 将内网 eMule LowID 转换为 HighID
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-01-06 20:46:01" itemprop="dateCreated datePublished" datetime="2018-01-06T20:46:01+08:00">2018-01-06</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-07-22 02:42:00" itemprop="dateModified" datetime="2025-07-22T02:42:00+08:00">2025-07-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%A8%8B%E5%BA%8F/" itemprop="url" rel="index"><span itemprop="name">程序</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>以前在学校里用的是移动网，每人都有公网ip（真是美滋滋）。现在换了电信网后反而只能得到一个内网ip了，比如我现在的网络中除了我自己的路由器，外面还夹着两个路由，过了这两个路由才是电信的路由，然后才到外网∠( ᐛ 」∠)＿ 。这种状况想要正常地获得 eMule 的 HighID 实在困难。另外 easyMule 貌似是有 lowID 互相通讯的打洞功能，但是 easyMule 名声不好不想用。。正好手头也有 vps，于是准备用它来作映射。</p>
+<span id="more"></span>
+<p>这里介绍使用 vpn 来中继的方案。其实一开始我是准备用 frp 的，然而配置完后发觉并没有卵用，因为别人获取到你的 ip 仍然是电信的公网 ip，而不是你的 vps 的 ip，所以就换成 vpn 来。</p>
+<p>vps 系统为 Centos 6 x86, 目前的 OpenVPN 版本为 2.4.4。</p>
+<h1 id="配置服务器"><a href="#配置服务器" class="headerlink" title="配置服务器"></a>配置服务器</h1><h2 id="1、安装-openvpn-easy-rsa"><a href="#1、安装-openvpn-easy-rsa" class="headerlink" title="1、安装 openvpn easy-rsa"></a>1、安装 openvpn easy-rsa</h2><p>使用命令<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install openvpn easy-rsa -y</span><br></pre></td></tr></table></figure>安装 OpenVPN 和 easy-rsa。</p>
+<h2 id="2、配置-server-conf"><a href="#2、配置-server-conf" class="headerlink" title="2、配置 server.conf"></a>2、配置 server.conf</h2><p>复制模板配置<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cp</span> /usr/share/doc/openvpn-\*/sample/sample-config-files/server.conf /etc/openvpn</span><br></pre></td></tr></table></figure>启用数据包转发（去掉注释）<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">push <span class="string">&quot;redirect-gateway def1 bypass-dhcp&quot;</span></span><br></pre></td></tr></table></figure>修改 dns（查找DNS并修改）<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">push <span class="string">&quot;dhcp-option DNS 8.8.8.8&quot;</span> push <span class="string">&quot;dhcp-option DNS 8.8.4.4&quot;</span></span><br></pre></td></tr></table></figure>修改权限（去掉注释）<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">user nobody group nobody</span><br></pre></td></tr></table></figure></p>
+<h2 id="3、生成证书"><a href="#3、生成证书" class="headerlink" title="3、生成证书"></a>3、生成证书</h2><p>创建目录用于存放生成的证书<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> -p /etc/openvpn/easy-rsa/keys</span><br></pre></td></tr></table></figure>复制 easy-rsa&#x2F;2.0 目录下所有文件到 openvpn 目录<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cp</span> -rf /usr/share/easy-rsa/2.0/\* /etc/openvpn/easy-rsa</span><br></pre></td></tr></table></figure>打开 &#x2F;etc&#x2F;openvpn&#x2F;easy-rsa&#x2F;vars 文件并按需要修改其中的默认配置<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">export KEY\_COUNTRY=&quot;US&quot; export KEY\_PROVINCE=&quot;NY&quot; export KEY\_CITY=&quot;New York&quot; export KEY\_ORG=&quot;DigitalOcean&quot; export KEY\_EMAIL=&quot;sammy@example.com&quot; export KEY\_OU=&quot;Community&quot; export KEY\_NAME=&quot;server&quot; // 这个名称在生成证书时会用到 export KEY\_CN=openvpn.example.com</span><br></pre></td></tr></table></figure>生成证书，按顺序逐个执行命令<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /etc/openvpn/easy-rsa <span class="built_in">source</span> ./vars // 初始化环境变量 ./clean-all // 清除原有证书 ./build-ca // 生成根证书ca.crt和根密钥ca.key ./build-key-server server // 注意：中间会提示设置密码，输入即可 ./build-key client1 // 为客户端生成证书和密钥（这里有两个） ./build-key client2 ./build-dh // 创建迪菲·赫尔曼密钥，会生成dh2048.pem文件 openvpn --genkey --secret keys/ta.key // 生成ta.key文件（防DDos攻击、UDP淹没等恶意攻击）</span><br></pre></td></tr></table></figure>复制证书<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cp</span> dh2048.pem ca.crt server.crt server.key ta.key /etc/openvpn</span><br></pre></td></tr></table></figure></p>
+<h2 id="4、路由表"><a href="#4、路由表" class="headerlink" title="4、路由表"></a>4、路由表</h2><p>安装 iptables（一般都已安装）<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install iptables-services -y service iptable start iptables --flush</span><br></pre></td></tr></table></figure>设置并保存 iptables (注意备份)，假设连接 vpn 后的 ip 为 10.8.0.x<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -j MASQUERADE // 增加 -o &lt;网卡&gt; 参数会导致无法上网 iptables-save &gt; /etc/sysconfig/iptables // 保存设置</span><br></pre></td></tr></table></figure>打开并配置 &#x2F;etc&#x2F;sysctl.conf，将<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">net.ipv4.ip\_forward = 0 // 修改为 net.ipv4.ip\_forward = 1</span><br></pre></td></tr></table></figure>保存后重启网络服务<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">service network restart</span><br></pre></td></tr></table></figure></p>
+<h2 id="5、设置端口转发"><a href="#5、设置端口转发" class="headerlink" title="5、设置端口转发"></a>5、设置端口转发</h2><p>假定 eMule 的 TCP 和 UDP 端口分别为 5555 和 6666，vps 公网 ip 为 1.1.1.1，客户端连接 vpn 后得到的 ip 为 10.8.0.3， 分别执行<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -t nat -A PREROUTING -p tcp -d 1.1.1.1 --dport 5555 -j DNAT --to 10.8.0.6:5555 iptables -t nat -A PREROUTING -p udp -d 1.1.1.1 --dport 6666 -j DNAT --to 10.8.0.6:6666 iptables-save &gt; /etc/sysconfig/iptables</span><br></pre></td></tr></table></figure>完成两个端口转发规则的添加，这里只需要设置入站的转发即可，一开始我把出站的也加上了，通讯一直有问题，浪费了不少时间∠( ᐛ 」∠)＿。查看 iptables 设置状态使用命令<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -nL -t nat --line-numbers // 或 service iptables status</span><br></pre></td></tr></table></figure>iptables 的默认策略是 ACCEPT , 所以不用特意添加端口的入站规则。</p>
+<h2 id="6、分配固定-ip"><a href="#6、分配固定-ip" class="headerlink" title="6、分配固定 ip"></a>6、分配固定 ip</h2><p>因为模板规则里默认是启用客户端地址关联的(ifconfig-pool-persist ipp.txt), 所以服务器会按照记录为客户端分配上一次的 ip。</p>
+<h2 id="7、启动-openvpn"><a href="#7、启动-openvpn" class="headerlink" title="7、启动 openvpn"></a>7、启动 openvpn</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">service openvpn start</span><br></pre></td></tr></table></figure>
+
+<h2 id="8、设置开机自启动"><a href="#8、设置开机自启动" class="headerlink" title="8、设置开机自启动"></a>8、设置开机自启动</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chkconfig openvpn on</span><br></pre></td></tr></table></figure>
+
+<p>至此服务器的设置完成，接下去设置客户端。</p>
+<h1 id="配置客户端"><a href="#配置客户端" class="headerlink" title="配置客户端"></a>配置客户端</h1><h2 id="1、在-windows-上安装客户端"><a href="#1、在-windows-上安装客户端" class="headerlink" title="1、在 windows 上安装客户端"></a>1、在 windows 上安装客户端</h2><p><a target="_blank" rel="noopener" href="https://openvpn.net/index.php/open-source/downloads.html">下载</a></p>
+<h2 id="2、复制客户端证书"><a href="#2、复制客户端证书" class="headerlink" title="2、复制客户端证书"></a>2、复制客户端证书</h2><p>安装完成后将服务器上生成的客户端证书复制一份到安装目录的 config 子目录中。客户端证书（在 &#x2F;etc&#x2F;openvpn&#x2F;easy-rsa&#x2F;keys 目录中）包含 ca.crt、ta.key、client.crt 和 client.key 四个文件。</p>
+<h2 id="3、修改客户端配置"><a href="#3、修改客户端配置" class="headerlink" title="3、修改客户端配置"></a>3、修改客户端配置</h2><p>首先从客户端安装目录下的 sample-config 中复制 client.ovpn 到 config 目录中。修改配置文件<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">client dev tun proto udp remote 1.1.1.1 1194 // 改为实际的 ip 和端口 resolv-retry infinite nobind persist-key persist-tun ca ca.crt cert client1.crt // 文件名一致 key client1.key remote-cert-tls server tls-auth ta.key 1 cipher AES-256-CBC verb 3</span><br></pre></td></tr></table></figure></p>
+<h2 id="4、启动客户端"><a href="#4、启动客户端" class="headerlink" title="4、启动客户端"></a>4、启动客户端</h2><p>运行后右键单击客户端任务栏图标，选择连接即可。如果一切顺利，客户端会提示连接成功。</p>
+<p>附： <a target="_blank" rel="noopener" href="https://fedoraproject.org/wiki/OpenVPN">OpenVPN 配置</a> <a target="_blank" rel="noopener" href="https://wiki.archlinux.org/index.php/Iptables_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)#.E9.93.BE_.EF.BC.88Chains.EF.BC.89">iptables 介绍</a></p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>flandre
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://kerisa.github.io/304/" title="使用 OpenVPN 将内网 eMule LowID 转换为 HighID">https://kerisa.github.io/304/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/eMule/" rel="tag"># eMule</a>
+              <a href="/tags/HighID/" rel="tag"># HighID</a>
+              <a href="/tags/LowID/" rel="tag"># LowID</a>
+              <a href="/tags/openVPN/" rel="tag"># openVPN</a>
+              <a href="/tags/%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F/" rel="tag"># 内网穿透</a>
+              <a href="/tags/%E7%AB%AF%E5%8F%A3%E6%98%A0%E5%B0%84/" rel="tag"># 端口映射</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/289/" rel="prev" title="DirectWrite 文字描边">
+      <i class="fa fa-chevron-left"></i> DirectWrite 文字描边
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/1/" rel="next" title="WordPress 迁移">
+      WordPress 迁移 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="nav-number">1.</span> <span class="nav-text">配置服务器</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1%E3%80%81%E5%AE%89%E8%A3%85-openvpn-easy-rsa"><span class="nav-number">1.1.</span> <span class="nav-text">1、安装 openvpn easy-rsa</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2%E3%80%81%E9%85%8D%E7%BD%AE-server-conf"><span class="nav-number">1.2.</span> <span class="nav-text">2、配置 server.conf</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3%E3%80%81%E7%94%9F%E6%88%90%E8%AF%81%E4%B9%A6"><span class="nav-number">1.3.</span> <span class="nav-text">3、生成证书</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4%E3%80%81%E8%B7%AF%E7%94%B1%E8%A1%A8"><span class="nav-number">1.4.</span> <span class="nav-text">4、路由表</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5%E3%80%81%E8%AE%BE%E7%BD%AE%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91"><span class="nav-number">1.5.</span> <span class="nav-text">5、设置端口转发</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6%E3%80%81%E5%88%86%E9%85%8D%E5%9B%BA%E5%AE%9A-ip"><span class="nav-number">1.6.</span> <span class="nav-text">6、分配固定 ip</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7%E3%80%81%E5%90%AF%E5%8A%A8-openvpn"><span class="nav-number">1.7.</span> <span class="nav-text">7、启动 openvpn</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8%E3%80%81%E8%AE%BE%E7%BD%AE%E5%BC%80%E6%9C%BA%E8%87%AA%E5%90%AF%E5%8A%A8"><span class="nav-number">1.8.</span> <span class="nav-text">8、设置开机自启动</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E5%AE%A2%E6%88%B7%E7%AB%AF"><span class="nav-number">2.</span> <span class="nav-text">配置客户端</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1%E3%80%81%E5%9C%A8-windows-%E4%B8%8A%E5%AE%89%E8%A3%85%E5%AE%A2%E6%88%B7%E7%AB%AF"><span class="nav-number">2.1.</span> <span class="nav-text">1、在 windows 上安装客户端</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2%E3%80%81%E5%A4%8D%E5%88%B6%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%AF%81%E4%B9%A6"><span class="nav-number">2.2.</span> <span class="nav-text">2、复制客户端证书</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3%E3%80%81%E4%BF%AE%E6%94%B9%E5%AE%A2%E6%88%B7%E7%AB%AF%E9%85%8D%E7%BD%AE"><span class="nav-number">2.3.</span> <span class="nav-text">3、修改客户端配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4%E3%80%81%E5%90%AF%E5%8A%A8%E5%AE%A2%E6%88%B7%E7%AB%AF"><span class="nav-number">2.4.</span> <span class="nav-text">4、启动客户端</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt=""
+      src="/sys-imgs/42553027_1.png">
+  <p class="site-author-name" itemprop="name"></p>
+  <div class="site-description" itemprop="description">This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">247</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">flandre</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">328k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">4:58</span>
+</div>
+  <div class="powered-by">Powered by love
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

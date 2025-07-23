@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kerisa.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="之前公司项目中一直没有方便好用的异步编程框架，在开发过程中会遇到一些问题。比如多线程编码时开发需要自己管理线程，并在两侧同步数据。一些操作也会被直接放在主线程中，就算单个操作的耗时并不明显，长此以往也会积少成多，最终拖慢了 UI 的速度。 但好在公司的代码库已经支持 C++11，我们基于 C++11 开发了一个仅使用标准库的框架。这样既能简化业务开发时的代码工作量，也可以提高代码的可读性，而且使用">
+<meta property="og:type" content="article">
+<meta property="og:title" content="C++ 异步编程框架">
+<meta property="og:url" content="https://kerisa.github.io/2074/index.html">
+<meta property="og:site_name" content="Re: Memory (mirror)">
+<meta property="og:description" content="之前公司项目中一直没有方便好用的异步编程框架，在开发过程中会遇到一些问题。比如多线程编码时开发需要自己管理线程，并在两侧同步数据。一些操作也会被直接放在主线程中，就算单个操作的耗时并不明显，长此以往也会积少成多，最终拖慢了 UI 的速度。 但好在公司的代码库已经支持 C++11，我们基于 C++11 开发了一个仅使用标准库的框架。这样既能简化业务开发时的代码工作量，也可以提高代码的可读性，而且使用">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-04-07T13:21:40.000Z">
+<meta property="article:modified_time" content="2025-07-21T18:42:00.448Z">
+<meta property="article:author" content="flandre">
+<meta property="article:tag" content="c++">
+<meta property="article:tag" content="task">
+<meta property="article:tag" content="异步">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://flandre-scarlet.moe/blog/2074/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>C++ 异步编程框架 | Re: Memory (mirror)</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Re: Memory (mirror)</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/2074/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/sys-imgs/42553027_1.png">
+      <meta itemprop="name" content="flandre">
+      <meta itemprop="description" content="This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Re: Memory (mirror)">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          C++ 异步编程框架
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-04-07 21:21:40" itemprop="dateCreated datePublished" datetime="2024-04-07T21:21:40+08:00">2024-04-07</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-07-22 02:42:00" itemprop="dateModified" datetime="2025-07-22T02:42:00+08:00">2025-07-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%A8%8B%E5%BA%8F/" itemprop="url" rel="index"><span itemprop="name">程序</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>之前公司项目中一直没有方便好用的异步编程框架，在开发过程中会遇到一些问题。比如多线程编码时开发需要自己管理线程，并在两侧同步数据。一些操作也会被直接放在主线程中，就算单个操作的耗时并不明显，长此以往也会积少成多，最终拖慢了 UI 的速度。</p>
+<p>但好在公司的代码库已经支持 C++11，我们基于 C++11 开发了一个仅使用标准库的框架。这样既能简化业务开发时的代码工作量，也可以提高代码的可读性，而且使用 std 组件实现也方便支持所有平台。更进一步的话还可以给框架加入其他支持，如：</p>
+<ul>
+<li>task 优先级</li>
+<li>task 延迟调用、重复调用，并可自定义调用间隔等属性</li>
+<li>指定多个 task 在同一个线程中运行<span id="more"></span></li>
+</ul>
+<h2 id="基本结构"><a href="#基本结构" class="headerlink" title="基本结构"></a>基本结构</h2><p>显然每个 task 开一个线程非常不环保，所以首先需要实现一个基本的线程池。不到 100 行就可以搞定一个纯头文件的简单实现 <a target="_blank" rel="noopener" href="https://github.com/progschj/ThreadPool/blob/master/ThreadPool.h">ThreadPool</a>。使用方法也非常简单，参见项目的介绍即可。</p>
+<p>通常客户端程序除了 UI 处理外，大多的业务逻辑也会放在主线程一起执行。所以比较常见的模式是在主线程提交一个耗时操作到工作线程，当任务完成后再回到主线程做下一步的处理。除非项目里其他组件都是线程安全的，否则在工作线程里直接做后续操作（比如同步数据状态等）都可能会引发竞态条件，所以这里默认都让主线程去完成这些逻辑操作。</p>
+<p>而且也不可能让 UI 线程&#x2F;主线程去做同步等待，所以会在 UI 线程做 OnIdle 处理时会加入一个对完成队列的检查，当任务完成后结果被 post 到完成队列里时，主线程再去取出来执行后续步骤。</p>
+<p>PS：在 windows 平台上可以利用 UI 线程的消息循环，自定义一个消息并将结果用 PostMessage 传过去，这样就可以优化掉 OnIdle 时的队列检查，处理会更加高效，但这样的话其他平台需要做类似的适配，用自身平台的机制实现同样效果。</p>
+<p>基于这个线程池，我们可以快速搞出一个提交任务处理的基本结构： <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// // 定义一个线程池，全局或者是在特定范围的类里均可，同时设置好最大线程数 // ThreadPool th\_pool\_(5); // 指定池里的最大线程数，这里随便写了个 5 ThreadSafeQueue&lt;std::packaged\_task&lt;void()&gt;&gt; completed\_queue\_; // 完成队列，用来存放需要主线程做后续处理的 task</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// // 在任何需要的地方将 task 提交到线程池中运行 // void Panel::OnButtonClick() &#123;   // ... 其他代码   std::string full\_path = ...;   th\_pool\_.enqueue(\[this, full\_path\]() &#123;     // 以下代码都在工作线程中执行</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 做一些耗时操作，比如读写文件等     auto result = LoadData(full\_path);</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 工作线程部分的操作结束后在主线程进行后续操作，比如通知其他组件操作结果，     // 刷新 UI 等，需要新建一个 task 并 post 给主线程     auto ptask = std::make\_shared&lt;std::packaged\_task&lt;void()&gt;&gt;(\[this, result\]() &#123;       // 这个 lambda 内的代码会在主线程中执行       log::info(&quot;save data result: &quot; &lt;&lt; result);       if (this-&gt;sink\_)         this-&gt;sink\_-&gt;OnDataLoaded(result);       UpdateLabel();     &#125;);     // 将下一步的 task 放到完成队列中等待主线程执行     completed\_queue\_.push(ptask);   &#125;); &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// // 主线程的 OnIdle 函数 // void OnIdle() &#123;   // ... 其他操作   std::shared\_ptr&lt;std::packaged\_task&lt;void()&gt;&gt; tmp;   while (finished\_task\_queue\_.try\_pop(tmp) &amp;&amp; tmp) &#123;     (\*tmp)();   &#125; &#125;</span></span><br></pre></td></tr></table></figure></p>
+<p>这里用了 packaged_task、future、thread 等来实现简单的异步和回调处理，将 callback 写成 lambda 这样后续的逻辑就一目了然，不用再到代码里东翻西找了。</p>
+<h2 id="封装函数对象"><a href="#封装函数对象" class="headerlink" title="封装函数对象"></a>封装函数对象</h2><p>实际实现中我们不会直接将任务提交到线程池，而是增加一个间接层比如 TaskRunner，用来处理任务调度，跟由系统调度器默认安排线程来执行 task 相比有更高的灵活度。比如将一些 task 安排到同一个线程、低负载情况下尽可能地唤醒同一个线程来处理 task 等。</p>
+<p>实现 task 的优先级、延时、重复执行也比较容易，只要定义一个 Task 类，将外部提交的 lambda 等可执行对象和优先级等属性一起打包保存，然后放到 TaskRunner 的优先队列里，再把队列里的任务分配给线程池执行就可以。重复的任务执行完毕后再次入队即可。</p>
+<p>加入 TaskRunner 的封装也可以让主线程变成“Worker Thread”之一，对框架来讲所有线程都可以一视同仁了。</p>
+<h2 id="取消-Task"><a href="#取消-Task" class="headerlink" title="取消 Task"></a>取消 Task</h2><p>Task 的取消操作也是必不可少的。实际使用中我们大概率会把类对象的 this 指针传入，方便在 task 执行过程中即时更新状态等，或者 task 执行完后调用某个充当 callback 的成员函数。那这样肯定会遇到 task 还没执行，类对象就要被析构的情况；或者传入某个 lambda 表达式，但是在函数被执行前动态库就要被卸载了。在这之前就必须要取消 task，免得到时候不体面。</p>
+<p>但是要取消已经开始执行的 task 比较麻烦，通常的处理还是只取消未开始执行的 task，对正在执行的就采取等待的方式。否则需要用到类似 pthread_cancel 的操作，并且在编写 task 逻辑时还需要考虑异常、栈展开时能正确释放资源等，比较麻烦。</p>
+<p>也可以特殊处理下，比如外部调用 Task::Cancel 取消一个正在运行的 task 时，将 task 内部的状态设置成 Canceling。同时在 task 的执行函数里面按业务逻辑设置几个检查点，当发现状态变为 Canceling 时就立即终止后续代码的执行，和跑完全部流程相比可以尽量缩短取消时的等待时间。</p>
+<p>除了这种持有 task 对象指针，并在适当时候调用 Cancel 接口取消任务之外，还可以给 Task 对象绑定一个 tag，这样可以一次性取消某个 tag 的所有 task，实际使用中会比较方便。比如可以给一个动态库分配一个 tag，也可以直接用一个类的 this 指针作为一个 tag。</p>
+<p>还有一种方式可以适用于 this 指针失效的情况，就是以 weakptr 的形式传入 this，这样当类析构之后这个 weakptr 自然也就失效了。不过这对于外部代码的影响比较大，需要改动它们的实现，继承或者在类中增加 weakptr 相关的成员变量并把它传递到 task 里面。</p>
+<h2 id="处理能力"><a href="#处理能力" class="headerlink" title="处理能力"></a>处理能力</h2><p>实际使用中还会遇到 task 中间调用了会阻塞的 api，这样导致线程池中的线程一直被占用。这个处理起来也简单，只要增加线程池的最大线程数，不要局限在 CPU 物理核心数量上就可以了，这样可以解决处理能力下降的问题。</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>flandre
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://kerisa.github.io/2074/" title="C++ 异步编程框架">https://kerisa.github.io/2074/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/c/" rel="tag"># c++</a>
+              <a href="/tags/task/" rel="tag"># task</a>
+              <a href="/tags/%E5%BC%82%E6%AD%A5/" rel="tag"># 异步</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2069/" rel="prev" title="《白夜行》读书笔记">
+      <i class="fa fa-chevron-left"></i> 《白夜行》读书笔记
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2088/" rel="next" title="部分 Crash 分析记录">
+      部分 Crash 分析记录 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E7%BB%93%E6%9E%84"><span class="nav-number">1.</span> <span class="nav-text">基本结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%81%E8%A3%85%E5%87%BD%E6%95%B0%E5%AF%B9%E8%B1%A1"><span class="nav-number">2.</span> <span class="nav-text">封装函数对象</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%96%E6%B6%88-Task"><span class="nav-number">3.</span> <span class="nav-text">取消 Task</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%84%E7%90%86%E8%83%BD%E5%8A%9B"><span class="nav-number">4.</span> <span class="nav-text">处理能力</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt=""
+      src="/sys-imgs/42553027_1.png">
+  <p class="site-author-name" itemprop="name"></p>
+  <div class="site-description" itemprop="description">This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">247</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">flandre</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">328k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">4:58</span>
+</div>
+  <div class="powered-by">Powered by love
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

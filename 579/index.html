@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kerisa.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="作为练手的 160 个 CrackMe 系列整理分析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CrackMe 反汇编练习之 052">
+<meta property="og:url" content="https://kerisa.github.io/579/index.html">
+<meta property="og:site_name" content="Re: Memory (mirror)">
+<meta property="og:description" content="作为练手的 160 个 CrackMe 系列整理分析">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2018/09/crackme-52-1.png">
+<meta property="article:published_time" content="2018-09-24T21:21:00.000Z">
+<meta property="article:modified_time" content="2025-07-21T18:42:00.466Z">
+<meta property="article:author" content="flandre">
+<meta property="article:tag" content="CrackMe">
+<meta property="article:tag" content="反汇编">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kerisa.github.io/assets/imgs/2018/09/crackme-52-1.png">
+
+<link rel="canonical" href="https://flandre-scarlet.moe/blog/579/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>CrackMe 反汇编练习之 052 | Re: Memory (mirror)</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Re: Memory (mirror)</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/579/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/sys-imgs/42553027_1.png">
+      <meta itemprop="name" content="flandre">
+      <meta itemprop="description" content="This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Re: Memory (mirror)">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          CrackMe 反汇编练习之 052
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-09-25 05:21:00" itemprop="dateCreated datePublished" datetime="2018-09-25T05:21:00+08:00">2018-09-25</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-07-22 02:42:00" itemprop="dateModified" datetime="2025-07-22T02:42:00+08:00">2025-07-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/programs/" itemprop="url" rel="index"><span itemprop="name">programs</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/programs/%E9%80%86%E5%90%91/" itemprop="url" rel="index"><span itemprop="name">逆向</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>11k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>10 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>作为练手的 160 个 CrackMe 系列整理分析</p>
+<span id="more"></span>
+<p>CrackMe 来源：<a target="_blank" rel="noopener" href="https://www.52pojie.cn/thread-709699-1-1.html">【反汇编练习】160个CrackME索引目录1~160建议收藏备用</a></p>
+<p>这个五星的还真有点麻烦，主要是前面还原 C 代码花了不少时间2333，如果直接抽代码出来应该能省下不少功夫。。。</p>
+<p>整个流程是这样：</p>
+<ol>
+<li>输入用户名，进行 u(用户名) 变换后计算 md5（我都逆完了才反应过来，其实看到那组初始 key 就该注意到的，而且没把一开始用 PEiD 看到的 md5 算法当回事。。OTZ），得到一个结果 key；</li>
+<li>以输入的注册码为初始值，经过 code &#x3D; f(input) 的变换后，将 key 与 code 进行比较，相等就通过校验。</li>
+</ol>
+<p>其中 u(用户名) &#x3D; 用户名+用户名反转+产品ID+所有者ID。后面两个分别是注册表中 HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion 里的 ProductId 和 RegisteredOwner。如果 RegisteredOwner 不存在将会用 ProductId 替代，即接上两个 ProductId。</p>
+<p>既然是 md5 ，那么这样只能在 f 上下手了，首先还原回来的 f 大概长这样：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">unsigned</span> <span class="type">int</span>\* <span class="built_in">ParseCode</span>(<span class="type">unsigned</span> <span class="type">int</span> \*input, <span class="type">int</span> time) &#123; DWORD esi, edi, eax, ecx, ebx, edx, ebp; esi = input\[<span class="number">0</span>\]; edi = input\[<span class="number">1</span>\]; <span class="keyword">while</span> (time--) &#123; v18 = ebp = edi &gt;&gt; <span class="number">31</span> edx:eax = <span class="built_in">Lshl</span>(edi:esi, <span class="number">1</span>) ebp = edx edi = ebp ecx = v18 eax edx = <span class="number">0</span> eax = esi = ecx eax &amp;= <span class="number">4</span> edx:eax = <span class="built_in">Lshl</span>(edx:eax, <span class="number">0xb</span>) ecx = esi ecx &amp;= <span class="number">0x2000</span> eax &amp;= ecx edx:eax = <span class="built_in">Lshl</span>(edx:eax, <span class="number">0x12</span>) ecx = esi edx ^= ebp ecx &amp;= <span class="number">0x80000000</span> eax ^= ecx edx:eax = <span class="built_in">Lshl</span>(edx:eax, <span class="number">0x1</span>) esi ^= eax edi ^= edx &#125; input\[<span class="number">0</span>\] = esi; input\[<span class="number">1</span>\] = edi; <span class="keyword">return</span> input; &#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里只是简单地还原了一下，其中 edx:eax 表示 64 为整数，edx 为高 32 位。Lshl 是 64 位无符号左移的一个包装。稍作整理，做点等效变换，然后分析一下有没有可以简化的计算步骤。</p>
+<p>首先需要发现 v18 和 esi、edi，以及一开始左移一位之间的关系，其实就是一个循环左移。精简后得到下面的代码。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">unsigned</span> <span class="type">int</span>\* <span class="built_in">ParseCode</span>(<span class="type">unsigned</span> <span class="type">int</span> \*input, <span class="type">int</span> time) &#123; DWORD esi, edi, eax, ecx, ebx, edx, ebp; esi = input\[<span class="number">0</span>\]; edi = input\[<span class="number">1</span>\]; <span class="keyword">while</span> (time--) &#123; <span class="built_in">Rol64</span>((<span class="type">unsigned</span> \_\_int64)edi &lt;&lt; <span class="number">32</span> esi, <span class="number">1</span>, &amp;edi, &amp;esi); <span class="comment">// eax 形如 00000000 00000000 00000000 00000?00 eax = (esi) &amp; 4; edx = 0; Lshl(edx, eax, 0xb, &amp;edx, &amp;eax); // eax 形如 00000000 00000000 00?00000 00000000 ecx = esi &amp; 0x2000; eax ^= ecx; Lshl(edx, eax, 0x12, &amp;edx, &amp;eax); // eax 形如 ?0000000 00000000 00000000 00000000 ecx = esi &amp; 0x80000000; eax ^= ecx; Lshl(edx, eax, 0x1, &amp;edx, &amp;eax); // eax === 0 // 此时 edx 等于 !!(esi &amp; 4) ^ !!(esi &amp; 0x2000) ^ !!(esi &amp; 0x80000000) edi ^= edx; &#125; input\[0\] = esi; input\[1\] = edi; return input; &#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>既然开头的位移是循环位移，那么首先可以放点心了。然后观察这三组看似无规律的位与和异或，好吧我写在注释里了，因为高位的 edx 为 0，低位的 eax 经过一通左移也变为 0 了，然后仅有的一个有效位被移入 edx 最低位，最后简化的结果就是下面这样：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">unsigned</span> <span class="type">int</span>\* <span class="built_in">ParseCode</span>(<span class="type">unsigned</span> <span class="type">int</span> \*input, <span class="type">int</span> time) &#123; DWORD esi, edi; esi = input\[<span class="number">0</span>\]; edi = input\[<span class="number">1</span>\]; <span class="keyword">while</span> (time--) &#123; <span class="built_in">Rol64</span>((<span class="type">unsigned</span> \_\_int64)edi &lt;&lt; <span class="number">32</span> esi, <span class="number">1</span>, &amp;edi, &amp;esi); edi ^= (!!(esi &amp; <span class="number">0x4</span>) ^ !!(esi &amp; <span class="number">0x2000</span>) ^ !!(esi &amp; <span class="number">0x80000000</span>)); &#125; input\[<span class="number">0</span>\] = esi; input\[<span class="number">1</span>\] = edi; <span class="keyword">return</span> input; &#125;</span><br></pre></td></tr></table></figure>
+
+<p>f 的逆就不用多说了吧。</p>
+<p>至于 md5 算法的还原。。。难度不大（都知道 md5 了），里面有一段读取了 exe 的内存，所以要把它们拖过来。中间的翻译过程细心点不要看错了就好。。。有些地方我一开始也搞错，比如第一个循环里的第三个和第四个，计算循环左移用的地址一直是固定的 constAddr1[0] 和 constAddr1[1]，我一开始弄成 constAddr1[ii] 了，然后算出结果当然不对啦。</p>
+<p><img src="/assets/imgs/2018/09/crackme-52-1.png" alt="result"></p>
+<p>最后附上注册机源码：</p>
+<p>[cpp] #include <cassert> #include <array> #include <cstring> #include &lt;windows.h&gt; std::array&lt;std::pair&lt;int, int&gt;, 16&gt; constAddr1 &#x3D; { std::pair&lt;int,int&gt;(0x41b0b0, 0xD76AA478), std::pair&lt;int,int&gt;(0x41b0b4, 0xE8C7B756), std::pair&lt;int,int&gt;(0x41b0b8, 0x242070DB), std::pair&lt;int,int&gt;(0x41b0bc, 0xC1BDCEEE), std::pair&lt;int,int&gt;(0x41b0c0, 0xF57C0FAF), std::pair&lt;int,int&gt;(0x41b0c4, 0x4787C62A), std::pair&lt;int,int&gt;(0x41b0c8, 0xA8304613), std::pair&lt;int,int&gt;(0x41b0cc, 0xFD469501), std::pair&lt;int,int&gt;(0x41b0d0, 0x698098D8), std::pair&lt;int,int&gt;(0x41b0d4, 0x8B44F7AF), std::pair&lt;int,int&gt;(0x41b0d8, 0xFFFF5BB1), std::pair&lt;int,int&gt;(0x41b0dc, 0x895CD7BE), std::pair&lt;int,int&gt;(0x41b0e0, 0x6B901122), std::pair&lt;int,int&gt;(0x41b0e4, 0xFD987193), std::pair&lt;int,int&gt;(0x41b0e8, 0xA679438E), std::pair&lt;int,int&gt;(0x41b0ec, 0x49B40821), }; std::array&lt;std::pair&lt;int, int&gt;, 16&gt; constAddr2 &#x3D; { std::pair&lt;int,int&gt;(0x41b0f0, 0xF61E2562), std::pair&lt;int,int&gt;(0x41b0f4, 0xC040B340), std::pair&lt;int,int&gt;(0x41b0f8, 0x265E5A51), std::pair&lt;int,int&gt;(0x41b0fc, 0xE9B6C7AA), std::pair&lt;int,int&gt;(0x41b100, 0xD62F105D), std::pair&lt;int,int&gt;(0x41b104, 0x02441453), std::pair&lt;int,int&gt;(0x41b108, 0xD8A1E681), std::pair&lt;int,int&gt;(0x41b10c, 0xE7D3FBC8), std::pair&lt;int,int&gt;(0x41b110, 0x21E1CDE6), std::pair&lt;int,int&gt;(0x41b114, 0xC33707D6), std::pair&lt;int,int&gt;(0x41b118, 0xF4D50D87), std::pair&lt;int,int&gt;(0x41b11c, 0x455A14ED), std::pair&lt;int,int&gt;(0x41b120, 0xA9E3E905), std::pair&lt;int,int&gt;(0x41b124, 0xFCEFA3F8), std::pair&lt;int,int&gt;(0x41b128, 0x676F02D9), std::pair&lt;int,int&gt;(0x41b12c, 0x8D2A4C8A), }; std::array&lt;std::pair&lt;int, int&gt;, 16&gt; constAddr3 &#x3D; { std::pair&lt;int,int&gt;(0x41b130, 0xFFFA3942), std::pair&lt;int,int&gt;(0x41b134, 0x8771F681), std::pair&lt;int,int&gt;(0x41b138, 0x6D9D6122), std::pair&lt;int,int&gt;(0x41b13c, 0xFDE5380C), std::pair&lt;int,int&gt;(0x41b140, 0xA4BEEA44), std::pair&lt;int,int&gt;(0x41b144, 0x4BDECFA9), std::pair&lt;int,int&gt;(0x41b148, 0xF6BB4B60), std::pair&lt;int,int&gt;(0x41b14c, 0xBEBFBC70), std::pair&lt;int,int&gt;(0x41b150, 0x289B7EC6), std::pair&lt;int,int&gt;(0x41b154, 0xEAA127FA), std::pair&lt;int,int&gt;(0x41b158, 0xD4EF3085), std::pair&lt;int,int&gt;(0x41b15c, 0x04881D05), std::pair&lt;int,int&gt;(0x41b160, 0xD9D4D039), std::pair&lt;int,int&gt;(0x41b164, 0xE6DB99E5), std::pair&lt;int,int&gt;(0x41b168, 0x1FA27CF8), std::pair&lt;int,int&gt;(0x41b16c, 0xC4AC5665), }; std::array&lt;std::pair&lt;int, int&gt;, 16&gt; constAddr4 &#x3D; { std::pair&lt;int,int&gt;(0x41b170, 0xF4292244), std::pair&lt;int,int&gt;(0x41b174, 0x432AFF97), std::pair&lt;int,int&gt;(0x41b178, 0xAB9423A7), std::pair&lt;int,int&gt;(0x41b17c, 0xFC93A039), std::pair&lt;int,int&gt;(0x41b180, 0x655B59C3), std::pair&lt;int,int&gt;(0x41b184, 0x8F0CCC92), std::pair&lt;int,int&gt;(0x41b188, 0xFFEFF47D), std::pair&lt;int,int&gt;(0x41b18c, 0x85845DD1), std::pair&lt;int,int&gt;(0x41b190, 0x6FA87E4F), std::pair&lt;int,int&gt;(0x41b194, 0xFE2CE6E0), std::pair&lt;int,int&gt;(0x41b198, 0xA3014314), std::pair&lt;int,int&gt;(0x41b19c, 0x4E0811A1), std::pair&lt;int,int&gt;(0x41b1a0, 0xF7537E82), std::pair&lt;int,int&gt;(0x41b1a4, 0xBD3AF235), std::pair&lt;int,int&gt;(0x41b1a8, 0x2AD7D2BB), std::pair&lt;int,int&gt;(0x41b1ac, 0xEB86D391), }; DWORD AddressValue(DWORD addr) { for (auto&amp; p : constAddr1) if (p.first &#x3D;&#x3D; addr) return p.second; for (auto&amp; p : constAddr2) if (p.first &#x3D;&#x3D; addr) return p.second; for (auto&amp; p : constAddr3) if (p.first &#x3D;&#x3D; addr) return p.second; for (auto&amp; p : constAddr4) if (p.first &#x3D;&#x3D; addr) return p.second; assert(“address not found.” &amp;&amp; 0); return 0; } int Rol(int a1, char a2) { __asm { mov eax, a1 mov cl, a2 rol eax, cl mov a1, eax } return a1; } &#x2F;&#x2F; 0x401700 unsigned int* ComputeKey(char* str, unsigned int *key) { int esi &#x3D; key[0]; int edi &#x3D; key[1]; int ebp &#x3D; key[2]; int ebx &#x3D; key[3]; PDWORD v11 &#x3D; PDWORD(str + 8); int ii &#x3D; 0; for (int i &#x3D; 0; i &lt; 4; ++i) { esi &#x3D; edi + Rol(constAddr1[ii].second + (edi &amp; ebp ebx &amp; ~edi) + esi + v11[-2], 7); ebx &#x3D; esi + Rol(constAddr1[ii+1].second + (esi &amp; edi ebp &amp; ~esi) + ebx + v11[-1], 12); ebp &#x3D; ebx + Rol(AddressValue((DWORD)((char *)v11 + constAddr1[0].first - str)) + (esi &amp; ebx edi &amp; ~ebx) + ebp + v11[0], 17); edi &#x3D; ebp + Rol(AddressValue((DWORD)((char *)v11 + constAddr1[1].first - str)) + (ebp &amp; ebx esi &amp; ~ebp) + edi + v11[1], 22); ii +&#x3D; 4; v11 +&#x3D; 4; &#x2F;&#x2F; 一次加 16 字节 } ii &#x3D; 0; BYTE original_6 &#x3D; 6; for (int i &#x3D; 0; i &lt; 4; ++i) { int v1 &#x3D; Rol(constAddr2[ii].second + (edi &amp; ebx ebp &amp; ~ebx) + esi + *PDWORD(str + 4 * ((original_6 - 5) &amp; 0xF)), 5); esi &#x3D; edi + v1; int v2 &#x3D; Rol(constAddr2[ii+1].second + ((edi + v1) &amp; ebp edi &amp; ~ebp) + ebx + *PDWORD(str + 4 * (original_6 &amp; 0xF)), 9); ebx &#x3D; esi + v2; int v3 &#x3D; Rol(constAddr2[ii+2].second + (edi &amp; (esi + v2) esi &amp; ~edi) + ebp + *PDWORD(str + 4 * ((original_6 + 5) &amp; 0xF)), 14); ebp &#x3D; ebx + v3; edi &#x3D; ebp + Rol(constAddr2[ii+3].second + (esi &amp; (ebx + v3) ebx &amp; ~esi) + edi + *PDWORD(str + 4 * ((original_6 - 6) &amp; 0xF)), 20); original_6 +&#x3D; 4; ii +&#x3D; 4; } ii &#x3D; 0; int v33 &#x3D; ebp ^ ebx; BYTE original_neg_5 &#x3D; -5; int original_neg_8 &#x3D; -8; for (int i &#x3D; 0; i &lt; 4; ++i) { int v1 &#x3D; Rol(constAddr3[ii].second + (edi ^ v33) + esi + *PDWORD(str + 4 * ((original_neg_5 - 6) &amp; 0xF)), 4); esi &#x3D; edi + v1; int v2 &#x3D; Rol(constAddr3[ii+1].second + ((edi + v1) ^ edi ^ ebp) + ebx + *PDWORD(str + 4 * (original_neg_8 &amp; 0xF)), 11); ebx &#x3D; esi + v2; int v3 &#x3D; Rol(constAddr3[ii+2].second + (esi ^ edi ^ (esi + v2)) + ebp + *PDWORD(str + 4 * (original_neg_5 &amp; 0xF)), 16); ebp &#x3D; ebx + v3; int v4 &#x3D; ebp ^ ebx; edi &#x3D; ebp + Rol(constAddr3[ii+3].second + (esi ^ v4) + edi + *PDWORD(str + 4 * ((original_neg_5 + 3) &amp; 0xF)), 23); v33 &#x3D; v4; original_neg_8 -&#x3D; 4; original_neg_5 -&#x3D; 4; ii +&#x3D; 4; } ii &#x3D; 0; BYTE original_0 &#x3D; 0; BYTE original_neg_2 &#x3D; -2; for (int i &#x3D; 0; i &lt; 4; ++i) { int v1 &#x3D; Rol(constAddr4[ii].second + (ebp ^ (edi ~ebx)) + esi + *PDWORD(str + 4 * (original_0 &amp; 0xF)), 6); esi &#x3D; edi + v1; int v2 &#x3D; Rol(constAddr4[ii+1].second + (edi ^ ((edi + v1) ~ebp)) + ebx + *PDWORD(str + 4 * ((original_neg_2 - 7) &amp; 0xF)), 10); ebx &#x3D; esi + v2; int v3 &#x3D; Rol(constAddr4[ii+2].second + (esi ^ ((esi + v2) ~edi)) + ebp + *PDWORD(str + 4 * (original_neg_2 &amp; 0xF)), 15); ebp &#x3D; ebx + v3; edi &#x3D; ebp + Rol(constAddr4[ii+3].second + (ebx ^ ((ebx + v3) ~esi)) + edi + *PDWORD(str + 4 * ((original_neg_2 + 7) &amp; 0xF)), 21); original_0 -&#x3D; 4; original_neg_2 -&#x3D; 4; ii +&#x3D; 4; } key[0] +&#x3D; esi; key[1] +&#x3D; edi; key[2] +&#x3D; ebp; key[3] +&#x3D; ebx; return key; } unsigned __int64 Lshl(DWORD high, DWORD low, int shift, PDWORD high1, PDWORD low1) { unsigned __int64 v1 &#x3D; (unsigned __int64)high &lt;&lt; 32 low; v1 &lt;&lt;&#x3D; shift; *high1 &#x3D; (DWORD)(v1 &gt;&gt; 32); *low1 &#x3D; (DWORD)v1; return v1; } unsigned __int64 Rol64(unsigned __int64 a, char shift, PDWORD high1, PDWORD low1) { unsigned __int64 v1 &#x3D; (a &lt;&lt; shift) (a &gt;&gt; (64 - shift)); *high1 &#x3D; (DWORD)(v1 &gt;&gt; 32); *low1 &#x3D; (DWORD)v1; return v1; } unsigned __int64 Ror64(unsigned __int64 a, char shift, PDWORD high1, PDWORD low1) { unsigned __int64 v1 &#x3D; (a &gt;&gt; shift) (a &lt;&lt; (64 - shift)); *high1 &#x3D; (DWORD)(v1 &gt;&gt; 32); *low1 &#x3D; (DWORD)v1; return v1; } unsigned int* ParseCodeReverse(unsigned int *a1, int a2) { DWORD esi, edi; esi &#x3D; a1[0]; edi &#x3D; a1[1]; while (a2–) { edi ^&#x3D; (!!(esi &amp; 0x4) ^ !!(esi &amp; 0x2000) ^ !!(esi &amp; 0x80000000)); Ror64((unsigned __int64)edi &lt;&lt; 32 esi, 1, &amp;edi, &amp;esi); } a1[0] &#x3D; esi; a1[1] &#x3D; edi; return 0; } unsigned int* ParseCode(unsigned int *a1, int a2) { DWORD esi, edi; esi &#x3D; a1[0]; edi &#x3D; a1[1]; while (a2–) { Rol64((unsigned __int64)edi &lt;&lt; 32 esi, 1, &amp;edi, &amp;esi); edi ^&#x3D; (!!(esi &amp; 0x4) ^ !!(esi &amp; 0x2000) ^ !!(esi &amp; 0x80000000)); } a1[0] &#x3D; esi; a1[1] &#x3D; edi; return 0; } int main(int argc, char**argv) { &#x2F;&#x2F; argv[1] &#x3D; Name &#x2F;&#x2F; argv[2] &#x3D; ProductId &#x2F;&#x2F; argv[3] &#x3D; RegisteredOwner if (argc !&#x3D; 4) abort(); char str[512]; strcpy_s(str, sizeof(str), argv[1]); strcat_s(str, sizeof(str), _strrev(argv[1])); strcat_s(str, sizeof(str), argv[2]); strcat_s(str, sizeof(str), argv[3]); memset(str + strlen(str), 0, sizeof(str) - strlen(str)); int pos &#x3D; 0x40 - (strlen(str) + 1) &amp; 0x3f; if (pos &lt;&#x3D; 7) pos +&#x3D; 0x40; pos +&#x3D; strlen(str) + 1; str[strlen(str)] &#x3D; ‘\x80’; *PDWORD(str + pos - 8) &#x3D; strlen(str) * 8; unsigned int key[4] &#x3D; { 0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476 }; for (int i &#x3D; 0; i &lt; pos; i +&#x3D; 0x40) ComputeKey(str + i, key); key[0] &amp;&#x3D; 0xffff; for (int i &#x3D; 2; i &gt;&#x3D; 0; –i) &#x2F;&#x2F; i 也要倒过来 ParseCodeReverse(&amp;key[i], 0xbadc0de &#x2F; (0x50 + i)); printf(“%#x %#x %#x %#x\n”, key[0], key[1], key[2], key[3]); return 0; } [&#x2F;cpp]</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>flandre
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://kerisa.github.io/579/" title="CrackMe 反汇编练习之 052">https://kerisa.github.io/579/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/CrackMe/" rel="tag"># CrackMe</a>
+              <a href="/tags/%E5%8F%8D%E6%B1%87%E7%BC%96/" rel="tag"># 反汇编</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/573/" rel="prev" title="首页">
+      <i class="fa fa-chevron-left"></i> 首页
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/600/" rel="next" title="《Plastic Memories可塑性记忆》补完">
+      《Plastic Memories可塑性记忆》补完 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt=""
+      src="/sys-imgs/42553027_1.png">
+  <p class="site-author-name" itemprop="name"></p>
+  <div class="site-description" itemprop="description">This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">247</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">flandre</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">328k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">4:58</span>
+</div>
+  <div class="powered-by">Powered by love
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

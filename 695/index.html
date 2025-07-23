@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kerisa.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="在 vultr 买了新的主机，准备把网站迁过去。机房选在洛杉矶，果然西海岸的稳定性还是最好啊，丢包也少，东京在晚上高峰丢包太高了，受不了。说来在 V 家之前还试了试 IOZoom 的机子，然而到手时分到个被墙的 ip，ssh 都连不上，然后提工单换了；买了个亚洲优化，也就是 CN2 路线的 ip，又是被墙的我去……来来回回折腾几下相当失望，换完 ip 后高峰期丢包还是高得不行，基本在 10%(CN">
+<meta property="og:type" content="article">
+<meta property="og:title" content="服务器迁移到 vultr">
+<meta property="og:url" content="https://kerisa.github.io/695/index.html">
+<meta property="og:site_name" content="Re: Memory (mirror)">
+<meta property="og:description" content="在 vultr 买了新的主机，准备把网站迁过去。机房选在洛杉矶，果然西海岸的稳定性还是最好啊，丢包也少，东京在晚上高峰丢包太高了，受不了。说来在 V 家之前还试了试 IOZoom 的机子，然而到手时分到个被墙的 ip，ssh 都连不上，然后提工单换了；买了个亚洲优化，也就是 CN2 路线的 ip，又是被墙的我去……来来回回折腾几下相当失望，换完 ip 后高峰期丢包还是高得不行，基本在 10%(CN">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-04-08T13:41:56.000Z">
+<meta property="article:modified_time" content="2025-07-21T18:42:00.728Z">
+<meta property="article:author" content="flandre">
+<meta property="article:tag" content="bbr">
+<meta property="article:tag" content="frp">
+<meta property="article:tag" content="kcptun">
+<meta property="article:tag" content="lnmp">
+<meta property="article:tag" content="nginx">
+<meta property="article:tag" content="vultr">
+<meta property="article:tag" content="wordpress">
+<meta property="article:tag" content="服务器">
+<meta property="article:tag" content="网站">
+<meta property="article:tag" content="迁移">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://flandre-scarlet.moe/blog/695/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>服务器迁移到 vultr | Re: Memory (mirror)</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Re: Memory (mirror)</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/695/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/sys-imgs/42553027_1.png">
+      <meta itemprop="name" content="flandre">
+      <meta itemprop="description" content="This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Re: Memory (mirror)">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          服务器迁移到 vultr
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-04-08 21:41:56" itemprop="dateCreated datePublished" datetime="2019-04-08T21:41:56+08:00">2019-04-08</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-07-22 02:42:00" itemprop="dateModified" datetime="2025-07-22T02:42:00+08:00">2025-07-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%A8%8B%E5%BA%8F/" itemprop="url" rel="index"><span itemprop="name">程序</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>7.7k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>7 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在 vultr 买了新的主机，准备把网站迁过去。机房选在洛杉矶，果然西海岸的稳定性还是最好啊，丢包也少，东京在晚上高峰丢包太高了，受不了。说来在 V 家之前还试了试 IOZoom 的机子，然而到手时分到个被墙的 ip，ssh 都连不上，然后提工单换了；买了个亚洲优化，也就是 CN2 路线的 ip，又是被墙的我去……来来回回折腾几下相当失望，换完 ip 后高峰期丢包还是高得不行，基本在 10%(CN2) 和 16%(主 ip) 左右，后面果断退钱了。之后就入了 vultr 的。</p>
+<p>现在记录一下从头搭建的过程吧。专为 centos 7 x64 量身打造。</p>
+<span id="more"></span>
+<h1 id="SSH"><a href="#SSH" class="headerlink" title="SSH"></a>SSH</h1><ol>
+<li><p>首先设置 ssh 公钥访问、更换默认端口和取消密码访问</p>
+</li>
+<li><p>使用<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh-keygen -t rsa</span><br></pre></td></tr></table></figure>生成一对 rsa 密钥对存放在 &#x2F;root&#x2F;.ssh&#x2F; 目录下，带 .pub 后缀的是公钥</p>
+</li>
+<li><p>使用<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> <span class="built_in">id</span>\_rsa.pub &gt; authorized\_keys</span><br></pre></td></tr></table></figure> 导入。</p>
+</li>
+<li><p>sftp 下载公私钥到本地，先保存好，怎么用下面会说，现在接着配服务器。</p>
+</li>
+<li><p>修改配置文件（&#x2F;etc&#x2F;ssh&#x2F;sshd_config）</p>
+<ul>
+<li>去掉<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">PubkeyAuthentication <span class="built_in">yes</span> AuthorizedKeysFile .ssh/authorized\_keys</span><br></pre></td></tr></table></figure>前的 # 注释。</li>
+<li>将 <em>#Port 22</em> 的注释去掉，并改为一个任意的空闲高位端口。</li>
+<li>将 <em>PasswordAuthentication yes</em> 改为 _PasswordAuthentication no_。保存退出后使用<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl restart sshd</span><br></pre></td></tr></table></figure>重启 ssh。</li>
+</ul>
+</li>
+<li><p>配置 centos7 防火墙</p>
+<ol>
+<li>添加新的端口 A，就是刚刚在 ssh 配置里填的那个，比如下面的命令添加了 tcp 的 7777 端口（顺便一提把命令中的 “add” 换成 “remove” 即可删除；把 “7777” 换成 “7777-8888” 即可添加范围端口）。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">firewall-cmd --permanent --zone=public --add-port=7777/tcp</span><br></pre></td></tr></table></figure></li>
+<li>重新加载规则<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">firewall-cmd --reload</span><br></pre></td></tr></table></figure></li>
+<li>添加自启动<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl <span class="built_in">enable</span> firewalld</span><br></pre></td></tr></table></figure></li>
+<li>※ 这里添加一条就结束了，其他端口的添加如法炮制即可。</li>
+<li>※ 添加 http(s) 等类似常用端口可以直接添加现有服务来完成<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">firewall-cmd --permanent --zone=public --add-service=http firewall-cmd --permanent --zone=public --add-service=https</span><br></pre></td></tr></table></figure></li>
+<li>※未尽的说明可参考 vultr 的文档 <a target="_blank" rel="noopener" href="https://www.vultr.com/docs/using-firewalld-to-manage-your-firewall-on-centos-7">Using FirewallD to Manage Your Firewall on CentOS 7</a></li>
+</ol>
+<ul>
+<li>防火墙有各种 “zone”，其实就是不同的规则集，默认是 “public” zone，可用 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">firewall-cmd --get-default-zone firewall-cmd --set-default-zone=home</span><br></pre></td></tr></table></figure>查看和修改。</li>
+<li>查看某个 zone 下的现有规则 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">firewall-cmd --zone=public --list-ports firewall-cmd --zone=public --list-services</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li><p>※ 如果在 vultr 的 web 面板中配置了防火墙规则，则在那里也要进行相应的端口添加。</p>
+</li>
+<li><p>以上配置完成后在 <a target="_blank" rel="noopener" href="http://port.ping.pe/">port.ping.pe</a> 中检测相应端口的结果应该是可以成功连接的。没成功前千万别退出现有的 ssh 连接哦，因为没有后路了(o???)<br>（配置 sshd_config 时不删除 _Port 22_，直接补充一行如 <em>Port 7777</em> 即可同时监听两个端口，全部配完再删掉 22 端口。）</p>
+</li>
+<li><p>（本地电脑上）用 puttygen.exe 打开下载的私钥（软件界面上的 “Load” 按钮），完成后再点 “Save private key” 另存为 ppk 文件，这样在 putty 中就能使用该私钥登录了（在 Connection-SSH-Auth 中填入 ppk 文件路径，在 Connection-Data 中的 “Auto login username” 中填入你的用户名）。</p>
+</li>
+</ol>
+<h1 id="BBR"><a href="#BBR" class="headerlink" title="BBR"></a>BBR</h1><ol>
+<li>添加 ELRepo 源<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-2.el7.elrepo.noarch.rpm</span><br></pre></td></tr></table></figure></li>
+<li>安装最新内核<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum --enablerepo=elrepo-kernel install kernel-ml -y</span><br></pre></td></tr></table></figure></li>
+<li>成功后用<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rpm -qa grep kernel</span><br></pre></td></tr></table></figure>列出已安装的内核，其中应含有形如 “kernel-ml-5.0.6-1.el7.elrepo.x86_64” 的输出。</li>
+<li>列出 grub2 启动菜单<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">egrep ^menuentry /etc/grub2.cfg <span class="built_in">cut</span> -f 2 -d \\&#x27;</span><br></pre></td></tr></table></figure></li>
+<li>按顺序从上往下找到 5.0.6 内核的行数，第一行序号是 0，记住序号，输入<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">grub2-set-default &lt;你的序号&gt;</span><br></pre></td></tr></table></figure></li>
+<li>重启<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">shutdown -r now</span><br></pre></td></tr></table></figure></li>
+<li>重启后查看<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">uname</span> -r</span><br></pre></td></tr></table></figure>应显示 5.0.6 内核。</li>
+<li>启用 BBR。逐行执行<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;net.core.default\_qdisc=fq&#x27;</span> <span class="built_in">sudo</span> <span class="built_in">tee</span> -a /etc/sysctl.conf <span class="built_in">echo</span> <span class="string">&#x27;net.ipv4.tcp\_congestion\_control=bbr&#x27;</span> <span class="built_in">sudo</span> <span class="built_in">tee</span> -a /etc/sysctl.conf sysctl -p // 确认：sysctl net.ipv4.tcp\_available\_congestion\_control 输出应类似 <span class="string">&quot;reno cubic bbr&quot;</span> // 确认：sysctl -n net.ipv4.tcp\_congestion\_control 输出应为 <span class="string">&quot;bbr&quot;</span> // 确认：lsmod grep bbr 输出含有 <span class="string">&quot;tcp\_bbr&quot;</span></span><br></pre></td></tr></table></figure>完成</li>
+<li>※ Ex: <a target="_blank" rel="noopener" href="https://github.com/kuoruan/shell-scripts">OpenVZ 用的 BBR 一键脚本</a>。</li>
+</ol>
+<h1 id="LNMP"><a href="#LNMP" class="headerlink" title="LNMP"></a>LNMP</h1><ol>
+<li>安装 nginx <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install nginx -y systemctl <span class="built_in">enable</span> nginx systemctl start nginx</span><br></pre></td></tr></table></figure>现在通过 ip 直接访问应该可以看过欢迎页（防火墙已开，参照 ssh 处设置防火墙）。</li>
+<li>可在配置文件的 http 块中添加一行 <em>server_tokens off;</em> 来隐藏 nginx 的版本。</li>
+<li>安装 php7<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">// yum list installed grep php // 新机肯定没装 php，装过的要先卸掉。看一眼 rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm // 更新 rpm 源 yum install php70w php70w-fpm php70w-mysql -y systemctl <span class="built_in">enable</span> php-fpm systemctl start php-fpm</span><br></pre></td></tr></table></figure></li>
+<li>配置 nginx。php-fpm 的默认端口为 9000，现在将它加入 nginx 的配置中（此处不用开防火墙，内部使用）。打开 nginx 配置文件 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vi /etc/nginx/nginx.conf</span><br></pre></td></tr></table></figure>在 “server” 块的末尾加上<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">location ~ \\.php$ &#123; fastcgi\_pass 127.0.0.1:9000; fastcgi\_index index.php; fastcgi\_param SCRIPT\_FILENAME <span class="variable">$document</span>\_root<span class="variable">$fastcgi</span>\_script\_name; include fastcgi\_params; &#125;</span><br></pre></td></tr></table></figure>保存退出并<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl restart nginx</span><br></pre></td></tr></table></figure>重启 nginx。</li>
+<li>安装 MariaDB。有疑问可直接看 <a target="_blank" rel="noopener" href="https://www.vultr.com/docs/how-to-install-mariadb-10-1-on-centos-7">How to Install MariaDB 10.1 on CentOS 7</a>。<ol>
+<li>创建 yum repo ：粘贴以下全部后一次执行<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> &amp;lt;&amp;lt; EOF <span class="built_in">sudo</span> <span class="built_in">tee</span> -a /etc/yum.repos.d/MariaDB.repo <span class="comment"># MariaDB 10.1 CentOS repository list # http://downloads.mariadb.org/mariadb/repositories/ \[mariadb\] name = MariaDB baseurl = http://yum.mariadb.org/10.1/centos7-amd64 gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB gpgcheck=1 EOF</span></span><br></pre></td></tr></table></figure></li>
+<li>yum 安装<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install MariaDB-server MariaDB-client -y</span><br></pre></td></tr></table></figure></li>
+<li>启动并加入自启动<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl start mariadb.service systemctl <span class="built_in">enable</span> mariadb.service</span><br></pre></td></tr></table></figure></li>
+<li>安全化配置<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/usr/bin/mysql\_secure\_installation</span><br></pre></td></tr></table></figure>当前数据库 root 密码为空直接回车，然后设置新的 root 密码，脚本中所有 yes&#x2F;no 的选项都选 yes 即可，不放心的也可每个看一遍，都很直白的选项。</li>
+</ol>
+</li>
+<li>※ php-fpm进程过多，内存耗尽<ol>
+<li>打开 &#x2F;etc&#x2F;php-fpm.conf，翻到最后的 <em>Pool Definitions</em> 节，里面包含了 &#x2F;etc&#x2F;php-fpm.d&#x2F; 目录下的 .conf 文件</li>
+<li>打开 &#x2F;etc&#x2F;php-fpm.d&#x2F;<a target="_blank" rel="noopener" href="http://www.conf(只有这一个),修改/">www.conf（只有这一个），修改</a><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># 另一种模式 ondemand 工作方式是直接杀死空闲了 pm.process\_idle\_timeout 秒的闲置进程 pm = dynamic # 最大数根据内存情况设置，也不能太小 pm.max\_children = 10 pm.start\_servers = 3 # 最小和最大的闲置进程数，dynamic 模式只会杀死超过最大闲置进程数的进程 pm.min\_spare\_servers = 1 pm.max\_spare\_servers = 3 pm.max\_requests = 2048 request\_terminate\_timeout = 1200</span><br></pre></td></tr></table></figure></li>
+<li>重启 php-fpm <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl restart php-fpm</span><br></pre></td></tr></table></figure></li>
+</ol>
+</li>
+</ol>
+<h1 id="ss"><a href="#ss" class="headerlink" title="ss"></a>ss</h1><p>秋水逸冰一键脚本四合一版：<a target="_blank" rel="noopener" href="https://teddysun.com/486.html">Shadowsocks 一键安装脚本（四合一）</a></p>
+<h1 id="kcptun"><a href="#kcptun" class="headerlink" title="kcptun"></a>kcptun</h1><p>焕发第二春</p>
+<ol>
+<li>下载一键脚本进行安装<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget --no-check-certificate https://github.com/kuoruan/shell-scripts/raw/master/kcptun/kcptun.sh <span class="built_in">chmod</span> +x ./kcptun.sh ./kcptun.sh</span><br></pre></td></tr></table></figure></li>
+<li>设置 kcptun 服务器端口，默认为 29900，有防火墙的话注意打开。</li>
+<li>设置加速地址，一般 ss 监听的端口都是形如 0.0.0.0:7777，所以 kcptun 的地址和加速端口分别填 127.0.0.1 和 &lt;你的ss端口&gt; 即可。</li>
+<li>设置 kcptun 用的密钥用于客户端和服务器认证，注意和 ss 的密码是两回事。</li>
+<li>剩下的可直接用脚本的默认设置。</li>
+<li>到 <a target="_blank" rel="noopener" href="https://github.com/xtaci/kcptun/releases">kcptun Release</a> 下载合适的客户端。</li>
+<li>以 windows 为例，可以<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">client\_windows\_amd64.exe -c config.json</span><br></pre></td></tr></table></figure>启动客户端， json 来自安装服务器时的输出，或是直接在命令行中一个个指定参数<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">client\_windows\_amd64.exe -r &lt;ip&gt;:&lt;port&gt; --key &lt;kcptun 的密码&gt; --sndwnd 512</span><br></pre></td></tr></table></figure>因为我的服务器 sndwnd 设为 512，和默认的 128 不同，所以重新指定，其他参数因为和默认值一样所以不用特地在命令行中指出了。</li>
+<li>这样就能顺利连接了。</li>
+<li>手机端<ol>
+<li>下载用于 ss 客户端的 <a target="_blank" rel="noopener" href="https://github.com/shadowsocks/kcptun-android/releases/">kcptun-Android</a> 插件：</li>
+<li>在 ss 的配置界面里选择插件为 kcptun。</li>
+<li>在插件下面的配置编辑框中填入服务器的配置内容（来自安装服务器时的输出，当然自己指定也是一样的）。</li>
+<li>在插件配置中补充<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">remoteaddr=&lt;你的服务器ip&gt;:&lt;你的 kcptun 端口&gt;</span><br></pre></td></tr></table></figure>。</li>
+<li>保持其他 ss 配置不变就能顺利连接了。</li>
+<li>如有不能连接的情况首先确保禁用 kcptun 插件时能正常使用 ss；然后再校对 kcptun 的各个参数。要是还没用的话把插件中的 UDP Fallback 打开，选另一个 ss 节点就能连上了。</li>
+</ol>
+</li>
+<li>※ 有疑难可以看<a target="_blank" rel="noopener" href="https://blog.kuoruan.com/110.html">作者的博客</a>。</li>
+</ol>
+<h1 id="docker"><a href="#docker" class="headerlink" title="docker"></a>docker</h1><p>这个其实是个可选项，一起塞在这里吧。</p>
+<p>docker 前置条件是 kernel 大于等于 3.10，centos 7 没问题。</p>
+<ol>
+<li>yum 安装<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum upgrade -y yum install docker -y systemctl start docker</span><br></pre></td></tr></table></figure></li>
+<li>设置镜像。打开 &#x2F;etc&#x2F;docker&#x2F;daemon.json，添加成<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123; <span class="string">&quot;registry-mirrors&quot;</span>: \[<span class="string">&quot;https://aj2rgad5.mirror.aliyuncs.com&quot;</span>\] &#125;</span><br></pre></td></tr></table></figure>保存退出。</li>
+<li>重启docker<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl daemon-reload systemctl restart docker.service</span><br></pre></td></tr></table></figure></li>
+<li>测试docker<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run hello-world</span><br></pre></td></tr></table></figure>应该有 “Hello from Docker!” 的输出。</li>
+</ol>
+<p>到这里基本的部署就结束了，下面就把 wordpress 整个搬过来就好了。</p>
+<h1 id="迁移-wordpress"><a href="#迁移-wordpress" class="headerlink" title="迁移 wordpress"></a>迁移 wordpress</h1><p>一开始想尝试直接修改 wp 的站点链接后复制整个目录和数据库，结果失败了，页面样式一直没法正常显示，浪费了不少时间搞来搞去。于是走常规路线，将插件 UpdraftPlus Backup 备份的数据进行还原。</p>
+<ol>
+<li><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget http://wordpress.org/latest.tar.gz tar -xzf latest.tar.gz</span><br></pre></td></tr></table></figure>下载最新版 wp 并解压到安装目录。</li>
+<li>创建和原来相同的数据库和数据库用户。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">// 以数据库名=wordpress，用户名=wp@localhost 为例，原密码 <span class="built_in">pwd</span> 也保持一致 CREATE DATABASE wordpress; CREATE USER wp@localhost; SET PASSWORD FOR wp@localhost=PASSWORD(<span class="string">&quot;pwd&quot;</span>); GRANT ALL PRIVILEGES ON wordpress.\* TO wp@localhost IDENTIFIED BY <span class="string">&#x27;pwd&#x27;</span>; FLUSH PRIVILEGES;</span><br></pre></td></tr></table></figure></li>
+<li>设置 wp 目录下的 wp-config.php 文件。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/\*\* 数据库名 \*/ define(<span class="string">&#x27;DB\_NAME&#x27;</span>,<span class="string">&#x27;wordpress&#x27;</span>); /\*\* 数据库用户 \*/ define(<span class="string">&#x27;DB\_USER&#x27;</span>,<span class="string">&#x27;wordpress&#x27;</span>); /\*\* 数据库密码 \*/ define(<span class="string">&#x27;DB\_PASSWORD&#x27;</span>,<span class="string">&#x27;pwd&#x27;</span>);</span><br></pre></td></tr></table></figure></li>
+<li>将 wp 所在整个目录的所有权转移给 apache 用户。以便 wp 能正常运行。</li>
+<li>访问 <yoursite>&#x2F;wp-admin&#x2F;install.php 进行安装。</li>
+<li>安装 UpdraftPlus Backup 插件并连接原来进行备份的云端账号（如果是用其他方式备份的保持相同即可），导入账号中的备份数据。</li>
+<li>还原后一切正常。</li>
+</ol>
+<p>做 wp 的修改的时候要注意 wp-content&#x2F;cache 目录下的缓存，会导致改动的效果不会立刻展现。</p>
+<p>最后强烈推荐安装 Classic Editor 插件回复经典编辑器界面，md 辣鸡 Gutenberg 浪费我时间。</p>
+<h1 id="Ex-frp-with-nginx"><a href="#Ex-frp-with-nginx" class="headerlink" title="Ex: frp with nginx"></a>Ex: frp with nginx</h1><p>让 nginx 把 443 的 https 连接转发到 frps 做内网穿透。</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/fatedier/frp/releases">下载</a>最新版 frp。注意服务器和客户端的软件版本要保持一致。现在的版本加入了 systemd 的服务脚本，使用更方便了。以服务器为例，将解压后的 <em>systemd&#x2F;frps.service</em> 复制到 <em>&#x2F;etc&#x2F;systemd&#x2F;system</em> 下，<em>frps</em> 复制到 <em>&#x2F;usr&#x2F;bin&#x2F;</em> 下，<em>frps.ini</em> 复制到 <em>&#x2F;etc&#x2F;frp&#x2F;</em> 下，最后 <em>systemctl enable frps_、_systemctl start frps</em> 即可。<br>基本的配置就跳过了，就说下 nginx 转发的事。首先在 frps 配置中修改设置<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vhost\_https\_port = 9100</span><br></pre></td></tr></table></figure>随后在 nginx 配置中添加这么一个 server 块。<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">server &#123; listen 443 ssl http2; listen \[::\]:443 ssl http2; server\_name &lt;你要映射的外网域名&gt;; ssl\_certificate &quot;&lt;tls 证书&gt;.crt&quot;; ssl\_certificate\_key &quot;&lt;tls 证书&gt;.key&quot;; ssl\_session\_cache shared:SSL:1m; ssl\_session\_timeout 10m; ssl\_ciphers HIGH:!aNULL:!MD5; ssl\_prefer\_server\_ciphers on; location / &#123; resolver 8.8.8.8; proxy\_ssl\_server\_name on; proxy\_set\_header X-Real-IP $remote\_addr; proxy\_set\_header X-Forwarded-For $proxy\_add\_x\_forwarded\_for; proxy\_set\_header X-Forwarded-Proto $scheme; proxy\_set\_header Host $host; proxy\_pass https://$host:9100; # 与 frps 中的端口保持一致即可 &#125; &#125;</span><br></pre></td></tr></table></figure>最后在 frpc（客户端）配置中加入<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">\[https1\] type = https local\_port = 443 ; 客户端本地服务使用的端口 custom\_domains = &lt;你要映射的外网域名&gt;</span><br></pre></td></tr></table></figure>就可以顺利连接了。</p>
+<p>这里省略了基本的配置过程，所以在配置 nginx 转发前应确保正常的比如 tcp 转发能够进行，最后加入上面的配置就没问题了。</p>
+<p>更新：一开始连接都是正常的，第二天才出现了 502 bad gateway 的错误，原因在于 frp 客户端和 nginx 上使用的证书不是同一份，导致 ssl 握手失败，换掉证书就正常了。还有一个方法就是将 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">proxy\_set\_header Host $host</span><br></pre></td></tr></table></figure>的 $host 改为 frp 客户端上证书对应的域名。</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>flandre
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://kerisa.github.io/695/" title="服务器迁移到 vultr">https://kerisa.github.io/695/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/bbr/" rel="tag"># bbr</a>
+              <a href="/tags/frp/" rel="tag"># frp</a>
+              <a href="/tags/kcptun/" rel="tag"># kcptun</a>
+              <a href="/tags/lnmp/" rel="tag"># lnmp</a>
+              <a href="/tags/nginx/" rel="tag"># nginx</a>
+              <a href="/tags/vultr/" rel="tag"># vultr</a>
+              <a href="/tags/wordpress/" rel="tag"># wordpress</a>
+              <a href="/tags/%E6%9C%8D%E5%8A%A1%E5%99%A8/" rel="tag"># 服务器</a>
+              <a href="/tags/%E7%BD%91%E7%AB%99/" rel="tag"># 网站</a>
+              <a href="/tags/%E8%BF%81%E7%A7%BB/" rel="tag"># 迁移</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/673/" rel="prev" title="pixivspider – P 站爬虫工具">
+      <i class="fa fa-chevron-left"></i> pixivspider – P 站爬虫工具
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/722/" rel="next" title="[ 注册 vultr 赠送 $300 ]">
+      [ 注册 vultr 赠送 $300 ] <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#SSH"><span class="nav-number">1.</span> <span class="nav-text">SSH</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#BBR"><span class="nav-number">2.</span> <span class="nav-text">BBR</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#LNMP"><span class="nav-number">3.</span> <span class="nav-text">LNMP</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ss"><span class="nav-number">4.</span> <span class="nav-text">ss</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#kcptun"><span class="nav-number">5.</span> <span class="nav-text">kcptun</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#docker"><span class="nav-number">6.</span> <span class="nav-text">docker</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%BF%81%E7%A7%BB-wordpress"><span class="nav-number">7.</span> <span class="nav-text">迁移 wordpress</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Ex-frp-with-nginx"><span class="nav-number">8.</span> <span class="nav-text">Ex: frp with nginx</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt=""
+      src="/sys-imgs/42553027_1.png">
+  <p class="site-author-name" itemprop="name"></p>
+  <div class="site-description" itemprop="description">This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">247</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">flandre</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">328k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">4:58</span>
+</div>
+  <div class="powered-by">Powered by love
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

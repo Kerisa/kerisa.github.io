@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kerisa.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="作为练手的 160 个 CrackMe 系列整理分析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CrackMe 反汇编练习之 024、026">
+<meta property="og:url" content="https://kerisa.github.io/501/index.html">
+<meta property="og:site_name" content="Re: Memory (mirror)">
+<meta property="og:description" content="作为练手的 160 个 CrackMe 系列整理分析">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2018/07/crackme-24-1.png">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2018/07/crackme-24-2.png">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2018/07/crackme-24-3.png">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2018/07/crackme-26-1.png">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2018/07/crackme-26-2.png">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2018/07/crackme-26-3.png">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2018/07/crackme-26-4.png">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2018/07/crackme-26-5.png">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2018/07/crackme-26-6.png">
+<meta property="article:published_time" content="2018-07-15T12:01:23.000Z">
+<meta property="article:modified_time" content="2025-07-21T18:42:00.456Z">
+<meta property="article:author" content="flandre">
+<meta property="article:tag" content="CrackMe">
+<meta property="article:tag" content="反汇编">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kerisa.github.io/assets/imgs/2018/07/crackme-24-1.png">
+
+<link rel="canonical" href="https://flandre-scarlet.moe/blog/501/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>CrackMe 反汇编练习之 024、026 | Re: Memory (mirror)</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Re: Memory (mirror)</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/501/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/sys-imgs/42553027_1.png">
+      <meta itemprop="name" content="flandre">
+      <meta itemprop="description" content="This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Re: Memory (mirror)">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          CrackMe 反汇编练习之 024、026
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-07-15 20:01:23" itemprop="dateCreated datePublished" datetime="2018-07-15T20:01:23+08:00">2018-07-15</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-07-22 02:42:00" itemprop="dateModified" datetime="2025-07-22T02:42:00+08:00">2025-07-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/programs/" itemprop="url" rel="index"><span itemprop="name">programs</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/programs/%E9%80%86%E5%90%91/" itemprop="url" rel="index"><span itemprop="name">逆向</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.5k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>1 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>作为练手的 160 个 CrackMe 系列整理分析</p>
+<span id="more"></span>
+<p>CrackMe 来源：<a target="_blank" rel="noopener" href="https://www.52pojie.cn/thread-709699-1-1.html">【反汇编练习】160个CrackME索引目录1~160建议收藏备用</a></p>
+<h1 id="024"><a href="#024" class="headerlink" title="024"></a>024</h1><p><img src="/assets/imgs/2018/07/crackme-24-1.png" alt="代码"></p>
+<p>流程是使用用户名注册码计算出 X 存入 [4012D9] 处，再对包含 [4012D9] 在内的一段代码进行异或检验计算。</p>
+<p>这段计算的关键在于使用了代码段的一部分 (4011EC~4012E4 共 3E*4 个字节) 四字节循环异或计算校验值，其中 [4012D9] 这个双字会受到用户名和注册码的影响而变化，此外也不能打 int3 断点。</p>
+<p>接下来进行倒推，假设 [4012D9] &#x3D; 0xM1M2M3M4，注意 [4012D9] 没有 4 字节对齐<br>(4012D8 ：04 M4 M3 M2 M1 AD 33 D8)。</p>
+<p>因为计算过程是每个双字代入异或，所以将 04 和 M1 交换不影响结果(两个都是最低位)，由此得到 0xM2M3M4M1 &#x3D; 0xAFFCCFFB ^ 0xFBDA24A3 &#x3D; 0x5426EB58，其中 0xFBDA24A3 是将 [4012D9] 填入 0 时剩余部分计算的结果。</p>
+<p>还原得到 [4012D9] &#x3D; 0x585426EB。</p>
+<p>当填入正确的机器码时，流程便会跳转到正确提示处</p>
+<p><img src="/assets/imgs/2018/07/crackme-24-2.png" alt="正确执行流程">  </p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">004012BB 3105 D9124000 xor dword ptr ds:\[4012D9\],eax ; eax 视为 X 004012C1 C1E8 10 shr eax,10 004012C4 66:2905 D9124000 sub word ptr ds:\[4012D9\],ax ; 这里高 16 位可单独推算</span><br></pre></td></tr></table></figure>
+
+<p>根据上面的代码有公式 [4012D9] &#x3D; ([初始4012D9] ^ X) - (X &gt;&gt; 16) &#x3D; 0x585426EB, 代入 [4012D9] 初值 0x584554,<br>得出 X &#x3D; 580C????，剩下的写个循环算一下得到 3BA3，所以 X &#x3D; 580C3BA3</p>
+<p>而 X 由</p>
+<ul>
+<li>[40300B] 的初值 0x58455443</li>
+<li>用户名的计算和</li>
+<li>atoi(注册码)</li>
+</ul>
+<p>计算得到（参见代码图），方便起见用户名填入一个”1”(不能留空)，得到注册码应为 X - 0x58455474 &#x3D; 0xFFC6E72F &#x3D; 4291225391，其中 0x58455474 是用户名填 1 时与 [40300B] 计算的中间值，即 0x58455443 + 0x31 &#x3D; 0x58455474。</p>
+<p>注：因为是按整个缓冲区的大小来对用户名进行计算的，所以比如先填了”2222”，再换成”1”，缓冲区中残留的 “22” 也会对计算造成影响，所以在程序运行后不要填写多余的字符才行。</p>
+<p>得到一组注册码：<br>1<br>4291225391</p>
+<p><img src="/assets/imgs/2018/07/crackme-24-3.png" alt="结果">  </p>
+<h1 id="026"><a href="#026" class="headerlink" title="026"></a>026</h1><p>通过查找字符串可快速定位到计算注册码的代码。然后一直往上翻，即可找到函数的入口处。接下来顺序往下看（以用户名“123456”为例）</p>
+<ol>
+<li>(跳过用户名最小长度检测部分)</li>
+<li>首先是一个循环，里面顺序取出用户名的每个字符，进行 ch * 432.4 * 17.79 &#x2F; 15 &#x3D; X1 的运算，并且通过 SendKeys 函数向窗口发送 home 键和 del 键的消息来取后续的用户名字符。因为每次循环都会将结果保存到同一个地方，所以等价为计算最后一个字符。 SendKeys 这里有反调试的效果，单步会使原程序收不到按键消息而进入死循环。<img src="/assets/imgs/2018/07/crackme-26-1.png" alt="2"></li>
+<li>将上一步的 X1 取整为 X11。<img src="/assets/imgs/2018/07/crackme-26-2.png" alt="3"></li>
+<li>X11 加上用户名第一个字符（的ascii）到 X2。<img src="/assets/imgs/2018/07/crackme-26-3.png" alt="4"></li>
+<li>X11 - (用户名第一个字符 * 0x19) 得到 X3。<img src="/assets/imgs/2018/07/crackme-26-4.png" alt="5"></li>
+<li>X11 转 16 进制字符串得到 X4。</li>
+<li>用户名第一个字符 * 用户名长度 - 0x1b 得到 X5。<img src="/assets/imgs/2018/07/crackme-26-5.png" alt="7"></li>
+<li>将 (10进制X2)、(16进制X3)、(X4)、(10进制X5)、(用户名长度)、(“-CM”) 依次连接，即得到正确注册码，最后比较。</li>
+</ol>
+<p><img src="/assets/imgs/2018/07/crackme-26-6.png" alt="8">  </p>
+<p>Ps: vb代码真又臭又长。</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>flandre
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://kerisa.github.io/501/" title="CrackMe 反汇编练习之 024、026">https://kerisa.github.io/501/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/CrackMe/" rel="tag"># CrackMe</a>
+              <a href="/tags/%E5%8F%8D%E6%B1%87%E7%BC%96/" rel="tag"># 反汇编</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/481/" rel="prev" title="sse 指令中 xmm 寄存器复制到内存出现异常">
+      <i class="fa fa-chevron-left"></i> sse 指令中 xmm 寄存器复制到内存出现异常
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/527/" rel="next" title="获取浏览器存储密码">
+      获取浏览器存储密码 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#024"><span class="nav-number">1.</span> <span class="nav-text">024</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#026"><span class="nav-number">2.</span> <span class="nav-text">026</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt=""
+      src="/sys-imgs/42553027_1.png">
+  <p class="site-author-name" itemprop="name"></p>
+  <div class="site-description" itemprop="description">This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">247</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">flandre</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">328k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">4:58</span>
+</div>
+  <div class="powered-by">Powered by love
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kerisa.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="第一章 网络攻防技术概述  发展历史，事件 基础技术体系框架：Web 安全攻防（热点） （主要内容） 系统安全攻防——软件安全漏洞（技术基础） 网络协议安全攻防——网络协议安全漏洞（技术基础） 物理攻击与社会工程学——人的心里弱点、物理设计缺陷（技术基础）   网络攻击路径 信息收集 踩点：Web 搜索与挖掘、DNS 和 IP 查询、网络拓扑侦擦 扫描：Ping 扫描、端口扫描、操作系统探测、网络">
+<meta property="og:type" content="article">
+<meta property="og:title" content="《网络攻防技术与实践》读书笔记">
+<meta property="og:url" content="https://kerisa.github.io/1795/index.html">
+<meta property="og:site_name" content="Re: Memory (mirror)">
+<meta property="og:description" content="第一章 网络攻防技术概述  发展历史，事件 基础技术体系框架：Web 安全攻防（热点） （主要内容） 系统安全攻防——软件安全漏洞（技术基础） 网络协议安全攻防——网络协议安全漏洞（技术基础） 物理攻击与社会工程学——人的心里弱点、物理设计缺陷（技术基础）   网络攻击路径 信息收集 踩点：Web 搜索与挖掘、DNS 和 IP 查询、网络拓扑侦擦 扫描：Ping 扫描、端口扫描、操作系统探测、网络">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-06-21T15:13:13.000Z">
+<meta property="article:modified_time" content="2025-07-21T17:32:47.059Z">
+<meta property="article:author" content="flandre">
+<meta property="article:tag" content="网络攻防技术与实践">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://flandre-scarlet.moe/blog/1795/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>《网络攻防技术与实践》读书笔记 | Re: Memory (mirror)</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Re: Memory (mirror)</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/1795/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/sys-imgs/42553027_1.png">
+      <meta itemprop="name" content="flandre">
+      <meta itemprop="description" content="This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Re: Memory (mirror)">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          《网络攻防技术与实践》读书笔记
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-06-21 23:13:13" itemprop="dateCreated datePublished" datetime="2020-06-21T23:13:13+08:00">2020-06-21</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-07-22 01:32:47" itemprop="dateModified" datetime="2025-07-22T01:32:47+08:00">2025-07-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">读书笔记</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.7k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>第一章 网络攻防技术概述</p>
+<ul>
+<li>发展历史，事件</li>
+<li>基础技术体系框架：Web 安全攻防（热点）<ul>
+<li>（主要内容）</li>
+<li>系统安全攻防——软件安全漏洞（技术基础）</li>
+<li>网络协议安全攻防——网络协议安全漏洞（技术基础）</li>
+<li>物理攻击与社会工程学——人的心里弱点、物理设计缺陷（技术基础）</li>
+</ul>
+</li>
+<li>网络攻击路径<ul>
+<li>信息收集<ol>
+<li>踩点：Web 搜索与挖掘、DNS 和 IP 查询、网络拓扑侦擦</li>
+<li>扫描：Ping 扫描、端口扫描、操作系统探测、网络服务探测、安全漏洞扫描</li>
+<li>查点：网络服务旗标抓取、网络服务查点、用户账号查点</li>
+</ol>
+</li>
+<li>实施攻击<ol>
+<li>获取访问：密码窃听，共享文件的蛮力攻击、攫取密码文件、缓冲区溢出</li>
+<li>特权提升：密码破解，利用已知漏洞或脆弱点</li>
+<li>拒绝服务：SYN Flood、ICMP 技术、同一 src&#x2F;dst SYN 请求、重叠 fragment&#x2F;offset、错误（bugs、Out of bounds TCP、options（OOB））、DDOS</li>
+</ol>
+</li>
+<li>成功之后<ol>
+<li>偷盗窃取：评估可信系统的坚固度，探索明文密码</li>
+<li>掩踪灭迹：清除日志记录、掩藏工具</li>
+<li>创建后门：创建“无赖”账号，安排批处理命令作业、感染初启文件、植入远程控制服务、安装监控机制、利用木马替换应用</li>
+</ol>
+</li>
+</ul>
+</li>
+</ul>
+<span id="more"></span>
+<ul>
+<li>态度<ul>
+<li>世界充满了待人解决的谜题</li>
+<li>一个问题不应该被解决两次</li>
+<li>无聊和乏味的工作是罪恶</li>
+<li>自由万岁（反独裁，反对审查、保密、压迫）</li>
+<li>态度不能替代能力（要有智力、实践、奉献精神和辛勤工作）</li>
+</ul>
+</li>
+</ul>
+<p>第二章 网络攻防实验环境<br>第三章 网络信息收集技术</p>
+<ul>
+<li>Google Hacking<ul>
+<li>找出北大域名中的网站服务器：allinurl:-php -html -htm -asp -aspx -ppt -pdf -swf -doc -xls site:pku.edu.cn，排除掉尽可能多的非首页网址</li>
+<li>找出开放 rdp web 连接的服务器： allinurl:tsweb&#x2F;default.html site:cn</li>
+<li>找出信用卡和身份证信息：filetype:xls 信用卡 site:edu.cn 和 filetype:xls 身份证号 site:edu.cn</li>
+<li>自动化：Google AJAX Search API，xgoogle 的 python 库</li>
+</ul>
+</li>
+<li>DNS，IP<ul>
+<li>GeoIP City 的免费版本：GeoLite</li>
+<li>tracert &#x2F; traceroute</li>
+</ul>
+</li>
+<li>主机扫描（Ping 扫描）<ul>
+<li>nmap -sP：集合 ICMP &#x2F; SYN &#x2F; ACK &#x2F; UDP Ping，默认</li>
+<li>nmap -PE：ICMP Echo 扫描</li>
+<li>nmap -PS<portlist>：TCP SYN 扫描</li>
+<li>nmap -PA<portlist>：TCP ACK 扫描</li>
+<li>nmap -PU<portlist>：UDP 主机扫描</li>
+</ul>
+</li>
+<li>端口扫描<ul>
+<li>nmap -sT：TCP Connect 扫描</li>
+<li>nmap -sS：TCP SYN 扫描</li>
+<li>nmap -sF：FIN 扫描</li>
+<li>nmap -sN：NULL 扫描</li>
+<li>nmap -sA：ACK 扫描</li>
+<li>nmap -sX：圣诞树扫描</li>
+<li>nmap -sU：UDP 扫描</li>
+</ul>
+</li>
+<li>系统探测<ul>
+<li>主动：nmap -O、queso</li>
+<li>被动：P0f、siphon</li>
+<li>网络服务主动：nmap -sV</li>
+<li>网络服务被动：PADS</li>
+</ul>
+</li>
+<li>漏洞扫描<ul>
+<li>Bugtraq、NVD（美国国家漏洞库）</li>
+<li>扫描器：Nessus、Cheops-ng</li>
+</ul>
+</li>
+<li>网络查点<ul>
+<li><p>网络服务旗标获取：使用 telnet、netcat 获得服务器的类型和版本号</p>
+</li>
+<li><p>STMP 的 VRFY 和 EXPN 指令</p>
+</li>
+<li><p>nmap -sR：RPC 查点</p>
+</li>
+<li><p>NetBIOS 查点</p>
+</li>
+<li><p>域：net view</p>
+</li>
+<li><p>域控制器：Windows Resource Kit 的 nltest &#x2F;dclist：DOMAIN_NAME</p>
+</li>
+<li><p>NetBIOS 名字表：nbtstat</p>
+</li>
+<li><p>SMB 会话查点</p>
+</li>
+<li><p>共享资源：net view \\HOST，Windows Resource Kit 的 rmtshare、srvcheck、srvinfo，Legoin、NetBIOS Audit Tool</p>
+</li>
+<li><p>注册表查点：Windows Resource Kit 的 regdump 或 DumpSec 的 Dump Services</p>
+</li>
+<li><p>查点受信任域：nltest &#x2F;server 和 nltest &#x2F;trusted_domain</p>
+</li>
+<li><p>用户查点：Windows Resource Kit 的 usrstat、showgrps、local、global，或 DumpSec</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>第四章 网络嗅探与协议分析</p>
+<ul>
+<li>MAC 地址洪泛：向交换机发送大量伪造的 MAC 和 IP 地址的包，使交换机的 MAC 地址-端口映射表 无法工作，从而进入广播模式</li>
+<li>MAC 欺骗：冒充目标的 MAC 地址欺骗交换机</li>
+<li>ARP 欺骗</li>
+<li>BPF、libpcap、tcpdump、wireshark</li>
+<li>嗅探检测：AntiSniff</li>
+<li>防范：安全的网络拓扑、VLAN、合理分段、静态 ARP、静态 MAC 绑定、网关等重点区域防范、避免明文协议</li>
+</ul>
+<p>第五章 TCP&#x2F;IP 网络协议攻击</p>
+<ul>
+<li><p>网络安全：机密性、完整性、可用性、真实性、不可抵赖性</p>
+</li>
+<li><p>中间人攻击</p>
+</li>
+<li><p>协议缺陷与攻击技术</p>
+<ul>
+<li><p>网络接口层</p>
+</li>
+<li><p>以太网协议：明文——网络嗅探与协议分析</p>
+</li>
+<li><p>以太网协议：缺乏 MAC 身份认证——MAC 欺骗</p>
+</li>
+<li><p>PPP 协议：明文——网络嗅探与协议分析</p>
+</li>
+<li><p>互联层</p>
+</li>
+<li><p>IPv4</p>
+</li>
+<li><p>缺乏 IP 地址身份认证——IP 地址欺骗</p>
+</li>
+<li><p>处理 IP 分片逻辑的错误——IP 分片攻击（可用性）</p>
+</li>
+<li><p>ICMP</p>
+</li>
+<li><p>ICMP 路由重定向缺乏身份认证——ICMP 路由重定向（完整、真实性）</p>
+</li>
+<li><p>广播地址对 Ping 的放大——Ping 洪泛、Smurf</p>
+</li>
+<li><p>ARP：广播且无认证——ARP 欺骗</p>
+</li>
+<li><p>BGP 等：缺乏较强身份认证——路由欺骗</p>
+</li>
+<li><p>传输层</p>
+</li>
+<li><p>TCP</p>
+</li>
+<li><p>三次握手队列瓶颈——SYN 洪泛</p>
+</li>
+<li><p>会话身份认证不安全——RST 攻击</p>
+</li>
+<li><p>会话身份认证不安全——会话劫持</p>
+</li>
+<li><p>UDP：UDP 洪泛</p>
+</li>
+<li><p>应用层</p>
+</li>
+<li><p>DNS：验证不安全——DNS 欺骗</p>
+</li>
+<li><p>SMB：NTLM认证有缺陷——SMB 中间人攻击</p>
+</li>
+<li><p>HTTP：url 明文，编码滥用——钓鱼；内嵌连接滥用——网页木马</p>
+</li>
+</ul>
+</li>
+<li><p>网络层协议攻击</p>
+<ul>
+<li><p>IP 源地址欺骗</p>
+</li>
+<li><p>TCP 初始序列号（ISN）猜测</p>
+</li>
+<li><p>nmap 的 -D 选项</p>
+</li>
+<li><p>Netwox 工具</p>
+</li>
+<li><p>防范：随机的 ISN、IPSec、避免基于 ip 信任而是认证用户身份、防火墙入站出站过滤内网地址</p>
+</li>
+<li><p>ARP 欺骗</p>
+</li>
+<li><p>DSniff 套装的 Arpspoof、arpoison、Ettercap、Netwox 33 号</p>
+</li>
+<li><p>防范：静态绑定 ip 和 mac，细分子网，加密数据、arp 防火墙</p>
+</li>
+<li><p>ICMP 路由重定向攻击</p>
+</li>
+<li><p>本用于路由通知网络拓扑的改变</p>
+</li>
+<li><p>防范：设置防火墙过滤</p>
+</li>
+</ul>
+</li>
+<li><p>传输层协议攻击</p>
+<ul>
+<li><p>TCP RST</p>
+</li>
+<li><p>TCP 会话劫持（通常结合 ARP 欺骗进行）</p>
+</li>
+<li><p>TCP SYN 洪泛拒绝服务</p>
+</li>
+<li><p>防范：SYN-Cookie。先动态分配资源，达到一定数量后再用 Cookie</p>
+</li>
+<li><p>UDP 洪泛拒绝服务</p>
+</li>
+<li><p>TCP&#x2F;IP 协议栈攻击防范</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>第六章 网络安全防范技术</p>
+<ul>
+<li><p>防火墙</p>
+<ul>
+<li>包过滤</li>
+<li>基于状态检测的包过滤</li>
+<li>代理：应用层代理、电路级代理、NAT 代理</li>
+</ul>
+</li>
+<li><p>防火墙部署</p>
+<ul>
+<li>包过滤路由器</li>
+<li>双宿主堡垒主机，但对内网控制过于严格，自身安全维护复杂</li>
+<li>屏蔽主机</li>
+<li>屏蔽子网</li>
+</ul>
+</li>
+<li><p>Linux 的 netfilter &#x2F; iptables</p>
+<ul>
+<li><p>filter</p>
+</li>
+<li><p>INPUT：发给本地协议栈</p>
+</li>
+<li><p>OUTPUT：本地协议栈发出的</p>
+</li>
+<li><p>FORWARD：路由转发的</p>
+</li>
+<li><p>nat</p>
+</li>
+<li><p>PREROUTING：未经路由选择的——DNAT、NAPT等</p>
+</li>
+<li><p>POSTROUTING：已经路由选择的——SNAT等</p>
+</li>
+<li><p>OUTPUT：本地协议栈发出即将的包——本地数据包DNAT等</p>
+</li>
+<li><p>mangle（特殊包修改）</p>
+</li>
+<li><p>以上五个：所有数据包——特殊包包头修改</p>
+</li>
+<li><p>iptables command</p>
+</li>
+<li><p>-A: append</p>
+</li>
+<li><p>-D: delete</p>
+</li>
+<li><p>-P: policy，缺省操作</p>
+</li>
+<li><p>-N: new chain 创建新链</p>
+</li>
+<li><p>-F: flush 删除指定链或所有链的规则</p>
+</li>
+<li><p>-L: list</p>
+</li>
+<li><p>iptables match，多个条件时采用 与 关系</p>
+</li>
+<li><p>-i&#x2F;-o: 进入&#x2F;发出网络接口</p>
+</li>
+<li><p>-s&#x2F;-d: 源&#x2F;目的地址</p>
+</li>
+<li><p>-p: 协议</p>
+</li>
+<li><p>-m: 网络连接状态</p>
+</li>
+<li><p>--sport&#x2F;–dport: 端口</p>
+</li>
+<li><p>iptables target 操作</p>
+</li>
+<li><p>ACCEPT：-j ACCEPT</p>
+</li>
+<li><p>DROP：-j DROP</p>
+</li>
+<li><p>REJECT：-j REJECT 不会在服务器和客户端上留下死套接字，同时也会通知发送端，drop 不会</p>
+</li>
+<li><p>RETURN: -jump RETURN 停止遍历使用默认</p>
+</li>
+<li><p>iptables nat</p>
+</li>
+<li><p>IP伪装、SNAT、DNAT</p>
+</li>
+</ul>
+</li>
+<li><p>网络检测技术与系统</p>
+<ul>
+<li>入侵检测：HIDS、NIDS</li>
+<li>入侵防御系统 IPS</li>
+<li>开源网络入侵检测系统 Snort</li>
+</ul>
+</li>
+<li><p>网络安全事件响应</p>
+<ul>
+<li>计算机取证</li>
+<li>攻击溯源于归因</li>
+<li>备份恢复</li>
+</ul>
+</li>
+</ul>
+<p>第七章 Windows 操作系统安全攻防</p>
+<ul>
+<li>Windows 系统和安全体系结构介绍</li>
+<li>Windows 远程口令猜测于破解（也有窃听）</li>
+<li>攻击 WIndows 网络服务，NetBIOS、SMB 重灾区，还有 RPC、IIS 等</li>
+<li>攻击 WIndows 客户端及用户，本地提权，口令破解</li>
+<li>防范：关闭非必要服务、防火墙、强口令、禁用不安全的协议、更新补丁</li>
+<li>Windows 销踪灭迹：auditpol 关闭审计、清理事件日志、</li>
+</ul>
+<p>第八章 Linux 操作系统安全攻防</p>
+<ul>
+<li><p>远程口令猜解、渗透（LAMP、FTP、samba、sendmail）</p>
+</li>
+<li><p>攻击客户端和用户（社会工程学 &#x2F; 软件分发站点）</p>
+</li>
+<li><p>攻击 linux 路由器和监听器</p>
+</li>
+<li><p>本地安全攻防</p>
+<ul>
+<li>su &#x2F; sudo 程序中的漏洞</li>
+<li>攻击用户态 SUID 提权：程序漏洞、缓冲区溢出、符号链接、竞争条件、共享函数库</li>
+<li>攻击内核代码提权</li>
+<li>shadow 口令破解</li>
+<li>利用系统配置不当（权限）</li>
+</ul>
+</li>
+</ul>
+<p>第九章 恶意代码安全攻防</p>
+<ul>
+<li>病毒、蠕虫、恶意移动代码、后门、木马、僵尸网络、内核套件（Rootkit）</li>
+<li>[恶意代码类型.]恶意代码家族名称[.变种号]</li>
+<li>静态分析技术<ul>
+<li>杀软扫描</li>
+<li>文件格式识别</li>
+<li>文件内字符串提取分析</li>
+<li>二进制结构分析</li>
+<li>反汇编&#x2F;反编译</li>
+<li>代码结构与逻辑分析</li>
+<li>加壳识别于脱壳</li>
+</ul>
+</li>
+<li>动态分析<ul>
+<li>各种进程、文件、注册表监控，调试器沙箱，网络嗅探器，虚拟机等</li>
+<li>基于快照比对</li>
+<li>系统行为监控（进程、文件等）</li>
+<li>网络监控</li>
+</ul>
+</li>
+</ul>
+<p>第十章 软件安全攻防——缓冲区溢出和 Shellcode</p>
+<ul>
+<li>缓冲区溢出<ul>
+<li>NSR模式。缓冲区较大，从低地址到高先填充 nop 再放 shellcode，最后加上覆盖 ret 返回地址的跳转</li>
+<li>RNS模式。缓冲区小，低到高依次是 ret、nop、shellcode</li>
+<li>RS模式。可以精确定位，直接由 ret 跳至 shellcode</li>
+<li>Windows 栈地址在 0x0012*** 附近，不像 linux 在 0xc0000000 下，有空字节截断问题</li>
+<li>windows 系统 dll 中找 jmp esp</li>
+</ul>
+</li>
+<li>堆溢出，一般利用函数指针改写（覆盖相邻的全局函数指针）、虚表改写、堆管理漏洞（4字节内存任意写）</li>
+<li>防御：dep、gs、使用安全的内存函数</li>
+</ul>
+<p>第十一章 Web 应用程序安全攻防</p>
+<ul>
+<li>手工审查 Web 应用程序结构和源码<ul>
+<li>静态&#x2F;动态页面</li>
+<li>目录结构，Whisker 探查特定目录</li>
+<li>辅助性文件，CSS JS 等</li>
+<li>输入表单</li>
+<li>查询参数字符串</li>
+<li>黑客解谜类网站：NotPron、Monyer、sqybi 等</li>
+</ul>
+</li>
+<li>自动下载、镜像 web 站点</li>
+<li>Google Hacking 审查与探测《Google Hacking for Penetration Testers》</li>
+<li>app 安全评估与漏洞探测</li>
+<li>攻击 Web 服务器软件<ul>
+<li>数据驱动的远程代码执行</li>
+<li>服务器功能扩展模块漏洞</li>
+<li>样本文件安全漏洞</li>
+<li>源码泄露漏洞</li>
+<li>资源解析攻击</li>
+</ul>
+</li>
+<li>攻击 Web app：攻击认证机制、授权、客户端、命令执行、信息暴露</li>
+<li>攻击 Web 数据内容：敏感数据泄漏、网站篡改、上传不良信息</li>
+<li>防范：安全的加密协议、冗余来应对 ddos、防止 arp 欺骗等、补丁；日志审计、使用稳定成熟的软件、只引入必要的动态页面；运维监控</li>
+<li>SQL 注入</li>
+<li>XSS 跨站脚本。防范：输入验证、输出净化、消除危险的输入点</li>
+</ul>
+<p>第十二章 Web 浏览器安全攻防</p>
+<ul>
+<li>浏览器的发展与威胁</li>
+<li>网页木马：针对浏览器的渗透攻击</li>
+<li>网页木马机制<ul>
+<li>内嵌 iframe &#x2F; frame 等 HTML 标签，可多层</li>
+<li>恶意 script 脚本</li>
+<li>内嵌对象链接，图片或 flash</li>
+<li>arp 欺骗，中间人挂马</li>
+<li>混淆（免杀）</li>
+</ul>
+</li>
+<li>检测分析<ul>
+<li>特征码匹配</li>
+<li>统计与机器学习的静态分析，本质也是特征检测</li>
+<li>动态行为结果判定</li>
+<li>基于模拟浏览器环境的动态分析</li>
+</ul>
+</li>
+<li>网络钓鱼<ul>
+<li>IDN 欺骗技术，unicode 编码的 url</li>
+</ul>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>flandre
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://kerisa.github.io/1795/" title="《网络攻防技术与实践》读书笔记">https://kerisa.github.io/1795/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%BD%91%E7%BB%9C%E6%94%BB%E9%98%B2%E6%8A%80%E6%9C%AF%E4%B8%8E%E5%AE%9E%E8%B7%B5/" rel="tag"># 网络攻防技术与实践</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/1280/" rel="prev" title="9-nine ゆきいろゆきはなゆきのあと 感想">
+      <i class="fa fa-chevron-left"></i> 9-nine ゆきいろゆきはなゆきのあと 感想
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/1802/" rel="next" title="《格蠹汇编》读书笔记">
+      《格蠹汇编》读书笔记 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt=""
+      src="/sys-imgs/42553027_1.png">
+  <p class="site-author-name" itemprop="name"></p>
+  <div class="site-description" itemprop="description">This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">247</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">flandre</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">328k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">4:58</span>
+</div>
+  <div class="powered-by">Powered by love
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

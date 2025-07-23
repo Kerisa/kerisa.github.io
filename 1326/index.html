@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kerisa.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="小镇上存在着“会”这种超自然现象，每场“会”就是进行一次战斗。所谓战斗说白了就类似塔防游戏，引发“会”的那个人在“会”里作为王，也是敌人的目标，士兵则负责拦住来袭的敌人。虽然王能掌握战局但是没法动弹，只能负责指挥。士兵的人选则是以王的人际关系出发，按关系好坏可被招聘至“会”中进行战斗的人。士兵的战斗力也是按关系好坏划分的，王持有一定点数作为招聘士兵的花销。当士兵在“会”中受伤死亡时便会无法再进入“">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ぼくの一人戦争 感想">
+<meta property="og:url" content="https://kerisa.github.io/1326/index.html">
+<meta property="og:site_name" content="Re: Memory (mirror)">
+<meta property="og:description" content="小镇上存在着“会”这种超自然现象，每场“会”就是进行一次战斗。所谓战斗说白了就类似塔防游戏，引发“会”的那个人在“会”里作为王，也是敌人的目标，士兵则负责拦住来袭的敌人。虽然王能掌握战局但是没法动弹，只能负责指挥。士兵的人选则是以王的人际关系出发，按关系好坏可被招聘至“会”中进行战斗的人。士兵的战斗力也是按关系好坏划分的，王持有一定点数作为招聘士兵的花销。当士兵在“会”中受伤死亡时便会无法再进入“">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-32.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-01.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-02.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-04.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-03.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-05.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-06.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-07.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-08.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-09.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-10.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-34.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-11.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-35.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-30.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-31.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-33.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-36.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-37.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-38.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-39.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-40.jpg">
+<meta property="article:published_time" content="2020-07-28T15:10:06.000Z">
+<meta property="article:modified_time" content="2025-07-21T17:32:47.062Z">
+<meta property="article:author" content="flandre">
+<meta property="article:tag" content="あかべぇそふとつぅ">
+<meta property="article:tag" content="ぼくの一人戦争">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kerisa.github.io/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-32.jpg">
+
+<link rel="canonical" href="https://flandre-scarlet.moe/blog/1326/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>ぼくの一人戦争 感想 | Re: Memory (mirror)</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Re: Memory (mirror)</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/1326/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/sys-imgs/42553027_1.png">
+      <meta itemprop="name" content="flandre">
+      <meta itemprop="description" content="This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Re: Memory (mirror)">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ぼくの一人戦争 感想
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-07-28 23:10:06" itemprop="dateCreated datePublished" datetime="2020-07-28T23:10:06+08:00">2020-07-28</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-07-22 01:32:47" itemprop="dateModified" datetime="2025-07-22T01:32:47+08:00">2025-07-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/acg/" itemprop="url" rel="index"><span itemprop="name">acg</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/acg/galgame/" itemprop="url" rel="index"><span itemprop="name">galgame</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.1k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>小镇上存在着“会”这种超自然现象，每场“会”就是进行一次战斗。所谓战斗说白了就类似塔防游戏，引发“会”的那个人在“会”里作为王，也是敌人的目标，士兵则负责拦住来袭的敌人。虽然王能掌握战局但是没法动弹，只能负责指挥。士兵的人选则是以王的人际关系出发，按关系好坏可被招聘至“会”中进行战斗的人。士兵的战斗力也是按关系好坏划分的，王持有一定点数作为招聘士兵的花销。当士兵在“会”中受伤死亡时便会无法再进入“会”，此时王的点数会增加，反映到现实中则是失去了和王之间的羁绊和记忆并且反目。如果有士兵牺牲那么本次战斗会立即结束，相反如果王被敌人干掉则王会在后面一段时间内变得口无遮拦、忠于自己的欲望，还会选择性失忆，仿佛活在梦里。</p>
+<p><img src="/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-32.jpg"></p>
+<span id="more"></span>
+<p><img src="/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-01.jpg"></p>
+<p>然后游戏里的反派叫长门大地，他为了将“会”引到莲司身上而演了一出戏。推测是他通过指使向坂希美先去咬一口莲司，然后向坂自己发动“会”并将莲司招聘进来。这样一来再适当进行诱导便可以让莲司相信“会”有遗传、传染等机制，自己就可以方便地以前辈和同伴的姿态操纵莲司。顺便莲司的老妈也是因为陷入“会”导致家庭破裂。随后长门送给莲司两封伪造成莲司老妈和向坂的亲笔信，同时在老妈的信那边附上了一个护身符，里面装的就是王的遗骨。因为要使新的“会”降临需要携带以前牵扯入“会”中王的遗骨，长门就是在赌通过这么一波装神弄鬼后莲司会带上来自老妈的这个珍贵护身符。另外越是死于绝望的王，他的遗骨孕育出的“会”就越惨烈。这样后面只要莲司“对现状不满，希望做出改变”即可引发“会”。</p>
+<p><img src="/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-02.jpg"> （长门让莲司学会驾驭“会”）</p>
+<p>随后便是在莲司的瞎搞搞下按工藤妹子、前脇忍、前女友錦戸結花、岡部沙代 + 二宮徹的顺序改善、恶化、失去和莲司之间的关系。沙代和徹主要是围绕沙代向莲司表白一事展开。</p>
+<p><img src="/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-04.jpg"> （结花受伤之后莲司遇到长门）</p>
+<p><img src="/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-03.jpg"> （结花小天使）</p>
+<p>其实工藤妹子在被招聘后便积极寻找关于“会”的文献，试图解开其中的秘密并找出突破口，然而找到的线索全被莲司视若无睹，要不然剧情怎么推进呢，哈哈。在工藤、忍、结花都忘记莲司后，长门跑来告诉莲司只要通过某个最终战就能摆脱“会”的好消息（当然是扯淡）。于是莲司准备一番后进行挑战，然后还真的成功过关了，代价是失去了沙代和彻的关系。</p>
+<p><img src="/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-05.jpg"></p>
+<p><img src="/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-06.jpg"> （“会”不是一个通过舍弃无能的人而逐步前进的游戏）</p>
+<p>莲司本以为就要迎来美好生活了，后来却忽然发现“会”降临到了鹭美身上。因为在莲司战里最后的沙代和徹都受了伤，其他妹子也早已忘记两人，没有“资源”可用的鹭美虽然先后召唤了她妈妈和莲司，但都先后战败。鹭美变得奇怪也是因为她想恢复与在“会”中战败士兵的关系导致的。想要让鹭美恢复正常则是需要满足她内心深处的愿望。当然在莲司一通操作下最后恢复了他和鹭美之间的关系。</p>
+<p><img src="/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-07.jpg"></p>
+<p><img src="/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-08.jpg"></p>
+<p>长门发现莲司并没有在他的教唆下放弃鹭美，他利用莲司和鹭美的计划眼看就要泡汤了，于是露出真面目。</p>
+<p><img src="/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-09.jpg"></p>
+<p><img src="/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-10.jpg"></p>
+<p>长门绑走鹭美并扬言要烧死她。而莲司则求助于他的伙伴们，并面对面让她们回想起了自己和鹭美（这里就强行合理了）。大家想到个办法就是把神出鬼没的长门叫到“会”里来群殴一顿。众人在“会”里坚守半天不断负伤，却终究等不到长门。结花在“会”中负伤而死，大家狼狈地逃出“会”时却发现长门悠然站在沙滩上看戏。“教育”了莲司一番后长门扬长而去。“长门”不过是老头子的一个假名，所以才召唤不到他。 过后下线多时的永治终于找上莲司，说自己在东京已经改邪归正，搬砖的日子过得充实且快活，并带给他当年老妈在神社买下的正版护身符，莲司这才发现老头的鬼把戏。</p>
+<p><img src="/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-34.jpg"> （不想吐槽这行李箱，话说工藤妹子为啥不用常见的电锯？感觉很搭，哈哈）</p>
+<p><img src="/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-11.jpg"></p>
+<p>然后莲司将计就计，将王骨塞回长门鞋子里，引他到沙滩的灵异点上触发了长门的“会”。莲司以一号士兵的身份被自动召唤，亲自送老头子上路。 长门是归西了，但鹭美还下落不明啊，所以莲司又一次把刚刚关系破裂的好友一个个拉了回来，然后一起迎回鹭美（强行合理2）。 因强行恢复关系，莲司在浑浑噩噩持续一年后最终清醒过来，开始新生活。</p>
+<p><img src="/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-35.jpg">  </p>
+<p>开篇介绍了那么多关于永治的内容，知道莲司才是主角时我想怎么也得好好扒一下永治的黑历史才行，然后序章一结束就遣返东京了，一点幺蛾子都没出的就这么给送回去了，直到最后才来送个道具。虽然这样安排有点迷，不过要是结合后面一波回忆杀干掉一个朋友的节奏来看，永治从一开始就在回忆杀了，算是第一个被忘掉的人，只不过莲司没有借助“会”的力量。 序章最后还从永治转换了视角到莲司，后来我在玩的时候发现前后逻辑对不上才发现换人了。感觉没啥必要，直白点让玩家知道是不同视角不挺好，这里又没诡计要耍。<br>“会”的设定也是不清不楚，反正相关信息都是要通过人物的对话才能推出来，很多东西剧本都懒得解释。虽说看完莲司救回鹭美那一段的思路整理大体能明白，但总还是有解释得不够官方的感觉。光把玩家弄晕也没啥意思，还是老老实实安排一处用作说明来得实在。。。<br>还有就是妹子们故事的展开，其实和“会”本身也没啥关系，玩家注意力都放在“会”的谜团上，这个时候岔开话题去讲妹子们的故事还真让人提不起劲，何况也不直接关系到“会”的推进。要是改成用一个妹子的故事暴露出“会”的一个弱点，不断累积制胜手段这样感觉还不错。<br>游戏的 bgm 倒是挺不错，几首钢琴独奏都很有味道。</p>
+<p><img src="/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-30.jpg"></p>
+<p><img src="/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-31.jpg"> （eiji VS renji, ROUND 1, FIGHT!）</p>
+<p><img src="/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-33.jpg"></p>
+<p><img src="/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-36.jpg"></p>
+<p><img src="/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-37.jpg"></p>
+<p><img src="/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-38.jpg"></p>
+<p><img src="/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-39.jpg"></p>
+<p><img src="/assets/imgs/2020/07/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89-40.jpg"></p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>flandre
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://kerisa.github.io/1326/" title="ぼくの一人戦争 感想">https://kerisa.github.io/1326/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E3%81%82%E3%81%8B%E3%81%B9%E3%81%87%E3%81%9D%E3%81%B5%E3%81%A8%E3%81%A4%E3%81%85/" rel="tag"># あかべぇそふとつぅ</a>
+              <a href="/tags/%E3%81%BC%E3%81%8F%E3%81%AE%E4%B8%80%E4%BA%BA%E6%88%A6%E4%BA%89/" rel="tag"># ぼくの一人戦争</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/1802/" rel="prev" title="《格蠹汇编》读书笔记">
+      <i class="fa fa-chevron-left"></i> 《格蠹汇编》读书笔记
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/1406/" rel="next" title="区块链原理、设计与应用">
+      区块链原理、设计与应用 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt=""
+      src="/sys-imgs/42553027_1.png">
+  <p class="site-author-name" itemprop="name"></p>
+  <div class="site-description" itemprop="description">This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">247</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">flandre</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">328k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">4:58</span>
+</div>
+  <div class="powered-by">Powered by love
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

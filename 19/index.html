@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kerisa.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="ListView控件在添加大量数据时速度很慢而且会频繁刷新以至于窗口不断闪烁，总之是没法用啦，这种情况把控件改成虚拟列表的形式就能解决这个问题。 虚拟列表不在控件中存储数据，而是向外部“索要”数据，即数据是由我们自己维护的，它唯一保存的数据是控件中项目的数量。虚拟列表通过 LVN_GETDISPINFO、LVN_ODFINDITEM和LVN_ODCACHEHINT这三个消息与外界交互。 创建虚拟列">
+<meta property="og:type" content="article">
+<meta property="og:title" content="虚拟列表的使用">
+<meta property="og:url" content="https://kerisa.github.io/19/index.html">
+<meta property="og:site_name" content="Re: Memory (mirror)">
+<meta property="og:description" content="ListView控件在添加大量数据时速度很慢而且会频繁刷新以至于窗口不断闪烁，总之是没法用啦，这种情况把控件改成虚拟列表的形式就能解决这个问题。 虚拟列表不在控件中存储数据，而是向外部“索要”数据，即数据是由我们自己维护的，它唯一保存的数据是控件中项目的数量。虚拟列表通过 LVN_GETDISPINFO、LVN_ODFINDITEM和LVN_ODCACHEHINT这三个消息与外界交互。 创建虚拟列">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2016-07-18T15:33:01.000Z">
+<meta property="article:modified_time" content="2025-07-21T18:42:00.776Z">
+<meta property="article:author" content="flandre">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://flandre-scarlet.moe/blog/19/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>虚拟列表的使用 | Re: Memory (mirror)</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Re: Memory (mirror)</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/19/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/sys-imgs/42553027_1.png">
+      <meta itemprop="name" content="flandre">
+      <meta itemprop="description" content="This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Re: Memory (mirror)">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          虚拟列表的使用
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-07-18 23:33:01" itemprop="dateCreated datePublished" datetime="2016-07-18T23:33:01+08:00">2016-07-18</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-07-22 02:42:00" itemprop="dateModified" datetime="2025-07-22T02:42:00+08:00">2025-07-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%A8%8B%E5%BA%8F/" itemprop="url" rel="index"><span itemprop="name">程序</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>ListView控件在添加大量数据时速度很慢而且会频繁刷新以至于窗口不断闪烁，总之是没法用啦，这种情况把控件改成虚拟列表的形式就能解决这个问题。</p>
+<p>虚拟列表不在控件中存储数据，而是向外部“索要”数据，即数据是由我们自己维护的，它唯一保存的数据是控件中项目的数量。虚拟列表通过 LVN_GETDISPINFO、LVN_ODFINDITEM和LVN_ODCACHEHINT这三个消息与外界交互。</p>
+<h1 id="创建虚拟列表控件"><a href="#创建虚拟列表控件" class="headerlink" title="创建虚拟列表控件"></a>创建虚拟列表控件</h1><p>使用CreateWindows(Ex)创建控件时加上 LVS_OWNERDATA 样式，这样创建的就是一个虚拟列表了。注意，虚拟列表样式只能在创建时指定而无法在创建后添加或移除。</p>
+<span id="more"></span>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hList = <span class="built_in">CreateWindowEx</span>(<span class="number">0</span>, WC\_LISTVIEW, <span class="literal">NULL</span>, LVS\_REPORT WS\_CHILD WS\_VISIBLE WS\_BORDER LVS\_ALIGNTOP LVS\_OWNERDATA, <span class="number">0</span>, <span class="number">0</span>, CW\_USEDEFAULT, CW\_USEDEFAULT, hDlg, (HMENU)ID\_LISTVIEW, (HINSTANCE)<span class="built_in">GetWindowLong</span>(hDlg, GWL\_HINSTANCE), <span class="literal">NULL</span>);</span><br></pre></td></tr></table></figure>
+
+<h1 id="向虚拟列表添加数据"><a href="#向虚拟列表添加数据" class="headerlink" title="向虚拟列表添加数据"></a>向虚拟列表添加数据</h1><p>使用的时候先准备好表中的数据，同时设置好表项的数量（ 使用<a target="_blank" rel="noopener" href="https://msdn.microsoft.com/en-us/library/windows/desktop/bb775095(v=vs.85).aspx">ListView_SetItemCountEx</a>或直接发<a target="_blank" rel="noopener" href="https://msdn.microsoft.com/en-us/library/windows/desktop/bb761188(v=vs.85).aspx">LVM_SETITEMCOUNT</a>消息给控件），这样就完成数据的添加了。</p>
+<h1 id="处理控件的通知消息"><a href="#处理控件的通知消息" class="headerlink" title="处理控件的通知消息"></a>处理控件的通知消息</h1><h1 id="·LVN-GETDISPINFO"><a href="#·LVN-GETDISPINFO" class="headerlink" title="·LVN_GETDISPINFO"></a>·LVN_GETDISPINFO</h1><p>ListView控件显示信息时向父窗口发送<a target="_blank" rel="noopener" href="https://msdn.microsoft.com/en-us/library/windows/desktop/bb774818(v=vs.85).aspx">LVN_GETDISPINFO</a>消息来获取数据。因此父窗口要处理 WM_NOTIFY 消息。而大多数情况下我们只要处理了这个消息就可以享受到虚拟列表的高速显示了，剩下两个不用管(‘∀`) LVN_GETDISPINFO消息的处理差不多是这个样子： <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM\_NOTIFY: <span class="keyword">if</span> (((NMHDR\*)lParam)-&gt;idFrom == ID\_LISTVIEW) &#123; <span class="keyword">switch</span> (((NMHDR\*)lParam)-&gt;code) &#123; <span class="keyword">case</span> LVN\_GETDISPINFO: &#123; NMLVDISPINFO \*pdi = reinterpret\_cast&lt;NMLVDISPINFO\*&gt;(lParam); LVITEMW \*pItem = &amp;pdi-&gt;item; <span class="comment">// 要获取第几行的数据 int itemid = pItem-&gt;iItem; // 从外部传递数据 Information \*pi = g\_Data\[itemid\]; if (pItem-&gt;mask &amp; LVIF\_TEXT) &#123; switch (pItem-&gt;iSubItem) &#123; case 0: // 获取第一列的数据 wcscpy\_s(pItem-&gt;pszText, pItem-&gt;cchTextMax, pi-&gt;firstcolumn ); break;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">case</span> <span class="number">1</span>: wcscpy\_s(pItem-&gt;pszText, pItem-&gt;cchTextMax, pi-&gt;secondcolumn ); <span class="keyword">break</span>; <span class="comment">// ... &#125; &#125; break; &#125; // ... &#125; &#125;</span></span><br></pre></td></tr></table></figure></p>
+<h1 id="·LVN-ODFINDITEM"><a href="#·LVN-ODFINDITEM" class="headerlink" title="·LVN_ODFINDITEM"></a>·LVN_ODFINDITEM</h1><p>LVN_ODFINDITEM消息用于处理查找特定的项，就像我们在资源管理器中输入exp来搜索exp开头的文件（夹）一样，这个消息就是用于支持这项功能的。当控件接受到键盘按键消息或LVM_FINDITEM消息时会向父控件发送此消息。此时的 lParam 指向一个<a target="_blank" rel="noopener" href="https://msdn.microsoft.com/en-us/library/windows/desktop/bb774784(v=vs.85).aspx">NMLVFINDITEM</a>结构。NMLVFINDITEM包含一个<a target="_blank" rel="noopener" href="https://msdn.microsoft.com/en-us/library/windows/desktop/bb774745(v=vs.85).aspx">LVFINDINFO</a>结构的成员变量。 NMLVFINDITEM中的iStart指示搜索的开始位置（从0开始），LVFINDINFO中的psz则储存了要搜索的字符串（同时flags成员中应包含LVFI_STRING），有了这些消息就可以自己搜索匹配的项了，然后找到了则返回项的偏移，找不到返回-1。</p>
+<h1 id="·LVN-ODCACHEHINT"><a href="#·LVN-ODCACHEHINT" class="headerlink" title="·LVN_ODCACHEHINT"></a>·LVN_ODCACHEHINT</h1><p>最后一个处理缓存的消息。将经常会被显示的项缓存起来以提高显示效率。此时lParam指向<a target="_blank" rel="noopener" href="https://msdn.microsoft.com/en-us/library/windows/desktop/bb774775(v=vs.85).aspx">NMLVCACHEHINT</a>结构。这个结构中的iFrom和iTo指示了显示范围。 当ListView的显示改变（比如滚动鼠标滚轮）时将会发送此消息，此时应用程序便可以决定是否缓存目标范围内的数据，然后等待LVN_GETDISPINFO消息的到来。 比如把大量数据存在硬盘，然后缓存一部分到内存里，收到消息时便可异步读取数据到内存，然后在LVN_GETDISPINFO中提交给控件显示(‘∀`)。 这个消息必须返回0。</p>
+<h1 id="复选框-checkbox-的处理"><a href="#复选框-checkbox-的处理" class="headerlink" title="复选框(checkbox)的处理"></a>复选框(checkbox)的处理</h1><p>Checkbox还是个挺有用的东西。</p>
+<p>首先创建控件时设置扩展风格LVS_EX_CHECKBOXES，这个不管是不是虚拟列表都要处理的。 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ListView\_SetExtendedListViewStyleEx( hList, <span class="number">0</span>, LVS\_EX\_GRIDLINES LVS\_EX\_CHECKBOXES LVS\_EX\_FULLROWSELECT);</span><br></pre></td></tr></table></figure></p>
+<p>非虚拟列表的话就不用处理其他的直接能看到效果了。因为虚拟列表不存储条目数量以外的数据，所以我们还得继续做点处理。一个是要维护一个列表中项目的选中状态，然后就是当有选中状态变换时及时刷新到界面上。比如使用空格键切换checkbox的选中状态： <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM\_NOTIFY: <span class="keyword">if</span> (((NMHDR\*)lParam)-&gt;idFrom == ID\_LISTVIEW) &#123; <span class="keyword">switch</span> (((NMHDR\*)lParam)-&gt;code) &#123; <span class="keyword">case</span> VK\_SPACE: iClickItem = ListView\_GetSelectionMark(hList); g\_Data\[iClickItem\].checkstate ^= <span class="number">0x3</span>; <span class="built_in">SendMessage</span>(hList, LVM\_REDRAWITEMS, iClickItem, iClickItem); <span class="keyword">break</span>; &#125; &#125;</span><br></pre></td></tr></table></figure> 其中 checkstate&#x3D;&#x3D;1 时代表未选中，2代表选中。更新了选中状态后发送<a target="_blank" rel="noopener" href="https://msdn.microsoft.com/en-us/library/windows/desktop/bb761145(v=vs.85).aspx">LVM_REDRAWITEMS</a>消息刷新显示。因为是虚拟列表，重刷当然还是在LVN_GETDISPINFO里处理。 因此处理checkbox时还要在LVN_GETDISPINFO中设置以下字段的值： <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> LVN\_GETDISPINFO: &#123; NMLVDISPINFO \*pdi = reinterpret\_cast&lt;NMLVDISPINFO\*&gt;(lParam); LVITEMW \*pItem = &amp;pdi-&gt;item; <span class="type">int</span> itemid = pItem-&gt;iItem; pdi-&gt;item.state = <span class="built_in">INDEXTOSTATEIMAGEMASK</span>(g\_Data\[itemid\].checkstate); pdi-&gt;item.stateMask = LVIS\_STATEIMAGEMASK;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 处理item内容 &#125;</span></span><br></pre></td></tr></table></figure></p>
+<p>state字段的12~15位表示item的状态图片，即checkbox的图片，0代表不显示。可用宏INDEXTOSTATEIMAGEMASK(sta)设置状态，这个宏就是将sta左移12位 同时还要设置stateMask，使state中的设置生效，状态图片对应的是LVIS_STATEIMAGEMASK。这样就能将checkbox的状态刷新上去了。其他的属性参考<a target="_blank" rel="noopener" href="https://msdn.microsoft.com/en-us/library/windows/desktop/bb774760(v=vs.85).aspx">LVITEM</a>。</p>
+<p>更多内容请参考<a target="_blank" rel="noopener" href="https://msdn.microsoft.com/en-us/library/windows/desktop/bb774735(v=vs.85).aspx#Virtual_ListView_Style">Virtual List-View Style</a>。</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>flandre
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://kerisa.github.io/19/" title="虚拟列表的使用">https://kerisa.github.io/19/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/6/" rel="prev" title="Tpk解包记录">
+      <i class="fa fa-chevron-left"></i> Tpk解包记录
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/54/" rel="next" title="XAudio2 Operation Sets 操作集">
+      XAudio2 Operation Sets 操作集 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E8%99%9A%E6%8B%9F%E5%88%97%E8%A1%A8%E6%8E%A7%E4%BB%B6"><span class="nav-number">1.</span> <span class="nav-text">创建虚拟列表控件</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%90%91%E8%99%9A%E6%8B%9F%E5%88%97%E8%A1%A8%E6%B7%BB%E5%8A%A0%E6%95%B0%E6%8D%AE"><span class="nav-number">2.</span> <span class="nav-text">向虚拟列表添加数据</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%A4%84%E7%90%86%E6%8E%A7%E4%BB%B6%E7%9A%84%E9%80%9A%E7%9F%A5%E6%B6%88%E6%81%AF"><span class="nav-number">3.</span> <span class="nav-text">处理控件的通知消息</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%C2%B7LVN-GETDISPINFO"><span class="nav-number">4.</span> <span class="nav-text">·LVN_GETDISPINFO</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%C2%B7LVN-ODFINDITEM"><span class="nav-number">5.</span> <span class="nav-text">·LVN_ODFINDITEM</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%C2%B7LVN-ODCACHEHINT"><span class="nav-number">6.</span> <span class="nav-text">·LVN_ODCACHEHINT</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%A4%8D%E9%80%89%E6%A1%86-checkbox-%E7%9A%84%E5%A4%84%E7%90%86"><span class="nav-number">7.</span> <span class="nav-text">复选框(checkbox)的处理</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt=""
+      src="/sys-imgs/42553027_1.png">
+  <p class="site-author-name" itemprop="name"></p>
+  <div class="site-description" itemprop="description">This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">247</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">flandre</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">328k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">4:58</span>
+</div>
+  <div class="powered-by">Powered by love
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

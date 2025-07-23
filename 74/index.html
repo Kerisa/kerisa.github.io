@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kerisa.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="1、编译环境的安装 　　1.1 解压从www.ijg.org上下载的源码，安装VS2010。 　　1.2 在打开cmd定位到解压后的jpeg库目录中，并执行 NMAKE &#x2F;f makefile.vc setup-v10 。（在install.txt的”HINTS FOR SPECIFIC SYSTEMS”一节中）此操作将生成（其实是重命名）vs2010的一系列工程文件。（提示nmake不">
+<meta property="og:type" content="article">
+<meta property="og:title" content="jpeglib的使用(使用VS2010编译)">
+<meta property="og:url" content="https://kerisa.github.io/74/index.html">
+<meta property="og:site_name" content="Re: Memory (mirror)">
+<meta property="og:description" content="1、编译环境的安装 　　1.1 解压从www.ijg.org上下载的源码，安装VS2010。 　　1.2 在打开cmd定位到解压后的jpeg库目录中，并执行 NMAKE &#x2F;f makefile.vc setup-v10 。（在install.txt的”HINTS FOR SPECIFIC SYSTEMS”一节中）此操作将生成（其实是重命名）vs2010的一系列工程文件。（提示nmake不">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2017-01-15T12:17:20.000Z">
+<meta property="article:modified_time" content="2025-07-21T18:42:00.509Z">
+<meta property="article:author" content="flandre">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://flandre-scarlet.moe/blog/74/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>jpeglib的使用(使用VS2010编译) | Re: Memory (mirror)</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Re: Memory (mirror)</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/74/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/sys-imgs/42553027_1.png">
+      <meta itemprop="name" content="flandre">
+      <meta itemprop="description" content="This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Re: Memory (mirror)">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          jpeglib的使用(使用VS2010编译)
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-01-15 20:17:20" itemprop="dateCreated datePublished" datetime="2017-01-15T20:17:20+08:00">2017-01-15</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-07-22 02:42:00" itemprop="dateModified" datetime="2025-07-22T02:42:00+08:00">2025-07-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/programs/" itemprop="url" rel="index"><span itemprop="name">programs</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/programs/%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">图像处理</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.5k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>1、编译环境的安装 　　1.1 解压从<a target="_blank" rel="noopener" href="http://www.ijg.org/">www.ijg.org</a>上下载的源码，安装VS2010。 　　1.2 在打开cmd定位到解压后的jpeg库目录中，并执行 NMAKE &#x2F;f makefile.vc setup-v10 。（在install.txt的”HINTS FOR SPECIFIC SYSTEMS”一节中）此操作将生成（其实是重命名）vs2010的一系列工程文件。（提示nmake不是有效命令的话则修要设置环境变量的path并重启cmd）</p>
+<span id="more"></span>
+<p>操作效果如下： 　　　　　　ren jconfig.vc jconfig.h 　　　　　　ren makejsln.v10 jpeg.sln 　　　　　　ren makeasln.v10 apps.sln 　　　　　　ren makejvcx.v10 jpeg.vcxproj 　　　　　　ren makejfil.v10 jpeg.vcxproj.filters 　　　　　　ren makecvcx.v10 cjpeg.vcxproj 　　　　　　ren makecfil.v10 cjpeg.vcxproj.filters 　　　　　　ren makedvcx.v10 djpeg.vcxproj 　　　　　　ren makedfil.v10 djpeg.vcxproj.filters 　　　　　　ren maketvcx.v10 jpegtran.vcxproj 　　　　　　ren maketfil.v10 jpegtran.vcxproj.filters 　　　　　　ren makervcx.v10 rdjpgcom.vcxproj 　　　　　　ren makerfil.v10 rdjpgcom.vcxproj.filters 　　　　　　ren makewvcx.v10 wrjpgcom.vcxproj 　　　　　　ren makewfil.v10 wrjpgcom.vcxproj.filters 　　1.3 运行vs2010打开jpeg.sln即可进行编译生成。 　　1.4 如果自己的程序是用别的编译器版本生成的，则将jpeg的项目文件升级至对应版本，并修改项目属性中”平台工具集”使其与你的程序保持一致即可。 　　1.5 编译如果出现型如 &lt; 默认库“libcmt.lib”与其他库的使用冲突；请使用 &#x2F;NODEFAULTLIB:library &gt; 的错误提示时，说明你的程序和lib库使用的运行时库不同，最好是使用同样的运行库链接方式（&#x2F;MT &#x2F;MTd &#x2F;MD &#x2F;MDd），或者根据提示添加对应的忽略项（配置属性&#x3D;&gt;链接器&#x3D;&gt;输入&#x3D;&gt;忽略特定库, 库名加双引号，用逗号隔开）</p>
+<p>2、解压jpeg图像 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 以下代码省略错误处理</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">jpeg</span>\_decompress\_struct cinfo; <span class="comment">// 自定义的jpeg错误处理器，要确保它的存活期贯穿整个图像处理过程 struct my\_error\_mgr /\*&#123; \* struct jpeg\_error\_mgr pub; \* jmp\_buf setjmp\_buffer; \*&#125; \*/ jerr;</span></span><br><span class="line"></span><br><span class="line">FILE \* infile;<span class="comment">// 源文件对象 JSAMPARRAY buffer;// 行输出缓冲区 int row\_stride;// 图像每行的字节数</span></span><br><span class="line"></span><br><span class="line">fopen\_s(&amp;infile, \_filename, <span class="string">&quot;rb&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 初始化jpeg解压对象并设置错误处理例程 cinfo.err = jpeg\_std\_error(&amp;jerr.pub); jerr.pub.error\_exit = my\_error\_exit; // 自定义的错误处理例程 void my\_error\_exit(j\_common\_ptr cinfo); // 设置错误处理返回点 if (setjmp(jerr.setjmp\_buffer)) &#123; fprintf(stderr, &quot;读取失败\\r\\n&quot;); jpeg\_destroy\_decompress(&amp;cinfo); return; &#125;</span></span><br><span class="line"></span><br><span class="line">jpeg\_create\_decompress(&amp;cinfo);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 设置输入数据来源 jpeg\_stdio\_src(&amp;cinfo, infile);</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 使用jpeg\_read\_header()读取jpeg文件基本数据 // 在调用jpeg\_read\_header()后直到调用jpeg\_finish\_decompress()之前都不应更改输入文件， // 如果要批量处理文件的话应该重复jpeg\_read\_header() 到 jpeg\_finish\_decompress() 之间的操作 jpeg\_read\_header(&amp;cinfo, TRUE); // 储存文件宽高等数据 // 如果只是想获取文件的尺寸等基本信息，这个时候再调用jpeg\_destroy()销毁jpeg对象或用jpeg\_abort()重置jpeg对象的状态 image\_color = cinfo.out\_color\_space; image\_height = cinfo.image\_height; image\_width = cinfo.image\_width; image\_buffer = new JSAMPLE\[cinfo.image\_width \* cinfo.image\_height \* cinfo.num\_components\];</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// // 可选操作：设置其他解压参数 //</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 解压 // 因为stdio是同步的所以可以忽略返回值(同上jpeg\_read\_hreader()也是) jpeg\_start\_decompress(&amp;cinfo);</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 每行的字节数 row\_stride = cinfo.output\_width \* cinfo.output\_components;</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">if</span> 1 buffer = (\*cinfo.mem-&gt;alloc\_sarray) ((j\_common\_ptr) &amp;cinfo, JPOOL\_IMAGE, row\_stride, 1);</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 库里提供了记录图片读取状态的变量output\_scanline while (cinfo.output\_scanline &lt; cinfo.output\_height) &#123; // 也可一次读取多行 jpeg\_read\_scanlines(&amp;cinfo, buffer, 1); // 因为读取后output\_scanline已经增加了所以减1 memcpy(image\_buffer + (cinfo.output\_scanline-1) \* row\_stride, buffer\[0\], row\_stride); &#125; #else // 或者直接读取到目标缓冲区，不过这样需要一个目标缓冲区的行首地址数组来辅助 JSAMPARRAY row\_arr = new JSAMPROW\[image\_height\]; for (int i = 0; i &lt; image\_height; ++i) row\_arr\[i\] = (JSAMPROW)(image\_buffer + i \* row\_stride); while (cinfo.output\_scanline &lt; cinfo.output\_height) (void)jpeg\_read\_scanlines(&amp;cinfo, &amp;row\_arr\[cinfo.output\_scanline\], 1); delete\[\] row\_arr; #endif</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 结束解码，同理因为是stdio的操作是同步的，不用理会返回值 jpeg\_finish\_decompress(&amp;cinfo);</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 释放资源 jpeg\_destroy\_decompress(&amp;cinfo); fclose(infile);</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 最后可以检查 jerr.pub.num 的值是否非0来确认是否有数据损坏的警告产生</span></span><br></pre></td></tr></table></figure></p>
+<p>　 3、压缩jpeg图像 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 以下代码省略错误处理</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">jpeg</span>\_compress\_struct cinfo; <span class="comment">// 自定义错误处理结构，同上 struct jpeg\_error\_mgr jerr;</span></span><br><span class="line"></span><br><span class="line">FILE \* outfile;<span class="comment">// 输出文件对象 JSAMPROW row\_pointer\[1\];// JSAMPLE row\[s\] 指针 int row\_stride;// 图像缓冲区每行的字节数</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 初始化jpeg压缩对象 cinfo.err = jpeg\_std\_error(&amp;jerr); jpeg\_create\_compress(&amp;cinfo);</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 初始化输出文件对象 fopen\_s(&amp;outfile, filename, &quot;wb&quot;); jpeg\_stdio\_dest(&amp;cinfo, outfile);</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 设置压缩参数 // 下列四个成员的值必须设置 cinfo.image\_width = image\_width; cinfo.image\_height = image\_height; cinfo.input\_components = 3; // 每个像素的颜色数 cinfo.in\_color\_space = JCS\_RGB; // 输入图像的颜色空间</span></span><br><span class="line"></span><br><span class="line">jpeg\_set\_defaults(&amp;cinfo); <span class="comment">// 调用前要先设置好 cinfo.in\_color\_space // 设置其他非默认参数... jpeg\_set\_quality(&amp;cinfo, \_quality, TRUE); // baseline-JPEG</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 开始压缩 jpeg\_start\_compress(&amp;cinfo, TRUE); // TRUE表示写入所有数据流，FALSE的情况详见文档中的 // Abbreviated datastreams and multiple images 部分 // 一般情况下用TRUE即可</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 按行写入 row\_stride = image\_width \* 3;// RGB</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span> (cinfo.next\_scanline &lt; cinfo.image\_height) &#123; row\_pointer\[<span class="number">0</span>\] = &amp;image\_buffer\[cinfo.next\_scanline \* row\_stride\]; jpeg\_write\_scanlines(&amp;cinfo, row\_pointer, <span class="number">1</span>); &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 结束处理 jpeg\_finish\_compress(&amp;cinfo); fclose(outfile);</span></span><br><span class="line"></span><br><span class="line">jpeg\_destroy\_compress(&amp;cinfo);</span><br></pre></td></tr></table></figure></p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>flandre
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://kerisa.github.io/74/" title="jpeglib的使用(使用VS2010编译)">https://kerisa.github.io/74/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/54/" rel="prev" title="XAudio2 Operation Sets 操作集">
+      <i class="fa fa-chevron-left"></i> XAudio2 Operation Sets 操作集
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/95/" rel="next" title="重编译openCV">
+      重编译openCV <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt=""
+      src="/sys-imgs/42553027_1.png">
+  <p class="site-author-name" itemprop="name"></p>
+  <div class="site-description" itemprop="description">This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">247</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">flandre</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">328k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">4:58</span>
+</div>
+  <div class="powered-by">Powered by love
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kerisa.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="KMS（Key Management Service，密钥管理服务）是一种激活服务，允许组织来统一管理 Windows 系统和 Office 的激活，目的是为了让中大型公司的激活更易于管理和控制。KMS 可以用来激活 VOL 版本的 WIndows 系统和 Office。因此通过自行搭建 KMS 服务便可完成相关激活事项自给自足了。另外网上容易下载到的 KMS 激活工具大多捆绑了不少流氓软件，趁着">
+<meta property="og:type" content="article">
+<meta property="og:title" content="自建 KMS 激活服务">
+<meta property="og:url" content="https://kerisa.github.io/890/index.html">
+<meta property="og:site_name" content="Re: Memory (mirror)">
+<meta property="og:description" content="KMS（Key Management Service，密钥管理服务）是一种激活服务，允许组织来统一管理 Windows 系统和 Office 的激活，目的是为了让中大型公司的激活更易于管理和控制。KMS 可以用来激活 VOL 版本的 WIndows 系统和 Office。因此通过自行搭建 KMS 服务便可完成相关激活事项自给自足了。另外网上容易下载到的 KMS 激活工具大多捆绑了不少流氓软件，趁着">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2019/08/Windows-7-x64-2-2019-08-12-22-33-511.png">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2019/08/Windows-7-x64-2-2019-08-12-23-14-25.png">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2019/08/Windows-7-x64-2-2019-08-13-00-42-081.png">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2019/08/Windows-7-x64-2-2019-08-13-01-12-491.png">
+<meta property="article:published_time" content="2019-08-12T15:07:45.000Z">
+<meta property="article:modified_time" content="2025-07-21T17:32:47.104Z">
+<meta property="article:author" content="flandre">
+<meta property="article:tag" content="windows">
+<meta property="article:tag" content="KMS">
+<meta property="article:tag" content="office">
+<meta property="article:tag" content="激活">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kerisa.github.io/assets/imgs/2019/08/Windows-7-x64-2-2019-08-12-22-33-511.png">
+
+<link rel="canonical" href="https://flandre-scarlet.moe/blog/890/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>自建 KMS 激活服务 | Re: Memory (mirror)</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Re: Memory (mirror)</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/890/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/sys-imgs/42553027_1.png">
+      <meta itemprop="name" content="flandre">
+      <meta itemprop="description" content="This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Re: Memory (mirror)">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          自建 KMS 激活服务
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-08-12 23:07:45" itemprop="dateCreated datePublished" datetime="2019-08-12T23:07:45+08:00">2019-08-12</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-07-22 01:32:47" itemprop="dateModified" datetime="2025-07-22T01:32:47+08:00">2025-07-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%A8%8B%E5%BA%8F/" itemprop="url" rel="index"><span itemprop="name">程序</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>1 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>KMS（Key Management Service，密钥管理服务）是一种激活服务，允许组织来统一管理 Windows 系统和 Office 的激活，目的是为了让中大型公司的激活更易于管理和控制。KMS 可以用来激活 VOL 版本的 WIndows 系统和 Office。因此通过自行搭建 KMS 服务便可完成相关激活事项自给自足了。另外网上容易下载到的 KMS 激活工具大多捆绑了不少流氓软件，趁着激活的时候混入系统，还有很多不知道究竟是不是误报的报毒提示，实在心累。</p>
+<span id="more"></span>
+<h2 id="·服务器"><a href="#·服务器" class="headerlink" title="·服务器"></a>·服务器</h2><p>这里使用 Github 上的<a target="_blank" rel="noopener" href="https://github.com/Wind4/vlmcsd/releases">开源实现</a>，下载二进制包后根据系统的版本使用相应可执行文件。比如我的操作系统是 64 位 Linux，CPU 是 intel，那么我就选择使用 Linux&#x2F;intel&#x2F;static 子目录下的文件，执行 .&#x2F;vlmcsd-x64-musl-static，这样 KMS 服务就启动了，十分便捷。可以用 netstat -anp grep 1688 确认程序是否正常运行。随后在防火墙中放行 tcp 1688 端口就完成服务器的配置了，如果有域名则可以选择与 ip 进行关联。</p>
+<h2 id="·客户端"><a href="#·客户端" class="headerlink" title="·客户端"></a>·客户端</h2><p>客户端也就是我们的操作系统了。</p>
+<ol>
+<li><p>用管理员身份打开命令提示符，输入 slmgr &#x2F;dlv 查看目前的许可。 因为 KMS 只能激活 VOL 版的，如果是零售版的许可则需要先更换密钥，如下图，左侧的是零售的许可，右侧是 VOL 的。更换密钥使用 slmgr &#x2F;ipk &lt;密钥&gt; 命令。密钥参考<a target="_blank" rel="noopener" href="https://docs.microsoft.com/zh-cn/windows-server/get-started/kmsclientkeys">微软官方密钥</a>。<img src="/assets/imgs/2019/08/Windows-7-x64-2-2019-08-12-22-33-511.png"></p>
+</li>
+<li><p>确认密钥后使用 slmgr &#x2F;skms ，提供下自己的 KMS 域名</p>
+<p>kms.flandre-scarlet.moe（已移除）</p>
+<p>，更换完毕会有弹窗提示。因为我的服务器的时区是 UTC+8 ，所以非东八区需要自行调整系统时间后再进行激活，否则会因为时间差过大导致激活失败。</p>
+</li>
+<li><p>最后使用 slmgr &#x2F;ato 进行激活，不出意外的话能看到激活成功的提示。<img src="/assets/imgs/2019/08/Windows-7-x64-2-2019-08-12-23-14-25.png"></p>
+</li>
+</ol>
+<p>另外需要注意的是旗舰版是不能通过 KMS 进行激活的。</p>
+<h2 id="·Office"><a href="#·Office" class="headerlink" title="·Office"></a>·Office</h2><p>Office 同样需要下载 VOL 版。</p>
+<p>管理员身份打开命令提示符，进入 Office 安装目录（C:\Program Files\Microsoft Office\Office16，以 64 位 Office 2016 为例）</p>
+<p>使用 cscript ospp.vbs &#x2F;dstatus 查看许可证类型，带有 VL 字样的就是 VOL 版本。<img src="/assets/imgs/2019/08/Windows-7-x64-2-2019-08-13-00-42-081.png"></p>
+<p>依次输入以下命令进行激活  </p>
+<ol>
+<li>cscript ospp.vbs &#x2F;sethst:kms.flandre-scarlet.moe</li>
+<li>cscript ospp.vbs &#x2F;act</li>
+</ol>
+<p>最后查看激活状态 cscript ospp.vbs &#x2F;dstatus</p>
+<p><img src="/assets/imgs/2019/08/Windows-7-x64-2-2019-08-13-01-12-491.png"></p>
+<p>附一个下载 windows &amp; office 原版镜像的<a target="_blank" rel="noopener" href="https://www.heidoc.net/joomla/technology-science/microsoft/67-microsoft-windows-iso-download-tool">工具</a>。</p>
+<p>以上就是使用 vlmcsd 搭建 KMS 服务器进行激活步骤。又水了一篇博客，咔咔</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>flandre
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://kerisa.github.io/890/" title="自建 KMS 激活服务">https://kerisa.github.io/890/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/windows/" rel="tag"># windows</a>
+              <a href="/tags/KMS/" rel="tag"># KMS</a>
+              <a href="/tags/office/" rel="tag"># office</a>
+              <a href="/tags/%E6%BF%80%E6%B4%BB/" rel="tag"># 激活</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/845/" rel="prev" title="C++ 程序的逆向分析以及 RTTI 信息检索">
+      <i class="fa fa-chevron-left"></i> C++ 程序的逆向分析以及 RTTI 信息检索
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/912/" rel="next" title="制作龙儿同款橙子挞">
+      制作龙儿同款橙子挞 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%C2%B7%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="nav-number">1.</span> <span class="nav-text">·服务器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%C2%B7%E5%AE%A2%E6%88%B7%E7%AB%AF"><span class="nav-number">2.</span> <span class="nav-text">·客户端</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%C2%B7Office"><span class="nav-number">3.</span> <span class="nav-text">·Office</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt=""
+      src="/sys-imgs/42553027_1.png">
+  <p class="site-author-name" itemprop="name"></p>
+  <div class="site-description" itemprop="description">This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">247</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">flandre</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">328k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">4:58</span>
+</div>
+  <div class="powered-by">Powered by love
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

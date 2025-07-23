@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kerisa.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="第 6 章 再解电源服务溢出崩溃  bcdedit 启用内核调试 !process 切换到触发异常的进程 .reload &#x2F;user 查看用户态内容 内核调试。UnhandledExceptionFilter 会在存在内核调试器的情况下触发 int 3 断点异常之后会发错误报告给 WER 服务  第 7 章 三解电源服务溢出崩溃  WinRE 设置 windbg 为 JIT 没有出现界面">
+<meta property="og:type" content="article">
+<meta property="og:title" content="《格蠹汇编》读书笔记">
+<meta property="og:url" content="https://kerisa.github.io/1802/index.html">
+<meta property="og:site_name" content="Re: Memory (mirror)">
+<meta property="og:description" content="第 6 章 再解电源服务溢出崩溃  bcdedit 启用内核调试 !process 切换到触发异常的进程 .reload &#x2F;user 查看用户态内容 内核调试。UnhandledExceptionFilter 会在存在内核调试器的情况下触发 int 3 断点异常之后会发错误报告给 WER 服务  第 7 章 三解电源服务溢出崩溃  WinRE 设置 windbg 为 JIT 没有出现界面">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2022/02/%E6%A0%BC%E8%A0%B9%E6%B1%87%E7%BC%96-1.png">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2022/02/%E6%A0%BC%E8%A0%B9%E6%B1%87%E7%BC%96-2.png">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2022/02/%E6%A0%BC%E8%A0%B9%E6%B1%87%E7%BC%96-3.png">
+<meta property="article:published_time" content="2020-07-27T15:28:46.000Z">
+<meta property="article:modified_time" content="2025-07-21T17:32:47.057Z">
+<meta property="article:author" content="flandre">
+<meta property="article:tag" content="格蠹汇编">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kerisa.github.io/assets/imgs/2022/02/%E6%A0%BC%E8%A0%B9%E6%B1%87%E7%BC%96-1.png">
+
+<link rel="canonical" href="https://flandre-scarlet.moe/blog/1802/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>《格蠹汇编》读书笔记 | Re: Memory (mirror)</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Re: Memory (mirror)</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/1802/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/sys-imgs/42553027_1.png">
+      <meta itemprop="name" content="flandre">
+      <meta itemprop="description" content="This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Re: Memory (mirror)">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          《格蠹汇编》读书笔记
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-07-27 23:28:46" itemprop="dateCreated datePublished" datetime="2020-07-27T23:28:46+08:00">2020-07-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-07-22 01:32:47" itemprop="dateModified" datetime="2025-07-22T01:32:47+08:00">2025-07-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">读书笔记</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>9.3k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>8 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>第 6 章 再解电源服务溢出崩溃</p>
+<ul>
+<li>bcdedit 启用内核调试</li>
+<li>!process 切换到触发异常的进程</li>
+<li>.reload &#x2F;user 查看用户态内容</li>
+<li>内核调试。UnhandledExceptionFilter 会在存在内核调试器的情况下触发 int 3</li>
+<li>断点异常之后会发错误报告给 WER 服务</li>
+</ul>
+<p>第 7 章 三解电源服务溢出崩溃</p>
+<ul>
+<li>WinRE 设置 windbg 为 JIT</li>
+<li>没有出现界面。再挂上内核调试器</li>
+<li>沿着调用栈顺藤摸瓜，查出等待链的最后是出问题的电源服务</li>
+<li>!process 0 0 列出所有进程；.PROCESS &#x2F;i &lt;eprocess 地址&gt; 切换到目标进程；!alpc &#x2F;m &lt;消息地址&gt; 查看 ALPC 信息（栈会打印消息地址）；.kill <eprocess> 杀进程</li>
+<li>禁用电源服务避免在系统启动过程中被调用，service.msc 设置服务的失败操作为什么也不做，防止重启</li>
+<li>session 0 隔离：在服务的属性页勾选“允许桌面交互”并启用交互服务检测服务（Interactive Server Dectection）。也可修改注册表里服务键值下的 Type，置上 0x100 位。0x20 表示与其他服务共享宿主进程，0x10 单独拥有宿主进程。</li>
+<li>JIT 仍没有动静，可能是启动过程受到干扰：可以在启动电源服务时同时启动调试器，在注册表“Computer\HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options” 里新建 svchost.exe，创建 Debugger 字符串值，设置为 windbg 路径</li>
+<li>注册表设置服务启动超时：Computer\HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control 新建字符串 ServicesPipeTimeout，单位毫秒，一天&#x3D;86400000</li>
+<li>设置注册表 JIT 以便远程调试：”windbg.exe -p %ld -e %ld -QY -c “.server tcp:port&#x3D;2000” -loga windbg.log” -g 开关是忽略初始断点，要去掉。触发后打开新的 windbg 进行远程调试<span id="more"></span></li>
+</ul>
+<p>第 8 章 拯救挂死的 PowerPoint</p>
+<ul>
+<li>ADplus 抓取 hang 进程的内存</li>
+<li>查看调用栈：OLE 对象链接与嵌入、DDE 动态数据交换、NtUserMessageCall 广播消息</li>
+<li>查看公开 API 的参数，找到 OLE 文件名，Message 的广播消息</li>
+<li>内核调试查看 ppt 线程的状态，Skywing 的 sdbgext 扩展模块查看 hwnd 句柄 !sdbgext.hwnd <handle> 找到消息的目标进程</li>
+<li>查看目标进程状态，它在等待服务管理器给它发命令，还没创建消息循环，所以无法处理消息（后查出这个消息是 WM_DDE_INITIATE）</li>
+<li>用 lm 查看这个服务来自哪里，找到后停止相应服务，一切恢复正常</li>
+<li>多模块间的协作问题，一环没有处在正确状态将导致整个链条挂起</li>
+<li>（原本是 XP 下的）win 7 没有这个问题是因为 win 7 有个 XP 没有的组件 ID，如果这个组件存在则会调用 BindToObject 而不是 XP 中的 DdeBingToObject，避免了无响应。这个组件是 Packager.dll 引入的第二代对象打包器</li>
+</ul>
+<p>第 9 章 经典阅读器的经典死锁</p>
+<ul>
+<li>.dump &#x2F;mfh <path> h 选项表示保存句柄信息</li>
+<li>!cs -l 观察关键段</li>
+</ul>
+<p>第 10 章 转储分析之双误谜团</p>
+<ul>
+<li>双误（double fault）异常，向量号 8。比如连续两次页错误、连续两次通用保护错误（General Fault）</li>
+<li>挂在了 push ebp 的指令上</li>
+<li>windbg 提示页目录和 cr3 寄存器的地址不匹配，说明系统已经切换了 cr3，但当前进程还没切换</li>
+<li>遇到双误后 CPU 用硬件的线程切换机制切换线程，但 OS 还没切换当前进程</li>
+<li>kvn 查看栈，(FPO: TSS 28:0) 任务门是 IDT 表里的一个入口，CPU 根据根据它指向的任务状态段(TSS)来切换到指定任务(线程)。比如双误时根据 8 号的任务门切换到处理双误的新线程上</li>
+<li>!pcr 得到当前线程的 TSS，TSS 结构的 BackLink 表示前一个线程的 TSS 段选择子（即 0x28），用 .tss 28 切换到前一个线程</li>
+<li>!pte <addr> 观察</li>
+<li>!thread 观察线程栈空间范围</li>
+<li>访问无效栈内存后 CPU 开始执行异常处理例程，但执行前的保存现场操作又触发了异常，于是 CPU 用硬件任务切换机制切换到新线程</li>
+<li>cr2 寄存器中存有最后一次页错误的地址</li>
+<li>ln 命令查找地址对应的符号</li>
+<li>原因在于在内核栈上大量分配数组局部变量导致栈空间用尽（内核栈一般在十几到几十 kib，windows x86&#x3D;12Kib, AMD64&#x2F;Intel64&#x3D;24Kib,Itanium&#x3D;32Kib）</li>
+<li>dds 命令帮助分析栈的执行轨迹</li>
+</ul>
+<p>第 11 章 混乱数据何处来——标准文件流有关的陷阱</p>
+<ul>
+<li>Linux Damon 程序有个开发建议是关闭三个标准流，但是关闭后再打开其他文件时分配到的描述符可能与标准流的描述符冲突，导致 write(stdout … 变成向目标文件写入内容了</li>
+</ul>
+<p>第 12 章 解救即将被断网的系统——补丁调试安装失败</p>
+<ul>
+<li>补丁安装失败，查看事件查看器——Windows Logs——Application——MsiInstaller</li>
+<li>启用 Windows Installer 安装日志，但是出错的步骤还没开始生成日志文件</li>
+<li>通过 CreateFileW 查看补丁打开的文件，里面有 OpenFileMapping 失败的日志，到 OpenFileMapping 上下断点，找到一次失败调用，但这不是安装失败的原因</li>
+<li>日志：补丁包认为系统不适用，查看补丁的描述文件 ParameterInfo.xml中 ApplicableIf 节</li>
+<li>bp KERNELBASE!CreateFileW+0x5 “dU &#x2F;c 50 poi(@ebp+*);gu;r eax;.if(@eax&lt;0){.echo hit}.else{gc}” &lt;- dU 以 Unicode 方式输出第一个参数（文件名），当返回值小于 0 时中断，否则继续执行</li>
+<li>发现评估补丁应用顺序的 api MsiDeterminePatchSeqence 在打开安装目录下某个 msi 失败了，因为该 msi 不存在</li>
+</ul>
+<p>第 13 章 SDK 安装程序卡壳之谜——兼谈函数的异常出口</p>
+<ul>
+<li>~*e ? @$tid; !gle 显示每个线程的 id 和 LastError 值</li>
+<li>LastErrorValue 和 LastErrorStatus 都保存在 teb 中，用 dt _TEB -y Last 可观察</li>
+<li>找到有操作失败的 api，发现栈上有异常处理的操作</li>
+<li>因为有 jit 代码，可以用 sos 扩展命令模块：.loadby sos mscorwks 从 mscorwks 模块所在位置加载 sos 扩展，再执行 !clrstack 观察托管方法调用经过</li>
+<li>使用 SOS 的 !threads 观察线程信息，每个异常名称后面是对应的异常对象地址，可用 !do <addr> 查看</li>
+<li>确定下载线程因为找不到文件陷入异常状态后 ildasm 查看中间语言</li>
+<li>SOS 模块的 !ip2md &lt;栈上的托管代码调用帧地址&gt; 查看其对应的托管方法</li>
+<li>原因是触发异常后没有清除一个标志位</li>
+</ul>
+<p>第 14 章 是谁动了我的句柄</p>
+<ul>
+<li>.ecxr 读取异常数据流，是 MINIDUMP_EXCEPTION_STREAM 结构</li>
+<li>ub 命令，反汇编，但是与 u 的方向相反</li>
+<li>关键段中的事件句柄无效</li>
+</ul>
+<p>第 15 章 转储分析之系统挂在 DPC</p>
+<ul>
+<li>按下右 ctrl 后连按两次 Scroll Lock 可以强制触发 KeBugCheckEx，Computer\HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\i8042prt\Parameters，DWORD 类型的 CrashOnCtrlScroll 值，1 为启用</li>
+<li>!pcr 查看处理器控制区（Process Control Region）用来管理 cpu 状态，格式为 KPCR 结构，一般为两页内存，x86 上用 FS 寄存器指向这个段，用 sg @fs 可以查看</li>
+<li>Windows 的空闲循环为 KiIdleLoop，会<ul>
+<li>调用电源管理函数让 cpu 进入低功耗状态（C-State），如 intel 的 AcpiC1Idle 和 AcpiC2Idle</li>
+<li>检查定时器和 DPC 任务</li>
+<li>检查是否有新线程等待执行</li>
+</ul>
+</li>
+<li>通过栈看到是处理 DPC 时出了问题</li>
+<li>找到一直读取硬件寄存器的函数现场，找到硬件寄存器的线性地址，用 !vtop 0 <vaddr> 转为物理地址</li>
+<li>!arbiter 2 列出系统中物理地址分配情况</li>
+<li>找到这块内存是分配给 usbehci 后查阅 intel 南桥数据手册（ICH Datasheet）关于 USB EHCI 的章节中关于这个寄存器的描述</li>
+<li>所以应该是硬件坏了</li>
+</ul>
+<p>第 16 章 转储分析之探寻唤醒失败原因</p>
+<ul>
+<li>!cpuinfo 查看 cpu 信息</li>
+<li>!locks 内核对象死锁</li>
+<li>.thread &#x2F;p <ethread> 切换到目标线程</li>
+<li>!drvobj &lt;驱动模块名&gt; 查看驱动的信息</li>
+<li>!devstack &lt;设备对象&gt; 查看设备栈</li>
+<li>!devnode 0 1 显示系统所有设备的设备树，查看目标设备的位置 -&gt; 发现是 USB 转串口设备的驱动</li>
+<li>!irp <addr> 查看 irp，地址后面带个 1 可以显示更详细的信息</li>
+<li>查看 irp 具体参数，发现设置电源状态的 irp 发往两个驱动，唤醒的和设置的</li>
+<li>因为要等待 PDO 处理，所以 FDO 设置了完成例程并等待，所以问题出在底层的 usbhub 驱动（或设备）上</li>
+</ul>
+<p>第 17 章 解救陷入死循环的 MSN</p>
+<ul>
+<li><del>*e .ttime 打印每个线程的运行时间，</del>*e?@$tid;.ttime 打印每个线程的 id 和运行时间</li>
+<li>bp MSVCR80!_vsnwprintf_s+0x19 “dU poi(@ebp+8);kv 3;gc” 自动打印信息</li>
+<li>在父函数中下断点判断造成循环的位置</li>
+<li>分析汇编的代码结构，查看原因</li>
+<li>recx&#x3D;poi(ecx); r ecx; z(ecx!&#x3D;0) windbg 循环命令，将 ecx 指向的值赋值给 ecx，显示 ecx，z(n) 是循环条件</li>
+<li>windbg 验证后发现是链表循环了</li>
+</ul>
+<p>第 18 章 寻找系统中的耗电大王</p>
+<ul>
+<li>分析汇编代码逻辑找出原因，略。。。</li>
+</ul>
+<p>第 19 章 Windows 8 的内核调试增强</p>
+<ul>
+<li>windows 的内核调试引擎（Kernel Debug Engine，简称 KD），狭义上指 NT 内核中一系列以 Kd 开头的函数和变量</li>
+<li>Kd 有串口、1394火线、usb 2.0 的通讯接口，但都有各种缺点：串口稀缺，其他的不稳定。win 8 新增了网络和 usb 3.0（新增了一系列 kdXXX.dll）</li>
+<li>网络调试（KdNet）：处于同一局域网，启用网络方式的内核调试<ul>
+<li>bcdedit&#x2F;dbgsettings net hostip:w.x.y.z port:50000 key:aaa.bbb.ccc.ddd</li>
+<li>bcdedit -debug on</li>
+<li>bcdedit &#x2F;set {dbgsettings} busparams b.d.f 多网卡时设置使用的网卡，最后分别是总线号、设备号和功能号，网卡设备属性中可查（Location information 属性）</li>
+</ul>
+</li>
+<li>KdNet 使用网卡固件提供的 UNDI 编程接口，全称是 Universal Network Device Interface，是英特尔和 SystemSoft 在 PXE(Preboot Execution Environment) 协议中定义的 api</li>
+<li>不同牌子网卡貌似也有点兼容性问题（写书的时间，现在未知）</li>
+<li>Usb 3.0<ul>
+<li>bacedit &#x2F;dbgsettings usb targetname:&lt;目标机器名字&gt;</li>
+<li>bacedit &#x2F;set dbgtransport kdusb3.dll</li>
+<li>bacedit &#x2F;debug on</li>
+<li>bacedit &#x2F;deletevalue dbgtransport （删除）</li>
+</ul>
+</li>
+</ul>
+<p>第 20 章 漫谈 Android 系统的调试模型</p>
+<ul>
+<li>接全功能键盘到 Android，Alt+F1 打开控制台窗口，Alt+F7 返回图形界面</li>
+<li>Dalvik 虚拟机沿用了标准 Java 平台调试器架构（JPDA），包含<ul>
+<li>Java 调试器接口（JDI, Java Debug Interface），在调试器进程中，访问目标程序，并同调试器其他部分交互</li>
+<li>Java 虚拟机工具接口（JVM TI, JVM Tool Interface），处于被调试进程中，提供调试服务的标准接口，负责与 java 虚拟机交互，是 native 的编程接口，可以观察 jvm 的状态</li>
+<li>Java Debug Wire Prootocal(JDWP)，JVM TI 和 JDI 的通信协议</li>
+</ul>
+</li>
+<li>&lt;省略…&gt;</li>
+</ul>
+<p>第 21 章 趣谈托管程序的辅助调试线程</p>
+<ul>
+<li>ICorDebug，COM 接口的托管调试 API</li>
+<li>调试的 3 种模式：<ol>
+<li>native debugger -&gt; native code。当作普通进程调试，如 windbg</li>
+<li>clr debugger -&gt; clr code。通过托管调试接口与运行时控制器（RCThread）通信，只能查看托管层次代码和数据</li>
+<li>mix 1 and 2。VS 支持 2、3 两种模式，该模式不能使用“编辑并继续”功能，速度也比较慢</li>
+</ol>
+</li>
+<li>SSCLI，Shared Source Common Language Infrastructure，是微软公开的 CLI 源码，又称 ROTOR，含有 RCThread 和 IPC 通信机制的原阿门，sscli20\clr\src\debug 目录</li>
+<li>会生成一个刺探线程检测某些资源（锁）是否可以安全地获取（是否被托管的普通线程拥有，普通线程需要 RCThread 唤醒后才能释放锁），避免死锁</li>
+<li>海森伯效应：调试器对被调试程序产生的影响，托管调试模型受影响较大</li>
+</ul>
+<p>第 22 章 漫谈 SOS 扩展</p>
+<ul>
+<li><p>kd：调试内核态，NTSD：调试用户态</p>
+</li>
+<li><p>开发 .Net 时微软开发用于调试托管代码的 windbg 扩展模块</p>
+</li>
+<li><p>SOS（Son Of Strike）是简化后的内部调试器 Strike</p>
+<ul>
+<li>.load clr10\sos.dll 加载指定版本的 sos</li>
+<li>观察核心模块 mscorwks.dll 的位置，加载同级目录下的 sos</li>
+<li>.loadby sos mscorwks.dll 加载 mscorwks 同位置的 sos，没有任何提示说明成功加载</li>
+<li>加载后可用 .chain 查看已加载扩展模块</li>
+</ul>
+</li>
+<li><p>sxe ld mscorwks.dll 接收模块加载通知，也可 sxe -c”.loadby sos mscorwks.dll;g” ld mscorwks.dll</p>
+</li>
+<li><p>!bpmd &lt;模块名&gt; &lt;方法名&gt; 下断 &#x2F; !bpmd -md <MethodDesc>，MethodDesc 通过 !name2ee &lt;模块名&gt; &lt;方法名&gt; 获取</p>
+</li>
+<li><p>用一个 SOSEX 的扩展模块根据源码下断 !mpb Program.cs 11</p>
+</li>
+<li><p>编写 windbg 扩展</p>
+<ul>
+<li>直接使用调试引擎服务接口，功能最强大，称为 DbgEng 扩展。SDK 目录 sdk\samples\exts\dbgexts 有样例。需要输出 DebugExtensionInitialize 函数</li>
+<li>使用 sdk 公布的一系列函数来让扩展模块调用。需要输出 WinDbgExtensionDllInit 函数</li>
+<li>EngExtCpp，类似 mfc、atl 的 cpp 框架，通过派生扩展。sdk\samples\extcpp 有样例。</li>
+</ul>
+</li>
+</ul>
+<p>第 23 章 趣谈 CLR4 的调试模型重构</p>
+<ul>
+<li>系统分发异常时如果启用了内核调试且当前进程的调试端口为空时会把异常分发给内核调试器，但是重构前的 clr 没有使用调试端口。因为 KiDebugRoutine 会放过其他软件异常而分发断点异常，从而导致系统僵死。所以做托管调试时如果开启了内核调试就会直接报错</li>
+<li>重构后的 clr4 不再允许两个调试器同时调试，因为占领了调试端口</li>
+<li>分析 dump 时也不再依赖调试线程而是直接分析进程的内存数据</li>
+</ul>
+<p>第 24 章 如何跟踪 ACPI 代码</p>
+<ul>
+<li>ACPI(Advanced Configuration and Power Interface, 高级配置和电源接口) 是 OS 和系统固件（Firmware）之间的标准接口</li>
+<li>ACPI 定义了 ASL(ACPI Source Language) 编程语言</li>
+<li>OS 通过解释执行固件中的 AML(ACPI Machine Language) 字节码来使用 ACPI 接口</li>
+<li>AML 解释器内部的 AMLI Debugger 用于调试 AML 代码的调试器后端，调试器借助内核调试会话与 AMLI Debugger 交互</li>
+<li>检查版本(Checked Build) 的驱动中才有 AMLI 调试器，需要自行下载检查版本的 win 软件包并替换 acpi.sys</li>
+<li>通过 x acpi!gDebug* 查看当前驱动是否有 gDebugger 符号，存在则为 checked 版本</li>
+<li>!amli debugger 注册 AMLI 调试断点，执行到 AML 代码时会中断</li>
+<li>? AMLI 帮助列表</li>
+<li>set traceon 启用 ACPI 解释器追踪功能，打印所有 AML 代码的执行情况</li>
+</ul>
+<p>第 25 章 如何调试窗口大总管</p>
+<ul>
+<li>PSTAT 工具可以查看线程的内核态用户态切换次数</li>
+<li>注册表 HKLM\SYSTEM\CurrentControlSet\Control\Session Manager，设置 GlobalFlag(REG_DWORD) 与 0x20000 或运算后写回。Gflags 勾选 “Enable debugging of Win32 Subsystem”</li>
+<li>双击调试。目标机运行 “ntsd –”，代表调试 CSRSS。</li>
+<li>调试有界面的程序时按 F12 可使其中断到调试器</li>
+<li>Xp前的程序错误是通过硬错误机制报告的(NtRaiseHardError)，属于 CSRSS 界面。Win 7之前 cmd 就是 CSRSS 的界面(win 7 及以后用 conhost 来处理输入了)。光盘的缺盘通知也是 CSRSS 的界面。</li>
+<li>Windbg 的小工具 break-in <pid> 也可以中断到调试器</li>
+<li>符号文件需要放在调试机上，可以直接复制或是下载符号包</li>
+<li>这种方法还能用于调试 winlogon 进程(如开发指纹登录这种程序时)</li>
+<li>全称 Client &#x2F; Server Runtime Server Subsystem，进程内有 winsrv, csrsrv, basesvr 三个重要服务模块</li>
+</ul>
+<p>第 26 章 嵌入式系统调试浅谈</p>
+<ul>
+<li>CPU提供的调试设施<ul>
+<li>int 3 指令，8086 引入，软件断点的基础</li>
+<li>TF，8086，单步</li>
+<li>DR0~7，80386，硬件断点，可以监视变量、io访问断点和特殊代码断点</li>
+<li>分支监视和记录，Pentium Pro(P6)，按分支单步的基础，也用于记录软件的执行流程</li>
+</ul>
+</li>
+<li>上电时期调试用 基于JTAG(Joint Test Action Group)协议的硬件调试器调试。依赖内建在目标系统芯片内的访问端口和边界扫描链路。</li>
+<li>上层的软件调试器可以全新开发，也可基于现有的如 windbg 开发</li>
+<li>操作系统内核调试则用双机内核调试</li>
+<li>应用程序调试通常是远程调试，如 Android 基于 adb 的调试</li>
+<li>设计时注重调试功能的集成</li>
+</ul>
+<p>第 27 章 海森伯效应一例</p>
+<ul>
+<li>kernel32!ReadProcessMemory+0x5.if poi(@ebp+c) &#x3D; 0xa30000 {} .else {kv 1; g} 条件断点</li>
+<li>调试器事先访问了 PAGE_GUARD 属性的页面，导致这个一次性的属性随后被去除</li>
+<li>内核调试器 bp &#x2F;p 82740200 nt!MiDoPoolCopy 写断，82740200 是 ntsd 的 process 结构地址</li>
+<li>push XXXX, call nt!_SEH_Prolog，其中 XXXX 为异常注册结构。用 dds 观察异常注册结构，+4 处是异常过滤表达式，+8 处是异常处理块地址。可在异常过滤表达式处下断等待异常触发</li>
+<li>根据异常信息得到的当前进程并非 ntsd，因为调试器调用了 KeStackAttachProcess</li>
+<li>win 7 已经修复了这个问题，调试器读取时就会触发异常</li>
+</ul>
+<p>第 28 章 使用调试器认识计算机世界</p>
+<ul>
+<li>软件工程师要对硬件概念如寄存器、io端口、中断、物理内存、pci总线有比较深刻的了解，否则根基不稳。</li>
+<li>rdmsr&#x2F;wrmsr 读写 msr(model specific register，64 位宽) 寄存器</li>
+<li>ib&#x2F;iw&#x2F;id&#x2F;ob&#x2F;ow&#x2F;od 读写 io 端口</li>
+<li>!apic 显示 CPU 内部的中断控制寄存器</li>
+<li>!idt 观察中断描述符表</li>
+<li>!pci 观察 pci 设备</li>
+</ul>
+<p>第 29 章 在调试器中细品 CPU</p>
+<ul>
+<li>通过 msr 寄存器读取 IA-32 架构 CPU 温度： rdmsr 19c，19c 是 IA32_THERM_STATUS 的地址，可以查看 IA-32 手册</li>
+<li>段寄存器 16 位宽，存放段选择子，用于选择一个段描述符</li>
+<li>dg 可以显示段选择子对应的段描述符信息</li>
+<li><img src="/assets/imgs/2022/02/%E6%A0%BC%E8%A0%B9%E6%B1%87%E7%BC%96-1.png"></li>
+<li><img src="/assets/imgs/2022/02/%E6%A0%BC%E8%A0%B9%E6%B1%87%E7%BC%96-2.png"></li>
+<li>虽然页机制比段机制更加方便，但由于段机制不可禁止和兼容性考虑，只能尽量淡化段的影响，如把段机制设为 0，范围最大。另外就是不同进程共享段描述符。windows 为每个 CPU 核心创建一套段描述符</li>
+<li><img src="/assets/imgs/2022/02/%E6%A0%BC%E8%A0%B9%E6%B1%87%E7%BC%96-3.png"></li>
+<li>FS 在 Ring 0 时指向 PCR(内核调试下可用 !pcr 显示)，Ring 3 时指向 TEB</li>
+<li>打印执行 MWaitIdle 函数的 CPU 编号(fs 段偏移 0x51 处)：bp intelppm!MWaitIdle+0xac “.echo mwait sleep; r eax; r ecx; db fs:51 l1; gc”</li>
+<li>TSS 任务状态段，存放任务（线程）的执行状态。配套的 TR(Task Register)指向当前任务的 TSS</li>
+<li>IA-32支持硬件级的任务切换，只要通过 jmp，call，中断，异常转移到某个 TSS，CPU就会去执行相应的任务。但是 windows 只为双误、不可屏蔽中断创建了 TSS 以便让 CPU 切换到全新线程处理，正常的任务则是共享同一个 TSS，它随任务不同而改变内容</li>
+<li>TSS 里记录了内核态栈顶和段选择子内容，线程进入内核态时就能顺利切换</li>
+<li>x64 中取消了硬件任务切换。在 TSS 里新增了 8 个 ist(interrupt stack table)表项，idt 新增 3 位选择 ist 的位域， ist 内存放一个栈的线性地址，CPU 从 idt 拿到 ist 后就可以找到新栈地址并切换。使用 gs 寄存器代替 fs 寄存器。gs 对应描述符的基址为 0，因为 x64 用了两个新的 msr 寄存器 IA32_FS_BASE 和 IA32_GS_BASE 保存寄存器的值。IA32_KERNEL_GSBASE 与 IA32_GS_BASE 有关，不活跃的 teb 或 pcr 会从 gs base 切换到这（新增了专用指令 swapgs，KiSystemCall64 入口）</li>
+<li>CPU 复位后工作在实模式下，cs&#x3D;f000,eip&#x3D;fff0，会指向 ffff0 处的 POST 程序代码，此时可以使用基于 JTAG 的硬件调试器调试 POST 程序，POST 在执行过程中会将一些 POST 码发送到 0x80 io 端口，调试器也可以对其设置 io 断点</li>
+</ul>
+<p>第 30 章 系统启动系列<br>第 31 章 在调试器中观察计算机的睡眠过程<br>第 32 章 在调试器中观察计算机的唤醒过程<br>第 33 章 使用调试器探索托管程序的执行起点</p>
+<ul>
+<li>ntdll!LdrpInitializeProcess 调用 ntdll!LdrpCorReplaceStartContext 替换入口点为 ntdll!CorExeMain 变量指向的 mscoree!_CorExeMain</li>
+<li>XP 前的 exe 会设置有无条件跳转，同样跳到 mscoree</li>
+</ul>
+<p>第 34 章 解读编码后的 HEAP_ENTRY 结构</p>
+<ul>
+<li>ub @eip 观察刚刚执行过的指令</li>
+</ul>
+<p>第 35 章 从调试器中看 win7 打电话回家</p>
+<ul>
+<li>Win7 上传 Sam 日志</li>
+</ul>
+<p>第 36 章 使用调试器透视 win 8 的 metro 应用</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>flandre
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://kerisa.github.io/1802/" title="《格蠹汇编》读书笔记">https://kerisa.github.io/1802/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%A0%BC%E8%A0%B9%E6%B1%87%E7%BC%96/" rel="tag"># 格蠹汇编</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/1795/" rel="prev" title="《网络攻防技术与实践》读书笔记">
+      <i class="fa fa-chevron-left"></i> 《网络攻防技术与实践》读书笔记
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/1326/" rel="next" title="ぼくの一人戦争 感想">
+      ぼくの一人戦争 感想 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt=""
+      src="/sys-imgs/42553027_1.png">
+  <p class="site-author-name" itemprop="name"></p>
+  <div class="site-description" itemprop="description">This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">247</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">flandre</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">328k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">4:58</span>
+</div>
+  <div class="powered-by">Powered by love
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

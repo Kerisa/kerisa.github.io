@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kerisa.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="作为练手的 160 个 CrackMe 系列整理分析CrackMe 来源：【反汇编练习】160个CrackME索引目录1~160建议收藏备用 这个 CrackMe 使用了 RSA 算法，因为程序中也给了相应的提示，在逆的过程中就会有意识的去找这方面的特征，当然 RSA 算法还是需要事先了解下。算法参考可见：RSA加密算法 OR RSA 算法的加密原理是什么">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CrackMe 反汇编练习之 081">
+<meta property="og:url" content="https://kerisa.github.io/931/index.html">
+<meta property="og:site_name" content="Re: Memory (mirror)">
+<meta property="og:description" content="作为练手的 160 个 CrackMe 系列整理分析CrackMe 来源：【反汇编练习】160个CrackME索引目录1~160建议收藏备用 这个 CrackMe 使用了 RSA 算法，因为程序中也给了相应的提示，在逆的过程中就会有意识的去找这方面的特征，当然 RSA 算法还是需要事先了解下。算法参考可见：RSA加密算法 OR RSA 算法的加密原理是什么">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2019/09/rsa-enc.png">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2019/09/rsa-dec.png">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2019/09/crackme083.png">
+<meta property="article:published_time" content="2019-09-21T11:33:40.000Z">
+<meta property="article:modified_time" content="2025-07-21T18:42:00.483Z">
+<meta property="article:author" content="flandre">
+<meta property="article:tag" content="CrackMe">
+<meta property="article:tag" content="反汇编">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kerisa.github.io/assets/imgs/2019/09/rsa-enc.png">
+
+<link rel="canonical" href="https://flandre-scarlet.moe/blog/931/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>CrackMe 反汇编练习之 081 | Re: Memory (mirror)</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Re: Memory (mirror)</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/931/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/sys-imgs/42553027_1.png">
+      <meta itemprop="name" content="flandre">
+      <meta itemprop="description" content="This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Re: Memory (mirror)">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          CrackMe 反汇编练习之 081
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-09-21 19:33:40" itemprop="dateCreated datePublished" datetime="2019-09-21T19:33:40+08:00">2019-09-21</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-07-22 02:42:00" itemprop="dateModified" datetime="2025-07-22T02:42:00+08:00">2025-07-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/programs/" itemprop="url" rel="index"><span itemprop="name">programs</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/programs/%E9%80%86%E5%90%91/" itemprop="url" rel="index"><span itemprop="name">逆向</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.8k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>作为练手的 160 个 CrackMe 系列整理分析<br>CrackMe 来源：<a target="_blank" rel="noopener" href="https://www.52pojie.cn/thread-709699-1-1.html">【反汇编练习】160个CrackME索引目录1~160建议收藏备用</a></p>
+<p>这个 CrackMe 使用了 RSA 算法，因为程序中也给了相应的提示，在逆的过程中就会有意识的去找这方面的特征，当然 RSA 算法还是需要事先了解下。<br>算法参考可见：<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/RSA%E5%8A%A0%E5%AF%86%E6%BC%94%E7%AE%97%E6%B3%95">RSA加密算法</a> OR <a target="_blank" rel="noopener" href="https://www.zhihu.com/question/25038691">RSA 算法的加密原理是什么</a></p>
+<span id="more"></span>
+<p>通过提示字符串可直接定位到按钮的处理函数 004029B0，一开始通过字符串复制设置一些初始变量。接着会检查输入的注册码是否为 14 个纯数字，满足条件后继续。</p>
+<p>起初还以为是个大数组，后来想想可能是一些大整数的结构。</p>
+<p>变量初始化完毕后会将注册码的 14 个数字简单拆分成 7 + 7 两部分进行处理，接着就到关键函数 00402B1D 这里了。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;前略&gt; 00402A6A . 8BC2 mov eax,edx 00402A6C . C64424 17 00 mov byte ptr ss:\[esp+0x17\],0x0 ; &quot;12790891&quot; 00402A71 . C64424 0F 00 mov byte ptr ss:\[esp+0xF\],0x0 00402A76 . 8B08 mov ecx,dword ptr ds:\[eax\] 00402A78 . 894C24 10 mov dword ptr ss:\[esp+0x10\],ecx 00402A7C . 66:8B48 04 mov cx,word ptr ds:\[eax+0x4\] 00402A80 . 66:894C24 14 mov word ptr ss:\[esp+0x14\],cx 00402A85 . 8B4A 07 mov ecx,dword ptr ds:\[edx+0x7\] 00402A88 . 8A40 06 mov al,byte ptr ds:\[eax+0x6\] 00402A8B . 894C24 08 mov dword ptr ss:\[esp+0x8\],ecx 00402A8F . 884424 16 mov byte ptr ss:\[esp+0x16\],al 00402A93 . 8D42 07 lea eax,dword ptr ds:\[edx+0x7\] 00402A96 . 8D4C24 10 lea ecx,dword ptr ss:\[esp+0x10\] 00402A9A . 66:8B50 04 mov dx,word ptr ds:\[eax+0x4\] 00402A9E . 8A40 06 mov al,byte ptr ds:\[eax+0x6\] ; 注册码从中间拆成两个字符串 00402AA1 . 51 push ecx 00402AA2 . 8D8C24 940500&gt;lea ecx,dword ptr ss:\[esp+0x594\] 00402AA9 . 66:895424 10 mov word ptr ss:\[esp+0x10\],dx 00402AAE . 884424 12 mov byte ptr ss:\[esp+0x12\],al 00402AB2 . E8 79E6FFFF call &lt;tsc.strcpy1&gt; 00402AB7 . 8D5424 18 lea edx,dword ptr ss:\[esp+0x18\] ; &quot;12890891&quot; 00402ABB . 8D8424 E00000&gt;lea eax,dword ptr ss:\[esp+0xE0\] ; &quot;9901&quot; 00402AC2 . 52 push edx ; /Arg3 = 0013F254 ASCII &quot;12790891&quot; 00402AC3 . 8D8C24 040400&gt;lea ecx,dword ptr ss:\[esp+0x404\] ; 00402ACA . 50 push eax ; Arg2 = 0013F31C ASCII &quot;9901&quot; 00402ACB . 51 push ecx ; Arg1 = 0013F7CC ASCII &quot;1111111&quot; 00402ACC . 8D8C24 9C0500&gt;lea ecx,dword ptr ss:\[esp+0x59C\] ; 00402AD3 . C68424 6C0600&gt;mov byte ptr ss:\[esp+0x66C\],0x4 ; 00402ADB . E8 30F8FFFF call tsc.00402310 ; \\tsc.00402310 00402AE0 . 8D5424 08 lea edx,dword ptr ss:\[esp+0x8\] 00402AE4 . 8D8C24 380300&gt;lea ecx,dword ptr ss:\[esp+0x338\] 00402AEB . 52 push edx 00402AEC . C68424 640600&gt;mov byte ptr ss:\[esp+0x664\],0x5 00402AF4 . E8 37E6FFFF call &lt;tsc.strcpy1&gt; 00402AF9 . 8D4424 18 lea eax,dword ptr ss:\[esp+0x18\] 00402AFD . 8D8C24 E00000&gt;lea ecx,dword ptr ss:\[esp+0xE0\] 00402B04 . 50 push eax ; /Arg3 = 0013F31C ASCII &quot;9901&quot; 00402B05 . 8D9424 CC0400&gt;lea edx,dword ptr ss:\[esp+0x4CC\] ; 00402B0C . 51 push ecx ; Arg2 = 0013F7CC ASCII &quot;1111111&quot; 00402B0D . 52 push edx ; Arg1 = 0013F254 ASCII &quot;12790891&quot; 00402B0E . 8D8C24 440300&gt;lea ecx,dword ptr ss:\[esp+0x344\] ; 00402B15 . C68424 6C0600&gt;mov byte ptr ss:\[esp+0x66C\],0x6 ; 00402B1D . E8 EEF7FFFF call tsc.00402310 ; \\tsc.00402310 00402B22 . 8D8424 700200&gt;lea eax,dword ptr ss:\[esp+0x270\] 00402B29 . 8D8C24 000400&gt;lea ecx,dword ptr ss:\[esp+0x400\] 00402B30 . 50 push eax 00402B31 . C68424 640600&gt;mov byte ptr ss:\[esp+0x664\],0x7 00402B39 . E8 82F2FFFF call &lt;tsc.strcmp1&gt; 00402B3E . 85C0 test eax,eax 00402B40 . 0F84 BF000000 je tsc.00402C05 00402B46 . 8D8C24 A80100&gt;lea ecx,dword ptr ss:\[esp+0x1A8\] 00402B4D . 51 push ecx 00402B4E . 8D8C24 CC0400&gt;lea ecx,dword ptr ss:\[esp+0x4CC\] 00402B55 . E8 66F2FFFF call &lt;tsc.strcmp1&gt; 00402B5A . 85C0 test eax,eax 00402B5C . 0F84 A3000000 je tsc.00402C05 ; 跳转则注册成功</span><br></pre></td></tr></table></figure>
+
+<p>这个函数传入了 4 个参数，分别是拆分出的 7 数字注册码，固定值 9901 和固定值 12890891，还有个输出变量。00402310 的内部相当复杂，一看就不是人干事。跳过去看下运行结果，算了个 898713 出来（我填的是 7 个 2）。因为事先已经了解到是 RSA 算法，所以推测是一个快速幂的算法，写个函数验证下， <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">f</span>(<span class="params">a, b, n</span>): t=<span class="number">1</span>; y=a; <span class="keyword">while</span> (b != <span class="number">0</span>): <span class="keyword">if</span> b &amp; <span class="number">1</span> == <span class="number">1</span>: t = t \* y % n; y = y \* y % n; b = b &gt;&gt; <span class="number">1</span>; <span class="keyword">return</span> t</span><br></pre></td></tr></table></figure> 发现计算结果一致。</p>
+<p>然后接着看下面，将前后两个 7 位数字计算完毕后会分别将结果和固定的 8483678 和 5666933 进行比较，两者只要有一个相符即可通过验证。</p>
+<p>我们填入的注册码相当于对应 RSA 的消息 n，e &#x3D; 9901，N &#x3D; 12890891，然后根据加密公式计算出的结果和程序内置的 c 进行比较，从而完成验证。<br>RSA 加密：<img src="/assets/imgs/2019/09/rsa-enc.png"><br>RSA 解密：<img src="/assets/imgs/2019/09/rsa-dec.png"><br>而上面出现的 8483678 和 5666933 就是预定义的密文 c 了。</p>
+<p>因为解空间也不大，所以可以直接枚举出正确结果，因为程序中会将注册码拆分，所以结果的位数最多只有 7 位，写个循环很快就可以计算出来，而且正好小于 12890891 的 7 位数结果只有 1 个。将前后两部分的结果分别计算出来就行了。 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">f</span>(<span class="params">a, b, n</span>): t=<span class="number">1</span>; y=a; <span class="keyword">while</span> (b != <span class="number">0</span>): <span class="keyword">if</span> b &amp; <span class="number">1</span> == <span class="number">1</span>: t = t \* y % n; y = y \* y % n; b = b &gt;&gt; <span class="number">1</span>; <span class="keyword">return</span> t <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, <span class="number">9999999</span>): res = f(i, <span class="number">9901</span>, <span class="number">12790891</span>) <span class="keyword">if</span> res == <span class="number">8483678</span>: <span class="built_in">print</span>(<span class="string">&#x27;first part: &#x27;</span> + <span class="built_in">str</span>(i)) <span class="comment"># first part: 7167622 elif res == 5666933: print(&#x27;second part: &#x27; + str(i)) # second part: 3196885</span></span><br></pre></td></tr></table></figure> <img src="/assets/imgs/2019/09/crackme083.png"></p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>flandre
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://kerisa.github.io/931/" title="CrackMe 反汇编练习之 081">https://kerisa.github.io/931/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/CrackMe/" rel="tag"># CrackMe</a>
+              <a href="/tags/%E5%8F%8D%E6%B1%87%E7%BC%96/" rel="tag"># 反汇编</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/912/" rel="prev" title="制作龙儿同款橙子挞">
+      <i class="fa fa-chevron-left"></i> 制作龙儿同款橙子挞
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/946/" rel="next" title="CrackMe 反汇编练习之 092">
+      CrackMe 反汇编练习之 092 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt=""
+      src="/sys-imgs/42553027_1.png">
+  <p class="site-author-name" itemprop="name"></p>
+  <div class="site-description" itemprop="description">This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">247</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">flandre</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">328k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">4:58</span>
+</div>
+  <div class="powered-by">Powered by love
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

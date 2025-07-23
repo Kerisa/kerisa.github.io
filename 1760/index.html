@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kerisa.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="第6章 修改代码的技术新生方法:*   将新增代码形成一个新的方法，并在修改点对其进行调用。  类的依赖关系太恶劣时，可考虑将新方法作为公有静态方法，并将this作为参数传递（便于测试）  新生类:*   确定修改点后在修改点生成新的类，需要将原来的局部变量传递时则将其传递给构造函数，同时有需要返回结果则构建对应的方法并进行调用来获得结果。  优点在于进行侵入型较强的修改时能有更大的自信继续进行，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="《修改代码的艺术》读书笔记">
+<meta property="og:url" content="https://kerisa.github.io/1760/index.html">
+<meta property="og:site_name" content="Re: Memory (mirror)">
+<meta property="og:description" content="第6章 修改代码的技术新生方法:*   将新增代码形成一个新的方法，并在修改点对其进行调用。  类的依赖关系太恶劣时，可考虑将新方法作为公有静态方法，并将this作为参数传递（便于测试）  新生类:*   确定修改点后在修改点生成新的类，需要将原来的局部变量传递时则将其传递给构造函数，同时有需要返回结果则构建对应的方法并进行调用来获得结果。  优点在于进行侵入型较强的修改时能有更大的自信继续进行，">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2017-06-17T12:45:52.000Z">
+<meta property="article:modified_time" content="2025-07-21T18:42:00.591Z">
+<meta property="article:author" content="flandre">
+<meta property="article:tag" content="Michael Feathers">
+<meta property="article:tag" content="修改代码的艺术">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://flandre-scarlet.moe/blog/1760/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>《修改代码的艺术》读书笔记 | Re: Memory (mirror)</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Re: Memory (mirror)</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/1760/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/sys-imgs/42553027_1.png">
+      <meta itemprop="name" content="flandre">
+      <meta itemprop="description" content="This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Re: Memory (mirror)">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          《修改代码的艺术》读书笔记
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-06-17 20:45:52" itemprop="dateCreated datePublished" datetime="2017-06-17T20:45:52+08:00">2017-06-17</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-07-22 02:42:00" itemprop="dateModified" datetime="2025-07-22T02:42:00+08:00">2025-07-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">读书笔记</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>5 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="第6章-修改代码的技术"><a href="#第6章-修改代码的技术" class="headerlink" title="第6章 修改代码的技术"></a>第6章 修改代码的技术</h2><p>新生方法:*   将新增代码形成一个新的方法，并在修改点对其进行调用。</p>
+<ul>
+<li>类的依赖关系太恶劣时，可考虑将新方法作为公有静态方法，并将this作为参数传递（便于测试）</li>
+</ul>
+<p>新生类:*   确定修改点后在修改点生成新的类，需要将原来的局部变量传递时则将其传递给构造函数，同时有需要返回结果则构建对应的方法并进行调用来获得结果。</p>
+<ul>
+<li>优点在于进行侵入型较强的修改时能有更大的自信继续进行，而且不用改变现有的头文件，不会增加原类的编译负担。</li>
+<li>缺点是会使系统中的概念复杂化。<span id="more"></span>
+时间耦合:*   两段代码仅仅是需要同时执行（执行了一个就必须也要执行另一个），可以使用新生类（当它们不再需要同时执行时方便拆分），但是外覆方法可能更好。</li>
+</ul>
+<p>外覆方法:*   生成同名的新方法，并在新方法中调用改名后的旧方法。（然后执行新的代码）</p>
+<ul>
+<li>将旧方法与新增代码包装形成一个新的接口。</li>
+<li>缺点<ol>
+<li>逻辑无法与原方法交融，必有先后（这应该不是坏事）</li>
+<li>函数取名可能会比较糟糕</li>
+</ol>
+</li>
+<li>优点是完全独立与现有的方法</li>
+<li>新生方法和外覆方法的区别在于是否会修改原方法内部（新生会插入一个调用而外覆不会）</li>
+</ul>
+<p>外覆类:*   进行实现提速或接口提取，并让外覆类实现该接口。（可以使用公有继承或类组合，取决于需要大范围更改还是个别地方的更改，同上）</p>
+<ul>
+<li>在设计模式中称为装饰模式。用一个类覆盖另一个类（被外覆类），并传递其对象，同时实现同样的接口，这样外覆类可通过派生子类来解决被外覆类同一个接口上不同的时间耦合问题，甚至可以将外覆类的子类们实现为层层嵌套（当然套太多了还是不好）</li>
+<li>使用情形:<ol>
+<li>新的操作与原类完全独立</li>
+<li>原类已经足够大了</li>
+</ol>
+</li>
+</ul>
+<h2 id="第8章-添加特性"><a href="#第8章-添加特性" class="headerlink" title="第8章 添加特性"></a>第8章 添加特性</h2><p>依赖倒置原则:*   让代码依赖于改动不频繁的接口而不是依赖于具体的类。</p>
+<ul>
+<li>为新类解依赖的同时提供新类的接口防止新类的客户代码对其依赖。</li>
+</ul>
+<p>测试驱动开发:*   （将想要修改的旧类置于测试之下）</p>
+<ul>
+<li>编写失败用例</li>
+<li>让用例通过编译</li>
+<li>让测试通过</li>
+<li>消除重复</li>
+<li>重复以上步骤</li>
+<li>测试驱动开发能避免同时进行编码与重构</li>
+</ul>
+<p>差异式编程:*   通过继承添加新特性，随后（在测试的帮助下）进行重构</p>
+<ul>
+<li>注意不要违反Liskov置换原则（LSP）: 子类对象应当能够替换代码中出现的它们的父类对象，无论后者出现在什么地方。有个一般性原则就是不要重写父类的非虚方法。</li>
+</ul>
+<h2 id="第9章-无法将类放入测试用具中"><a href="#第9章-无法将类放入测试用具中" class="headerlink" title="第9章 无法将类放入测试用具中"></a>第9章 无法将类放入测试用具中</h2><p>测试时旧方法（类）有很多麻烦的参数:*   接口提取，传 null（测试类中），子类化并重写</p>
+<ul>
+<li>空对象模式可让调用方免于进行显式错误检查，这个在调用方不关心是否成功是尤其有用（因为为无效对象进行一次调用不会产生副作用）</li>
+</ul>
+<p>隐藏依赖:*   参数化构造函数，让一个隐藏在构造函数中的依赖由外部传递，进而使用接口提取。</p>
+<ul>
+<li>其他方法:提取并重写获取方法，提取并重写工厂方法，替换实例变量。</li>
+<li>替换实例变量: 在外面构造对象后，通过替换方法将其传递进去（但是替换是可能会产生一些资源相关的问题）</li>
+</ul>
+<p>全局依赖&#x2F;单例模式:*   放松单例的约束（也称为引入静态设置方法）<br>    1.  添加新的静态方法，以替换单例中原先的静态实例<br>    2.  构造新的实例，然后进行替换。（这里因为很多单例的构造函数不是公开的，所以可以派生一个子类然后提取接口或者实现），允许打破单例的情况下也可直接将构造函数公开）</p>
+<p>洋葱参数（构造函数中不断传递其他类的对象）:*   参数传null，或用接口提取、实现提取简化</p>
+<p>化名参数*   有些情况下使用接口提取不太妥当（会使得接口与类一一对应），这时可以使用子类化并重写的方法解开依赖</p>
+<p>无法访问类中的私有方法:*   在子类中使用 using 暴露基类的保护接口</p>
+<p>“有益”的语言特性（封闭的类，sealed, final）*   通过非封闭的基类（如果有）进行参数适配（和接口提取类似，但是接口提取需要修改原始类，而这里的类是库中的，无法修改）</p>
+<ul>
+<li>剥离并外覆API</li>
+</ul>
+<h2 id="第11章-修改时应该测试哪些方法"><a href="#第11章-修改时应该测试哪些方法" class="headerlink" title="第11章 修改时应该测试哪些方法"></a>第11章 修改时应该测试哪些方法</h2><p>寻找影响的传播:</p>
+<ol>
+<li>确定修改的函数</li>
+<li>如果有返回值，查看调用方</li>
+<li>如果修改了一些值，则查看使用这些值的方法，以及调用这些方法的方法</li>
+<li>查看父类和子类，可能会使用这些实例变量和方法</li>
+<li>查看参数是否被修改</li>
+<li>全局变量和静态数据</li>
+</ol>
+<p>影响和封装:*   封装本身并不是目的，而是帮助理解代码的工具</p>
+<h2 id="第13章-修改时应该怎样写测试"><a href="#第13章-修改时应该怎样写测试" class="headerlink" title="第13章 修改时应该怎样写测试"></a>第13章 修改时应该怎样写测试</h2><p>特征测试:*   用于刻画当前代码的实际行为（而不是要寻找bug），不断调整测试用例使其与当前代码的行为一致（而不一定是保持正确），如果有与期望不一致的行为，也要弄清楚原因</p>
+<p>刻画类:*   寻找代码中逻辑复杂的部分</p>
+<ul>
+<li>为你认为可能出错的地方编写失败用例</li>
+<li>使用极端值&#x2F;临界值作为测试输入</li>
+<li>寻找不变式</li>
+</ul>
+<p>目标测试:*   确认测试的覆盖率（为代码分支编写测试时，应该考虑除了分支被执行之外的使测试通过的条件）</p>
+<ul>
+<li>确认输入是否会使原来不通过的测试通过了（例如数据类型不匹配造成错误），可以手动计算期望得到的值，留意每个存在类型转换的地方，或者利用调试器确认类型转换，或使用感知变量确认路径覆盖。</li>
+</ul>
+<h2 id="第15章-到处都是API调用"><a href="#第15章-到处都是API调用" class="headerlink" title="第15章 到处都是API调用"></a>第15章 到处都是API调用</h2><ul>
+<li>剥离并外覆API，同时使用签名保持以减少出错的概率。（适用于API规模较小&#x2F;想完全解开API的依赖&#x2F;没有测试的情况下）</li>
+<li>基于职责的提取，将API连同一部分代码一起提取为一个低级的接口，供上层使用。（API规模大&#x2F;能安全地完成重构）</li>
+</ul>
+<h2 id="第16章-对代码的理解不足"><a href="#第16章-对代码的理解不足" class="headerlink" title="第16章 对代码的理解不足"></a>第16章 对代码的理解不足</h2><p>理解旧代码:*   使用草图&#x2F;注记</p>
+<ul>
+<li>打印代码（方法）后进行标注</li>
+<li>删除完全没有被使用到的代码</li>
+</ul>
+<h2 id="第18章-测试代码碍手碍脚"><a href="#第18章-测试代码碍手碍脚" class="headerlink" title="第18章 测试代码碍手碍脚"></a>第18章 测试代码碍手碍脚</h2><p>测试代码命名约定:</p>
+<ol>
+<li>测试类: 后面加Test后缀</li>
+<li>测试子类: 子类化后的测试类可加上Testing前缀</li>
+<li>伪类: 加上Fake前缀</li>
+</ol>
+<p>测试代码安置</p>
+<ol>
+<li>与产品代码放在同一目录里</li>
+<li>放在同一地点，并用条件编译等隔离开</li>
+<li>最好不要将两者分离到不同项目中</li>
+</ol>
+<h2 id="第19章-修改非面向对象代码"><a href="#第19章-修改非面向对象代码" class="headerlink" title="第19章 修改非面向对象代码"></a>第19章 修改非面向对象代码</h2><ul>
+<li>用条件编译+宏来替换函数调用</li>
+<li>使用文件包含将产品和测试代码分离到不同文件中</li>
+<li>引入新函数而不是直接添加代码到旧函数中</li>
+<li>利用C的函数指针设立接缝</li>
+</ul>
+<h2 id="第21章-修改大量重复代码"><a href="#第21章-修改大量重复代码" class="headerlink" title="第21章 修改大量重复代码"></a>第21章 修改大量重复代码</h2><ul>
+<li>逐步提取公共部分以放到基类中，并对差异的部分使用虚函数进行特化，隐藏到接口之后。</li>
+<li>同时考虑: 增加新类（新特性）是否方便、修改当前所有类的行为是否方便，是否丧失了一些灵活性等。</li>
+<li>正交性: 即无关性，修改代码时有单一切入点</li>
+<li>开放&#x2F;封闭原则: 代码对于扩展是开放的而对于修改是封闭的，好的设计无需对代码进行太多修改就可以添加新特性。</li>
+</ul>
+<h2 id="第22章-要修改巨型方法，却没法写用例"><a href="#第22章-要修改巨型方法，却没法写用例" class="headerlink" title="第22章 要修改巨型方法，却没法写用例"></a>第22章 要修改巨型方法，却没法写用例</h2><p>分类:</p>
+<ol>
+<li>项目列表式:（几乎）毫无缩进，一串罗列下来仿佛列表般的代码，理想情况下可以将每个区段提取为一个方法</li>
+<li>锯齿状方法: 具有单个庞大的缩进块（嵌套if）</li>
+</ol>
+<p>尽量利用自动重构（工具）。没有测试的情况下，一定要只用工具进行，不要手工修改。重构、测试安置到位后再来手工修改。这个时候要做的是分离逻辑依赖和引入接缝（方便安置测试）</p>
+<p>手动重构</p>
+<ol>
+<li>引入感知变量: 借此来简化&#x2F;间接判断一些操作（或代码分支）是否执行</li>
+<li>只提取你所了解的: 提取小块代码。（耦合数: 传进传出所提取出方法的参数数）耦合数越少越好，数量大于0时可以使用感知变量。提取完后写几个测试。</li>
+<li>依赖收集: 写测试来保护需要保护（不修改）的逻辑，然后提取测试没有覆盖的部分，通过这样来保护关键的行为。</li>
+<li>分解出方法对象: 分解大方法时相当于创建了一个类: 原来的参数作为构造函数的参数，逻辑主体在Run()中完成。</li>
+</ol>
+<p>一些策略</p>
+<ol>
+<li>提取if等分支时，可以将判断和执行分开提取，也可以合并提取。分开的话便于重组，合并的话则逻辑会比较清晰。</li>
+<li>优先提取到当前类中：就算有些方法可以（或应该）并入其他类中，也先不要这么做，这样可以使当前的修改操作易于进行，不易出错。可以之后再分类合并。</li>
+</ol>
+<p>小块提取代码：一次提取太多容易忽略细节引入bug</p>
+<p>时刻准备重新提取：可能会有新的认识，更好的提取方法</p>
+<h2 id="第23章-降低修改的风险"><a href="#第23章-降低修改的风险" class="headerlink" title="第23章 降低修改的风险"></a>第23章 降低修改的风险</h2><ul>
+<li>单一目标的编辑: 一次只做一件事</li>
+<li>签名保持（其实同上）</li>
+<li>依靠编译器: 但要注意一些隐式类型转换、继承、重载等编译器无法识别的情况</li>
+<li>结对编程</li>
+</ul>
+<h2 id="第25章-解依赖技术"><a href="#第25章-解依赖技术" class="headerlink" title="第25章 解依赖技术"></a>第25章 解依赖技术</h2><p>参数适配</p>
+<ol>
+<li>创建被用于方法的新接口，接口越简单越好，同时也不应该造成对代码的大范围修改。</li>
+<li>为接口创建产品和测试的实现。</li>
+<li>编写用例将伪对象传给该方法，并适当进行修改以便能顺利测试。</li>
+</ol>
+<p>分解方法对象</p>
+<ol>
+<li>创建一个将要包含目标方法的类。</li>
+<li>创建与原方法相同签名的构造函数，并创建所有参数对应的类成员变量。</li>
+<li>有需要用到原类中的成员变量时，在参数列表中添加一个原类的引用，可能还要暴露一些额外的方法、或是为成员变量增加获取函数。</li>
+<li>在新类中创建一个空的执行方法（如 run() 等），将原方法的操作移至此中，并通过编译。</li>
+<li>在原方法中将工作委托给新类的方法完成。</li>
+<li>有需要的话再使用接口提取解开对原类的依赖。</li>
+</ol>
+<p>定义补全（C&#x2F;C++）</p>
+<ol>
+<li>为测试创建对应函数体的实现</li>
+<li>在链接时根据需要链接至不同的实现代码</li>
+<li>（维护比较麻烦，不推荐使用）</li>
+</ol>
+<p>封装全局引用</p>
+<ol>
+<li>创建类来引用全局变量&#x2F;函数。</li>
+<li>在想要使用伪对象的地方可以利用 引入静态设置方法&#x2F;参数化构造函数&#x2F;参数化方法&#x2F;获取方法替代全局引用。</li>
+</ol>
+<p>暴露静态方法</p>
+<ol>
+<li>将成员变量设置为静态的。</li>
+</ol>
+<p>提取并重写调用</p>
+<ol>
+<li>在当前类创建一个新方法，将对目标方法的调用移动到新方法中，然后调用这个新方法。</li>
+<li>可以解开如全局变量&#x2F;其他类的依赖。</li>
+</ol>
+<p>提取并重写工厂方法</p>
+<ol>
+<li>（构造函数中固定了的初始化工作可能会为测试带来很大麻烦）单独的init和clear方法</li>
+<li>（C++中在构造&#x2F;析构函数中虚函数的调用不会被重新决议，因此C++中该方法不适用，可用替换实例变量和提取并重写获取方法代替。其实把初始化从函数函数里移出来就行了。）</li>
+<li>在构造函数的新建对象移到一个工厂函数中并调用。</li>
+<li>在子类中重写工厂函数。</li>
+</ol>
+<p>提取并重写获取方法</p>
+<ol>
+<li>为想要替换的成员引入获取方法，以便换入伪对象。</li>
+<li>获取方法中使用迟求值的方法： if (!obj) { obj&#x3D;new XXX; } return obj;</li>
+<li>缺点是容易被直接访问变量绕过</li>
+<li>如果引用只有一处的话可用上面的 提取并重写调用。</li>
+</ol>
+<p>实现提取</p>
+<ol>
+<li>（主要用来处理接口提取时面临的命名接口困难的问题）</li>
+<li>（接口提取是新增一个接口，当前类作为一个派生；实现提取是自己架空成一个接口，用新增类代替自己原先的使用，也达到了新增接口的目的）</li>
+<li>如果当前类已经有了基类和派生类：B-&gt;C-&gt;D，转换后可能形如：IB-&gt;B-&gt;C-&gt;D + IB-&gt;IC-&gt;C-&gt;D 这样一个菱形结构。</li>
+</ol>
+<p>接口提取</p>
+<ol>
+<li>根据需要为当前类提取一个接口，并在代码中以对接口的引用来代替对原类的引用。</li>
+<li>注意与非虚函数同名的情况，或者提取时将非虚函数意外转变为虚函数的可能，这会引发运行时多态从而导致调用了错误的函数。</li>
+</ol>
+<p>引入实例委托</p>
+<ol>
+<li>在测试中有碰到会带来麻烦的静态方法时，可在静态类中添加一个非静态方法，并在其中调用静态方法，借此来引入对象接缝。</li>
+</ol>
+<p>引入静态设置方法</p>
+<ol>
+<li>在全局变量或单例的类中引入一个设置方法，以便（调用它们的Get时）能在产品和测试中返回不同实例。</li>
+<li>要求其构造函数至少是保护的，这样才能另外创建出对象后再调用设置方法替换。</li>
+<li>或者采用接口提取对其进行子类化。</li>
+</ol>
+<p>连接替换</p>
+<ol>
+<li>同定义补全。</li>
+</ol>
+<p>参数化构造函数</p>
+<ol>
+<li>复制一份想要参数化的构造函数。</li>
+<li>增加一个用来传递想要替换对象的参数，并修改对应逻辑。</li>
+<li>复制后的方法调用原方法（注意构造函数间不能显示调用！）</li>
+<li>（或者用默认参数）</li>
+</ol>
+<p>朴素化参数</p>
+<ol>
+<li>为了解开依赖，编写一个自由函数来实现想要做的事。</li>
+<li>通过一个中间表示在自由函数和原类方法之间传递信息。</li>
+</ol>
+<p>特性提升</p>
+<ol>
+<li>为了解开依赖将类中的一部分代码转移到抽象基类中去。</li>
+<li>通过编译之后为抽象基类创建一个测试子类。</li>
+</ol>
+<p>依赖下推</p>
+<ol>
+<li>在测试用具中创建目标类并找出依赖。</li>
+<li>将依赖复制到子类，并将目标类中相应方法设为抽象。</li>
+<li>创建并实例化测试子类。</li>
+</ol>
+<p>把函数换成函数指针</p>
+<ol>
+<li>与定义补全、连接替换不同，这个是发生在编译期。</li>
+</ol>
+<p>以获取方法代替全局引用</p>
+<ol>
+<li>和引入静态设置方法不同的是，这里是在调用的类里添加一个获取的方法。</li>
+</ol>
+<p>子类化并重写方法</p>
+<ol>
+<li>（面向对象程序中解依赖的核心技术）</li>
+</ol>
+<p>替换实例变量</p>
+<ol>
+<li>C++不支持构造函数中转发虚函数，故不支持“提取并重写工厂方法”</li>
+<li>改用单独写一个函数来销毁原先创建出的变量并直接换入新的变量。<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">Blendingpen::supersedeParameter</span><span class="params">(Parameter \*newParameter)</span> </span>&#123; <span class="keyword">delete</span> m\_param; m\_param = newParameter; &#125;</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>模板重定义</p>
+<ol>
+<li>在测试类中找出想替换的特性</li>
+<li>将类改为模板，并参数化想替换的变量为模板参数</li>
+<li>给模板换一个名字，如加上Impl</li>
+<li>在模板定义后面加上typdef XXXImpl XXX，以不影响原来的代码</li>
+<li>实例化并测试</li>
+<li>（C++编译器普遍不支持模板的分离编译）</li>
+<li>（不推荐这种改法）</li>
+</ol>
+<p>文本重定义（Ruby，C&#x2F;C++可以使用预处理）</p>
+<ol>
+<li>找出想要替换定义的方法所在的类</li>
+<li>在测试源文件开头添加require引入包含目标类的模块</li>
+<li>在测试源文件开头给每个要替换的方法提供新的定义</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>flandre
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://kerisa.github.io/1760/" title="《修改代码的艺术》读书笔记">https://kerisa.github.io/1760/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Michael-Feathers/" rel="tag"># Michael Feathers</a>
+              <a href="/tags/%E4%BF%AE%E6%94%B9%E4%BB%A3%E7%A0%81%E7%9A%84%E8%89%BA%E6%9C%AF/" rel="tag"># 修改代码的艺术</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/130/" rel="prev" title="软件中出现纯虚函数被调用的错误">
+      <i class="fa fa-chevron-left"></i> 软件中出现纯虚函数被调用的错误
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/138/" rel="next" title="指针类型的类成员变量突然指向无效内存">
+      指针类型的类成员变量突然指向无效内存 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC6%E7%AB%A0-%E4%BF%AE%E6%94%B9%E4%BB%A3%E7%A0%81%E7%9A%84%E6%8A%80%E6%9C%AF"><span class="nav-number">1.</span> <span class="nav-text">第6章 修改代码的技术</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC8%E7%AB%A0-%E6%B7%BB%E5%8A%A0%E7%89%B9%E6%80%A7"><span class="nav-number">2.</span> <span class="nav-text">第8章 添加特性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC9%E7%AB%A0-%E6%97%A0%E6%B3%95%E5%B0%86%E7%B1%BB%E6%94%BE%E5%85%A5%E6%B5%8B%E8%AF%95%E7%94%A8%E5%85%B7%E4%B8%AD"><span class="nav-number">3.</span> <span class="nav-text">第9章 无法将类放入测试用具中</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC11%E7%AB%A0-%E4%BF%AE%E6%94%B9%E6%97%B6%E5%BA%94%E8%AF%A5%E6%B5%8B%E8%AF%95%E5%93%AA%E4%BA%9B%E6%96%B9%E6%B3%95"><span class="nav-number">4.</span> <span class="nav-text">第11章 修改时应该测试哪些方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC13%E7%AB%A0-%E4%BF%AE%E6%94%B9%E6%97%B6%E5%BA%94%E8%AF%A5%E6%80%8E%E6%A0%B7%E5%86%99%E6%B5%8B%E8%AF%95"><span class="nav-number">5.</span> <span class="nav-text">第13章 修改时应该怎样写测试</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC15%E7%AB%A0-%E5%88%B0%E5%A4%84%E9%83%BD%E6%98%AFAPI%E8%B0%83%E7%94%A8"><span class="nav-number">6.</span> <span class="nav-text">第15章 到处都是API调用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC16%E7%AB%A0-%E5%AF%B9%E4%BB%A3%E7%A0%81%E7%9A%84%E7%90%86%E8%A7%A3%E4%B8%8D%E8%B6%B3"><span class="nav-number">7.</span> <span class="nav-text">第16章 对代码的理解不足</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC18%E7%AB%A0-%E6%B5%8B%E8%AF%95%E4%BB%A3%E7%A0%81%E7%A2%8D%E6%89%8B%E7%A2%8D%E8%84%9A"><span class="nav-number">8.</span> <span class="nav-text">第18章 测试代码碍手碍脚</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC19%E7%AB%A0-%E4%BF%AE%E6%94%B9%E9%9D%9E%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E4%BB%A3%E7%A0%81"><span class="nav-number">9.</span> <span class="nav-text">第19章 修改非面向对象代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC21%E7%AB%A0-%E4%BF%AE%E6%94%B9%E5%A4%A7%E9%87%8F%E9%87%8D%E5%A4%8D%E4%BB%A3%E7%A0%81"><span class="nav-number">10.</span> <span class="nav-text">第21章 修改大量重复代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC22%E7%AB%A0-%E8%A6%81%E4%BF%AE%E6%94%B9%E5%B7%A8%E5%9E%8B%E6%96%B9%E6%B3%95%EF%BC%8C%E5%8D%B4%E6%B2%A1%E6%B3%95%E5%86%99%E7%94%A8%E4%BE%8B"><span class="nav-number">11.</span> <span class="nav-text">第22章 要修改巨型方法，却没法写用例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC23%E7%AB%A0-%E9%99%8D%E4%BD%8E%E4%BF%AE%E6%94%B9%E7%9A%84%E9%A3%8E%E9%99%A9"><span class="nav-number">12.</span> <span class="nav-text">第23章 降低修改的风险</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC25%E7%AB%A0-%E8%A7%A3%E4%BE%9D%E8%B5%96%E6%8A%80%E6%9C%AF"><span class="nav-number">13.</span> <span class="nav-text">第25章 解依赖技术</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt=""
+      src="/sys-imgs/42553027_1.png">
+  <p class="site-author-name" itemprop="name"></p>
+  <div class="site-description" itemprop="description">This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">247</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">flandre</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">328k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">4:58</span>
+</div>
+  <div class="powered-by">Powered by love
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

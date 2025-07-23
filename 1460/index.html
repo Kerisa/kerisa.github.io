@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kerisa.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="虽然我是断断续续玩的，但是前后居然推了 4 个月……这还是后面看那些支线过于脱力快速略过的，剧本确实长得不行。  主要故事流程里包含了三个大的系列，分别是很久以前ジャバウォック王（以下简称 j8wk）的故事、约 1 年前 j8wk（此时已化身为桜井たくみ）的故事、然后就是现在的故事。恶心的地方就在于三个故事是并行展开的，这边讲一段，然后又加载其他故事的进度开始推进，然后讲了一点又换一个……看的让人">
+<meta property="og:type" content="article">
+<meta property="og:title" content="魔女こいにっき 感想">
+<meta property="og:url" content="https://kerisa.github.io/1460/index.html">
+<meta property="og:site_name" content="Re: Memory (mirror)">
+<meta property="og:description" content="虽然我是断断续续玩的，但是前后居然推了 4 个月……这还是后面看那些支线过于脱力快速略过的，剧本确实长得不行。  主要故事流程里包含了三个大的系列，分别是很久以前ジャバウォック王（以下简称 j8wk）的故事、约 1 年前 j8wk（此时已化身为桜井たくみ）的故事、然后就是现在的故事。恶心的地方就在于三个故事是并行展开的，这边讲一段，然后又加载其他故事的进度开始推进，然后讲了一点又换一个……看的让人">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2020/11/%E9%AD%94%E5%A5%B3%E3%81%93%E3%81%84%E3%81%AB%E3%81%A3%E3%81%8D-02.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2020/11/%E9%AD%94%E5%A5%B3%E3%81%93%E3%81%84%E3%81%AB%E3%81%A3%E3%81%8D-03.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2020/11/%E9%AD%94%E5%A5%B3%E3%81%93%E3%81%84%E3%81%AB%E3%81%A3%E3%81%8D-11.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2020/11/%E9%AD%94%E5%A5%B3%E3%81%93%E3%81%84%E3%81%AB%E3%81%A3%E3%81%8D-07.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2020/11/%E9%AD%94%E5%A5%B3%E3%81%93%E3%81%84%E3%81%AB%E3%81%A3%E3%81%8D-10.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2020/11/%E9%AD%94%E5%A5%B3%E3%81%93%E3%81%84%E3%81%AB%E3%81%A3%E3%81%8D-12.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2020/11/%E9%AD%94%E5%A5%B3%E3%81%93%E3%81%84%E3%81%AB%E3%81%A3%E3%81%8D-06.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2020/11/%E9%AD%94%E5%A5%B3%E3%81%93%E3%81%84%E3%81%AB%E3%81%A3%E3%81%8D-09.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2020/11/%E9%AD%94%E5%A5%B3%E3%81%93%E3%81%84%E3%81%AB%E3%81%A3%E3%81%8D-01.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2020/11/%E9%AD%94%E5%A5%B3%E3%81%93%E3%81%84%E3%81%AB%E3%81%A3%E3%81%8D-05.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2020/11/%E9%AD%94%E5%A5%B3%E3%81%93%E3%81%84%E3%81%AB%E3%81%A3%E3%81%8D-13.jpg">
+<meta property="article:published_time" content="2020-11-17T15:26:44.000Z">
+<meta property="article:modified_time" content="2025-07-21T17:32:47.118Z">
+<meta property="article:author" content="flandre">
+<meta property="article:tag" content="qoobrand">
+<meta property="article:tag" content="魔女こいにっき">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kerisa.github.io/assets/imgs/2020/11/%E9%AD%94%E5%A5%B3%E3%81%93%E3%81%84%E3%81%AB%E3%81%A3%E3%81%8D-02.jpg">
+
+<link rel="canonical" href="https://flandre-scarlet.moe/blog/1460/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>魔女こいにっき 感想 | Re: Memory (mirror)</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Re: Memory (mirror)</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/1460/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/sys-imgs/42553027_1.png">
+      <meta itemprop="name" content="flandre">
+      <meta itemprop="description" content="This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Re: Memory (mirror)">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          魔女こいにっき 感想
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-11-17 23:26:44" itemprop="dateCreated datePublished" datetime="2020-11-17T23:26:44+08:00">2020-11-17</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-07-22 01:32:47" itemprop="dateModified" datetime="2025-07-22T01:32:47+08:00">2025-07-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/acg/" itemprop="url" rel="index"><span itemprop="name">acg</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/acg/galgame/" itemprop="url" rel="index"><span itemprop="name">galgame</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.9k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>虽然我是断断续续玩的，但是前后居然推了 4 个月……这还是后面看那些支线过于脱力快速略过的，剧本确实长得不行。 <img src="/assets/imgs/2020/11/%E9%AD%94%E5%A5%B3%E3%81%93%E3%81%84%E3%81%AB%E3%81%A3%E3%81%8D-02.jpg"></p>
+<p>主要故事流程里包含了三个大的系列，分别是很久以前ジャバウォック王（以下简称 j8wk）的故事、约 1 年前 j8wk（此时已化身为桜井たくみ）的故事、然后就是现在的故事。恶心的地方就在于三个故事是并行展开的，这边讲一段，然后又加载其他故事的进度开始推进，然后讲了一点又换一个……看的让人比较蒙，而且 1 年前的支线剧情大多都不重要，前面堆了很多支线故事非常消耗耐心，会让人觉得是个雷作。</p>
+<span id="more"></span>
+<p>下面简单总结下。</p>
+<h3 id="现在"><a href="#现在" class="headerlink" title="现在"></a>现在</h3><p>在蔷薇色小镇上学的南乃爱丽丝在时钟塔发现了传言中的魔女恋爱日记，随后带回家开始阅读。后来有只自称巴拉贡（バラゴン）的龙出现，要求爱丽丝以收集&#x2F;阅读日记的方式来拯救世界。其他两个系列的故事都是作为爱丽丝阅读的日记内容来展开。 <img src="/assets/imgs/2020/11/%E9%AD%94%E5%A5%B3%E3%81%93%E3%81%84%E3%81%AB%E3%81%A3%E3%81%8D-03.jpg"></p>
+<h3 id="1-年前"><a href="#1-年前" class="headerlink" title="1 年前"></a>1 年前</h3><p>讲的是一个失忆了的型男桜井たくみ每天到处勾搭学生妹（哦也有老师）然后和她们肉搏的故事，标准人渣。而且还是用的魔法不会留下作案证据（处女膜还在），应该算作精神污染么…… <img src="/assets/imgs/2020/11/%E9%AD%94%E5%A5%B3%E3%81%93%E3%81%84%E3%81%AB%E3%81%A3%E3%81%8D-11.jpg"></p>
+<h3 id="更早-约-60-年前"><a href="#更早-约-60-年前" class="headerlink" title="更早~约 60 年前"></a>更早~约 60 年前</h3><p>j8wk 是沙漠中某个国家的王，因为试图建造永久的乐园失败而被放逐。随后他和王后 Alice 以及一票魔法使随从离开国家在沙漠中跋涉，仍旧试图追寻乐园。途中很多随从放弃，王后也倒下。当 j8wk 也要无法坚持时，魔法使崑崙拿出日记本对他说，使用它的力量然后不断创造出故事吧，只要没有放弃，梦想就不算破灭。带着这样的想法 j8wk 使用日记的力量来到了东方的某地。 <img src="/assets/imgs/2020/11/%E9%AD%94%E5%A5%B3%E3%81%93%E3%81%84%E3%81%AB%E3%81%A3%E3%81%8D-07.jpg"></p>
+<p>j8wk 遇到了当时时计坂家族的领主女儿歌音，但因为 j8wk 自身身为“故事”，无法和歌音结合。歌音嫁给了其他势力强大的领主，不过也在她自己的领地里留下了学校以及时钟塔（蔷薇色小镇的前身）。 <img src="/assets/imgs/2020/11/%E9%AD%94%E5%A5%B3%E3%81%93%E3%81%84%E3%81%AB%E3%81%A3%E3%81%8D-10.jpg"></p>
+<p>j8wk 一直留在这里（然后改名桜井たくみ）。到约 60 年前的时候たくみ在小镇建立了当地最大的美容院辛德瑞拉，本人则在学校上学。他的英俊吸引了无数女学生。自然，たくみ与灰姑娘版的南乃爱丽丝相遇了，然后展开了一段灰姑娘的故事。</p>
+<p>灰姑娘爱丽丝把たくみ泡到手后听他讲了个故事，大意就是在追爱丽丝之前たくみ追过她的妈妈，而她的爸妈是一对要好的青梅竹马。たくみ为了追爱丽丝老妈才创办的美容院辛德瑞拉，然而依然没有得到她的青睐（原来这就是你盯上人家女儿的理由）。最后たくみ放弃并决心守望相爱的两人。而如今追到了爱丽丝的たくみ感到心满意足，便想将他的故事做个完结，与爱丽丝永远厮守。 <img src="/assets/imgs/2020/11/%E9%AD%94%E5%A5%B3%E3%81%93%E3%81%84%E3%81%AB%E3%81%A3%E3%81%8D-12.jpg"></p>
+<p>然而たくみ是不老不死之身，纵使爱丽丝一开始就知道他的体质并且也接受了，但是生活仍然在不停地侵蚀着他们。受钱所困的生活，日渐老去的爱丽丝，宠物狗库也离去，重新领养了长相相似的小狗，爱丽丝的唠叨也多了起来，但他们依然生活在一起。</p>
+<p>或许是由于学园流行复古风，重用了 60 年前学生制服款式的原因，一天爱丽丝的老年痴呆症发作了。她的记忆回到了学生时代，想到学校上学，放学后要去打工……甚至还将两位陌生的女学生当作自己昔日的好友。たくみ想恢复爱丽丝的记忆却无能为力，只好请求学校和打工的快餐店迁就，配合爱丽丝让她重新过上学生生活。</p>
+<p>平稳的日子持续了一阵。但是有一天爱丽丝却突然将たくみ认成是想要吃掉她的龙。たくみ心灰意冷，找到崑崙想要消除他自己的记忆。随后诞生出了失忆版たくみ，开始了推土机生活。爱丽丝则依旧继续着学园生活（也就是玩家在游戏中最初见到的爱丽丝）</p>
+<p>上面就是三个系列的概要了。中间省略了一些东西。比如零的故事：花音才是时计坂家族族长，而且每一代都有一位 Kanon 作为歌音的附身，零也是由魔法创造出来的幻想。灰姑娘爱丽丝故事里在和爱丽丝相遇前，たくみ还曾和辛德瑞拉的一位员工相马有栖（ありす）相爱过，但是相马有栖无法接受他不老不死的事实而差点精分，たくみ随后便从她的生活中消失。</p>
+<p>接下去的故事就串起来了。 在失忆たくみ故事的最后，他为了救下零而用尽力量陷入沉睡。たくみ在一年后的“现在”醒来，回忆起了除王后 Alice 外的所有过去。但是因为崑崙篡改了他的记忆，所以他将崑崙当成南乃爱丽丝了。然后又去和崑崙过了一段没羞没臊的生活。<img src="/assets/imgs/2020/11/%E9%AD%94%E5%A5%B3%E3%81%93%E3%81%84%E3%81%AB%E3%81%A3%E3%81%8D-06.jpg"></p>
+<p>然后有一天崑崙玩腻了后把真相告诉了たくみ，失忆たくみ终于进化为完全体たくみ了！然后他变身为巴拉贡，以拯救世界为由让南乃爱丽丝去读日记，从而使她恢复记忆。 南乃爱丽丝读完了所有的日记后终于回忆起了过去的一切，决心与たくみ走向故事的终焉，两人在城堡中跳着舞，宛如 60 年前的初遇一般。<img src="/assets/imgs/2020/11/%E9%AD%94%E5%A5%B3%E3%81%93%E3%81%84%E3%81%AB%E3%81%A3%E3%81%8D-09.jpg"></p>
+<p>END 1 就到到此结束了，然后标题画面会变成五位女主在绿洲的画面。在此画面稍候片刻就能进入 Alice 篇。</p>
+<p><img src="/assets/imgs/2020/11/%E9%AD%94%E5%A5%B3%E3%81%93%E3%81%84%E3%81%AB%E3%81%A3%E3%81%8D-01.jpg"></p>
+<p>j8wk 回到小镇发现没有人，因为作为故事舞台的小镇依然存在，这就说明里头还有人留下，所以 j8wk 要让故事彻底终结。然后他和零一起调查女主之一的周防聖的时候发现了她过去被涂抹过的名字有朱（Arisu），进而觉察到还有操纵这些的幕后者。而她就是王后 Alice。之后从标题里选日记重新快进一遍剧情，一共会有四个线索出现。</p>
+<p>王后 Alice 在过去被 j8wk 所抛弃。j8wk 认为不存在永恒不变的事物，所以他才会从故事中不断追求可喜可贺的瞬间。而王后 Alice 追寻的恰恰是永恒之物。因此 j8wk 抛下 Alice，飒爽地走向明天。</p>
+<p>我爱的人不爱我，怎么办呢。于是王后找崑崙做出了日记本，然后把 j8wk 关了进去。这样 j8wk 一次次地恋爱，作为阅读者的王后 Alice 便一次次地品尝着恋爱的感觉，偶尔还安排姓名同音的“alice”到故事里强化代入感。所以当 j8wk 想和南乃爱丽丝结束故事时是王后 Alice 出手作的梗，不然不就没好戏看了。</p>
+<p>最后 j8wk 找到躲在时钟塔里的王后揭露了真相，接着王后决定把 j8wk 塞进时钟塔齿轮里，两人一起化为人肉齿轮，由王后讲述着永恒的故事，这样王后就能永远和她心爱的人生活在一起了。在被齿轮碾碎前，j8wk 这样说到：</p>
+<p>如今，我已无法再爱上你。作为替代，就让我深爱这刺骨的痛楚，这辗转齿轮的悲鸣吧。所以，讲述吧，即便那是不切实际之事，即便那是无法实现之事，那又有什么关系呢？虽然略显笨拙，你还是开始讲述了。并非只由他人口中述说，而是由你自己开始讲述了。尽情地述说吧，向着世界，尽情祈愿就好，不久故事将化为龙，发出响彻天际的咆哮。</p>
+<p><img src="/assets/imgs/2020/11/%E9%AD%94%E5%A5%B3%E3%81%93%E3%81%84%E3%81%AB%E3%81%A3%E3%81%8D-05.jpg"></p>
+<p>PC 版的剧情就到此为止了。PS：psv 版本会有王后 Alice 的追加故事，这个我就没有玩了。  </p>
+<p>在对《魔女恋爱日记》主题的解释中，我在网上看到一个很有意思的<a target="_blank" rel="noopener" href="http://no1234shame567.hatenablog.com/entry/2017/02/03/211350">观点</a>，说这其实是对黄油玩家的嘲讽。最大的证据是在游戏发售一个月后在<a target="_blank" rel="noopener" href="http://qoo.amusecraft.com/01_mazyokoi/index.html">游戏官网</a>上公布的一段录音，里面是爱丽丝幽怨的控诉。[audio ogg&#x3D;”<a target="_blank" rel="noopener" href="https://flandre-scarlet.moe/blog/wp-content/uploads/2020/11/%E9%AD%94%E5%A5%B3%E3%81%93%E3%81%84%E3%81%AB%E3%81%A3%E3%81%8D-countmonth.ogg%22/]/[/audio/]%E5%A4%A7%E8%87%B4%E6%84%8F%E6%80%9D%E5%A6%82%E4%B8%8B%EF%BC%9A">https://flandre-scarlet.moe/blog/wp-content/uploads/2020/11/魔女こいにっき-countmonth.ogg&quot;\]\[/audio\]大致意思如下：</a></p>
+<p>事到如今还来找我有啥事呀？这一个月来你都干了些什么我全知道。尽情玩弄我们一番后下个月又和其他游戏的女主角们醉生梦死了是吧，我都懂。不过反正恋爱就是这样，一看到别的漂亮女孩内心就荡漾了啊，只有遗留的故事仍在诉说着过去。我就要在这里一遍遍读和你的故事。所以你请回吧，你（和故事）不一样，你是多余的。ヾ(￣▽￣)Bye<del>Bye</del></p>
+<p>录音讲得非常直白，就是说黄油玩家到处拈花惹草，刚这边海誓山盟呢又忙着赶下个片场了。然后还有一处就是 op 动画里出现的标语（前三句在开头，剩下的在末尾出现）：</p>
+<p>あなたを好きになりました（对你一见钟情）<br>日記を買いました（买了日记）<br>物語がはじまりました（故事开始了）<br>ひと目惚れより永遠を（比起一见钟情（我）更想要永恒）<br>どうか日記に残せたら（请留在日记里）<br>あなたが明日へ去らぬよう（为了能让你一直留着）<br>私に魔法が使えたら（我会施展魔法）</p>
+<p>为什么要买日记呢？看上去很唐突，但是影射成买黄油听上去就挺合理的：对新作女主心水了——去买游戏——玩她个天昏地暗。然后（女主角）为了留住玩家的心而施展魔法。感觉这已经是在疯狂暗示了。而且不仅是这里，包括本篇里也在不停地说“一见钟情”，说永恒的爱是不存在的，たくみ对南乃爱丽丝外的女主角一个个都海誓山盟过，然后他马上就跑路了，留下的只有形单影只的女主角和她自己的回忆。</p>
+<p>现实中那些满口“我老婆”的 j8wk 们完全可以对号入座了。他们就像是检阅战利品一般的看着自己口中的老婆们，接着用同样的态度对待下一位女孩，几乎没有能坚持只对一个女主角喊老婆的，不行啊(ˉ▽￣～)。所以说他们并没有爱上任何一个女孩，可能只向往着日记中那个面对女孩无往不利的自己。</p>
+<p>同样是“对黄油玩家的讽刺”这个思路，我觉得也可以反一下。刚刚说女主角们对玩家的控诉，但是这个“女主角”是不是可以换成黄油玩家呢？得不到爱的玩家们就像王后 Alice 一次次带入其他爱丽丝一样，不停地翻着日记（黄油）把自己幻想成和女主角恋爱的男主，兴奋之余又捶胸顿足道：我爱的人不爱我！！毕竟真正的男主角泡妹子治心理阴影还是玩命都不在话下，和开挂主角相比玩家们又要做到什么才能让女主角们倾心呢。我觉得新岛夕是在提醒玩家莫忘初心，不要忘记寄己没人爱的事实(╹ڡ╹ )</p>
+<p>游戏里南乃爱丽丝老去而 j8wk 永葆青春，现实中却相反，女主角们永远不会变化只有玩家逐渐衰老。似乎被被抛下的是玩家，但是如果说玩家同时也在成长呢？是不是又会觉得面对衰老也会不那么可怕了。j8wk 不断在变化中寻求短暂的美好，王后 Alice 则停留在原地；南乃爱丽丝虽然老去，但是却会跟上他的脚步，一同迎接变化。也许没有成长的永恒才是最寂寞的吧。</p>
+<p><img src="/assets/imgs/2020/11/%E9%AD%94%E5%A5%B3%E3%81%93%E3%81%84%E3%81%AB%E3%81%A3%E3%81%8D-13.jpg"></p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>flandre
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://kerisa.github.io/1460/" title="魔女こいにっき 感想">https://kerisa.github.io/1460/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/qoobrand/" rel="tag"># qoobrand</a>
+              <a href="/tags/%E9%AD%94%E5%A5%B3%E3%81%93%E3%81%84%E3%81%AB%E3%81%A3%E3%81%8D/" rel="tag"># 魔女こいにっき</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/1458/" rel="prev" title="Untitled Post - 1">
+      <i class="fa fa-chevron-left"></i> Untitled Post - 1
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/1554/" rel="next" title="Appverif 启动后闪退">
+      Appverif 启动后闪退 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8E%B0%E5%9C%A8"><span class="nav-number">1.</span> <span class="nav-text">现在</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%B9%B4%E5%89%8D"><span class="nav-number">2.</span> <span class="nav-text">1 年前</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9B%B4%E6%97%A9-%E7%BA%A6-60-%E5%B9%B4%E5%89%8D"><span class="nav-number">3.</span> <span class="nav-text">更早~约 60 年前</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt=""
+      src="/sys-imgs/42553027_1.png">
+  <p class="site-author-name" itemprop="name"></p>
+  <div class="site-description" itemprop="description">This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">247</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">flandre</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">328k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">4:58</span>
+</div>
+  <div class="powered-by">Powered by love
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

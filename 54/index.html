@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kerisa.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="部分XAudio2的方法中含有OperationSet参数，这个参数能决定是否延迟执行这些方法（仅添加一个挂起的操作）。然后在某个特定的时间通过调用XAudio2::CommitChanges，并将它的OperationSet参数指定为目标操作的ID，这样就能让XAudio2组件真正执行对应的操作。这个ID没有特殊要求，只要互不相同即可，因此可以用一个全局计数器来作为它们的ID，每次使用后增加计数">
+<meta property="og:type" content="article">
+<meta property="og:title" content="XAudio2 Operation Sets 操作集">
+<meta property="og:url" content="https://kerisa.github.io/54/index.html">
+<meta property="og:site_name" content="Re: Memory (mirror)">
+<meta property="og:description" content="部分XAudio2的方法中含有OperationSet参数，这个参数能决定是否延迟执行这些方法（仅添加一个挂起的操作）。然后在某个特定的时间通过调用XAudio2::CommitChanges，并将它的OperationSet参数指定为目标操作的ID，这样就能让XAudio2组件真正执行对应的操作。这个ID没有特殊要求，只要互不相同即可，因此可以用一个全局计数器来作为它们的ID，每次使用后增加计数">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2017-01-01T07:56:02.000Z">
+<meta property="article:modified_time" content="2025-07-21T18:42:00.568Z">
+<meta property="article:author" content="flandre">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://flandre-scarlet.moe/blog/54/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>XAudio2 Operation Sets 操作集 | Re: Memory (mirror)</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Re: Memory (mirror)</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/54/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/sys-imgs/42553027_1.png">
+      <meta itemprop="name" content="flandre">
+      <meta itemprop="description" content="This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Re: Memory (mirror)">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          XAudio2 Operation Sets 操作集
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-01-01 15:56:02" itemprop="dateCreated datePublished" datetime="2017-01-01T15:56:02+08:00">2017-01-01</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-07-22 02:42:00" itemprop="dateModified" datetime="2025-07-22T02:42:00+08:00">2025-07-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/programs/" itemprop="url" rel="index"><span itemprop="name">programs</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/programs/DirectX/" itemprop="url" rel="index"><span itemprop="name">DirectX</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.6k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>1 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>部分XAudio2的方法中含有OperationSet参数，这个参数能决定是否延迟执行这些方法（仅添加一个挂起的操作）。然后在某个特定的时间通过调用<a target="_blank" rel="noopener" href="https://msdn.microsoft.com/zh-cn/library/windows/desktop/microsoft.directx_sdk.ixaudio2.ixaudio2.commitchanges(v=vs.85).aspx">XAudio2::CommitChanges</a>，并将它的OperationSet参数指定为目标操作的ID，这样就能让XAudio2组件真正执行对应的操作。这个ID没有特殊要求，只要互不相同即可，因此可以用一个全局计数器来作为它们的ID，每次使用后增加计数即可。这样一来，不同代码就可以互不冲突地提交修改（全局计数器同时也可用于区分提交修改的时间先后）。</p>
+<p>同时，以原子方式提交的多个操作被确保是以采样率匹配方式混音的（一个混合音轨方面的术语，防止混音时因采样率的不准确而导致播放时长的变化，详见<a target="_blank" rel="noopener" href="http://www.emusician.com/how-to/1334/whaddya-mean-sample-accurate/33293">这里</a>）。比如，声音的播放将会是同步的。另一方面，如果用XAUDIO2_COMMIT_NOW（值为0）作为OperationSet参数的值，改动将立即生效。如果以XAUDIO2_COMMIT_ALL（值也为0）参数调用CommitChanges，则所有挂起的操作都将生效，这时OperationSet的ID将被忽略。</p>
+<span id="more"></span>
+<p>例如，分别调用 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">pSourceVoice1-&gt;<span class="built_in">Start</span>(<span class="number">0</span>, <span class="number">1</span>); pSourceVoice2-&gt;<span class="built_in">Start</span>(<span class="number">0</span>, <span class="number">2</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 这时声音还未播放</span></span><br><span class="line"></span><br><span class="line">pXaudio2-&gt;<span class="built_in">CommitChanges</span>(XAUDIO2\_COMMIT\_ALL); <span class="comment">// 声音1、2同时播放 //pXaudio2-&gt;CommitChanges(1); // 仅播放声音1 //pXaudio2-&gt;CommitChanges(2); // 仅播放声音2</span></span><br><span class="line"></span><br><span class="line">pSourceVoice3-&gt;<span class="built_in">Start</span>(); <span class="comment">// 声音3将立即播放(Start方法的两个参数默认值均为0)</span></span><br></pre></td></tr></table></figure> 在XAudio2的回调函数中用XAUDIO2_COMMIT_NOW调用一些方法时，操作会立即生效，而其他用XAUDIO2_COMMIT_NOW调用的方法将在方法返回后的下一个处理时机才会生效，或者等到用相同的OperationSet值调用CommitCahnges时生效。因此调用的生效顺序并不总是与调用顺序相等。</p>
+<p>所有挂起的操作在<a target="_blank" rel="noopener" href="https://msdn.microsoft.com/zh-cn/library/windows/desktop/microsoft.directx_sdk.ixaudio2.ixaudio2.stopengine(v=vs.85).aspx">IXAudio2::StopEngine</a>被调用时将以原子方式提交。任何在引擎停止时调用的方法都会无视OperationSet参数而立即生效（以同步模式）。当你重新启动引擎时，XAudio2会恢复异步模式。 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 但我在测试时发现在调用StopEngine后 // 以挂起方式调用的方法并没有立即生效，不知是不是我的理解有错，代码如下 hr = pSourceVoice-&gt;Start(0, 0); Sleep(4000); pXaudio2-&gt;StopEngine(); wprintf(L&quot;Engine Stopped!\\n&quot;); Sleep(4000); hr = pSourceVoice-&gt;SetVolume(0.1f, 1); //hr = pSourceVoice-&gt;SetVolume(0.1f, 0); // 如果以XAUDIO2\_COMMIT\_NOW调用则重启引擎时已经生效 Sleep(4000); pXaudio2-&gt;StartEngine(); wprintf(L&quot;Engine Restart\\n&quot;); Sleep(4000); pXaudio2-&gt;CommitChanges(1); // 修改音量的操作直到此时才生效，而不是在重启引擎时已经生效</span></span><br></pre></td></tr></table></figure></p>
+<p>以下为操作集的几个简单场景下的有效应用： 1、同时播放多个声音。 2、同时提交声音Buffer（SubmitSourceBuffer），设置声音参数，播放声音。 3、对音频进行大规模的修改参数，如把所有source voices连接到一个新的submix voice上。</p>
+<p>更多：<a target="_blank" rel="noopener" href="https://msdn.microsoft.com/zh-cn/library/windows/desktop/ee415807(v=vs.85).aspx">XAudio2 Operation Set</a></p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>flandre
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://kerisa.github.io/54/" title="XAudio2 Operation Sets 操作集">https://kerisa.github.io/54/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/19/" rel="prev" title="虚拟列表的使用">
+      <i class="fa fa-chevron-left"></i> 虚拟列表的使用
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/74/" rel="next" title="jpeglib的使用(使用VS2010编译)">
+      jpeglib的使用(使用VS2010编译) <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt=""
+      src="/sys-imgs/42553027_1.png">
+  <p class="site-author-name" itemprop="name"></p>
+  <div class="site-description" itemprop="description">This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">247</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">flandre</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">328k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">4:58</span>
+</div>
+  <div class="powered-by">Powered by love
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

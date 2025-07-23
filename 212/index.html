@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kerisa.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="最近在办公室里突然有蠕虫传播开了，因为办公室内网里都是没装杀软的，然后发发邮件就感染一片了（笑），而且只要有一台计算机没有清除就依然会传遍局域网。在电脑上找了一下，发现了名称为 DesktopLayer.exe 的病毒文件，于是把它保留了一份，打算研究研究。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Ramnit 蠕虫分析">
+<meta property="og:url" content="https://kerisa.github.io/212/index.html">
+<meta property="og:site_name" content="Re: Memory (mirror)">
+<meta property="og:description" content="最近在办公室里突然有蠕虫传播开了，因为办公室内网里都是没装杀软的，然后发发邮件就感染一片了（笑），而且只要有一台计算机没有清除就依然会传遍局域网。在电脑上找了一下，发现了名称为 DesktopLayer.exe 的病毒文件，于是把它保留了一份，打算研究研究。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2017/10/Ramnit-1.png">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2017/10/Ramnit-2.png">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2017/10/Ramnit-3.png">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2017/10/Ramnit-4.png">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2017/10/Ramnit-5.png">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2017/10/Ramnit-6.png">
+<meta property="article:published_time" content="2017-10-04T06:58:47.000Z">
+<meta property="article:modified_time" content="2025-07-21T17:32:47.041Z">
+<meta property="article:author" content="flandre">
+<meta property="article:tag" content="DesktopLayer">
+<meta property="article:tag" content="Ramnit">
+<meta property="article:tag" content="病毒">
+<meta property="article:tag" content="蠕虫">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kerisa.github.io/assets/imgs/2017/10/Ramnit-1.png">
+
+<link rel="canonical" href="https://flandre-scarlet.moe/blog/212/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Ramnit 蠕虫分析 | Re: Memory (mirror)</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Re: Memory (mirror)</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/212/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/sys-imgs/42553027_1.png">
+      <meta itemprop="name" content="flandre">
+      <meta itemprop="description" content="This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Re: Memory (mirror)">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Ramnit 蠕虫分析
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-10-04 14:58:47" itemprop="dateCreated datePublished" datetime="2017-10-04T14:58:47+08:00">2017-10-04</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-07-22 01:32:47" itemprop="dateModified" datetime="2025-07-22T01:32:47+08:00">2025-07-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/programs/" itemprop="url" rel="index"><span itemprop="name">programs</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/programs/%E9%80%86%E5%90%91/" itemprop="url" rel="index"><span itemprop="name">逆向</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近在办公室里突然有蠕虫传播开了，因为办公室内网里都是没装杀软的，然后发发邮件就感染一片了（笑），而且只要有一台计算机没有清除就依然会传遍局域网。在电脑上找了一下，发现了名称为 DesktopLayer.exe 的病毒文件，于是把它保留了一份，打算研究研究。</p>
+<span id="more"></span>
+<p>样本： 文件: DesktopLayer.exe 大小: 56320 字节 文件版本: 106.42.7 修改时间: 2017年8月28日, 19:04:24 MD5: FF5E1F27193CE51EEC318714EF038BEF SHA1: B4FA74A6F4DAB3A7BA702B6C8C129F889DB32CA6 CRC32: 40C57347</p>
+<h1 id="exe-分析"><a href="#exe-分析" class="headerlink" title="exe 分析"></a>exe 分析</h1><ol>
+<li>首先病毒是用UPX加了壳，脱了壳后看OEP像是用汇编写的。<br><img src="/assets/imgs/2017/10/Ramnit-1.png" alt="入口">3.  运行后病毒首先通过查询注册表(HKCR\http\shell\open\command)的方式获得默认浏览器的路径，并确认文件的存在，如果不存在还会在备用路径(%ProgramFiles%\Internet Explorer\iexplore.exe 和 SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\IEXPLORE.EXE)中查找。</li>
+<li>创建命名互斥体防止重入(这里的互斥体随后又马上被关闭)。</li>
+<li>检查当前运行的 exe 文件名是否为 DesktopLayer.exe，不是的话则会遍历以下7个目录：<ul>
+<li>%ProgramFiles%</li>
+<li>%CommonProgramFiles%</li>
+<li>%HOMEDRIVE%%HOMEPATH%</li>
+<li>%APPDATA%</li>
+<li>系统目录</li>
+<li>Windows目录</li>
+<li>临时目录如果有一个能写入文件且没有对应文件存在的话则复制自身到该目录下的 Microsoft 目录并重命名为 DesktopLayer.exe，然后停止尝试。随后运行刚复制的病毒。成功则结束程序，后续操作交由刚运行的病毒进行处理。</li>
+</ul>
+</li>
+<li>(新运行的病毒)通过 GetProcAddress 获取所需的 ntdll.dll API 地址。</li>
+<li>对 ntdll.dll 中的 ZwWriteVirtualMemory 进行 Hook。</li>
+<li>运行默认浏览器并退出。</li>
+</ol>
+<p>乍一看 hook 自身的 ntdll 函数并没有什么作用，但关键之处在于使用 CreateProcess 创建进程时会调用 ZwWriteVirtualMemory 对新进程写入数据，这个时候 hook 函数就会起作用了，避免了远线程的创建。</p>
+<h1 id="接下来看-hook-函数。"><a href="#接下来看-hook-函数。" class="headerlink" title="接下来看 hook 函数。"></a>接下来看 hook 函数。</h1><ol>
+<li>首先转发原始操作。<img src="/assets/imgs/2017/10/Ramnit-2.png" alt="hook code"></li>
+<li>随后从自身释放出一个dll，并加载到在病毒进程中。</li>
+<li>将加载后的Dll全部写入到浏览器进程中，这里两个进程中加载的地址是相同的，均为0x20010000，这么做避免了dll的重定位。</li>
+<li>继续写入初始化导入表的代码。</li>
+<li>写入修改内存页属性的代码。</li>
+<li>最后向程序入口写入跳转代码。</li>
+</ol>
+<p>这样浏览器进程启动之后便会跳转至注入代码执行。</p>
+<h1 id="注入代码"><a href="#注入代码" class="headerlink" title="注入代码"></a>注入代码</h1><ol>
+<li><p>依照注入顺序，代码从入口跳转过后依次进行导入表的初始化，内存区段的属性修改，随后调用DllMain <img src="/assets/imgs/2017/10/Ramnit-3.png" alt="入口跳转"><br><img src="/assets/imgs/2017/10/Ramnit-4.png" alt="DllMain"></p>
+</li>
+<li><p>DllMain中首先创建于 exe 中相同的命名互斥量。</p>
+</li>
+<li><p>初始化套接字，收集了一些设备信息，也会在浏览器程序所在的目录下生成文件 dmlconf.dat 用于记录一些数据，向网站 fget-career.com 发送数据。</p>
+</li>
+<li><p>创建7个完成核心功能的线程：</p>
+</li>
+<li><p>每秒检查注册表 HKLM\Software\Microsoft\Windows NT\CurrentVersion\Winlogon 下的 UserInit，确认病毒是否在其中，达到开机自启动的目的，不在常见的 Run 中不容易发现。</p>
+</li>
+<li><p>每(60+10)秒向 google.com:80, bing.com:80, yahoo.com:80 发送 http 请求，还记录了连接成功的间隔时间。</p>
+</li>
+<li><p>每分钟向文件 dmlconf.dat 写入几个全局变量中保存的值。</p>
+</li>
+<li><p>如果步骤3中的网络相关操作成功的话则创建一个每分钟向 fget-career.com 发包并接收回包的线程。</p>
+</li>
+<li><p>也是网络通讯相关线程。</p>
+</li>
+<li><p>每30秒检查一下磁盘，并对硬盘类型的磁盘进行遍历，分别处理两种文件：</p>
+<ol>
+<li>exe 和 dll: 如果已存在 .rmnet 节则说明已经感染，跳过；反之找到合适的空间写入一个 .rmnet 节。如果导入表中存在 LoadLibraryA 和 GetProcessAddress 这两个函数，则会对其进行重定位，以便注入代码使用。</li>
+<li>html 和 htm: 检查文件尾是否为 “</SCRIPT>“，是则说明已经感染，跳过；反之则添加一段脚本。 <img src="/assets/imgs/2017/10/Ramnit-5.png" alt="html插入脚本"></li>
+</ol>
+</li>
+<li><p>每10秒检查磁盘，若有可移动磁盘，通过 autorun.inf 的头 3 字节是否为 “RmN” 判断是否感染。若未感染，则在可移动磁盘根目录下创建 RECYCLER 目录，里面塞了随机命名的病毒 exe; 添加 autorun.inf, 使其自动运行病毒 exe <img src="/assets/imgs/2017/10/Ramnit-6.png" alt="autorun.inf"></p>
+</li>
+</ol>
+<p>至此该蠕虫基本分析完毕。<br>该病毒通过注入浏览器进程来伪装自己，因为现在的浏览器基本都是多进程的，不容易被发现。不过运行被感染的程序后会在同一目录下释放出一个带有 Srv 后缀的同名 exe, 这个操作还是比较醒目的。而且邮件客户端会因为 html 被感染而显示乱码，不然也不容易被发现中了毒。</p>
+<p>杀毒的话主要还是文件修复，可执行文件需要删除 .rmnet 段并修复入口点，网页文件则删除最后一段 <SCRIPT> 脚本内容。</p>
+<p>----------------------------------------------</p>
+<p>相关文件:<br><a target="_blank" rel="noopener" href="https://flandre-scarlet.moe/blog/wp-content/uploads/2017/10/DesktopLayer.7z">DesktopLayer病毒样本</a>，解压密码 123456</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>flandre
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://kerisa.github.io/212/" title="Ramnit 蠕虫分析">https://kerisa.github.io/212/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/DesktopLayer/" rel="tag"># DesktopLayer</a>
+              <a href="/tags/Ramnit/" rel="tag"># Ramnit</a>
+              <a href="/tags/%E7%97%85%E6%AF%92/" rel="tag"># 病毒</a>
+              <a href="/tags/%E8%A0%95%E8%99%AB/" rel="tag"># 蠕虫</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/197/" rel="prev" title="Duilib无法连续创建两个模态对话框">
+      <i class="fa fa-chevron-left"></i> Duilib无法连续创建两个模态对话框
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/275/" rel="next" title="Apache 虚拟主机配置 SSL">
+      Apache 虚拟主机配置 SSL <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#exe-%E5%88%86%E6%9E%90"><span class="nav-number">1.</span> <span class="nav-text">exe 分析</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%8E%A5%E4%B8%8B%E6%9D%A5%E7%9C%8B-hook-%E5%87%BD%E6%95%B0%E3%80%82"><span class="nav-number">2.</span> <span class="nav-text">接下来看 hook 函数。</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%B3%A8%E5%85%A5%E4%BB%A3%E7%A0%81"><span class="nav-number">3.</span> <span class="nav-text">注入代码</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt=""
+      src="/sys-imgs/42553027_1.png">
+  <p class="site-author-name" itemprop="name"></p>
+  <div class="site-description" itemprop="description">This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">247</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">flandre</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">328k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">4:58</span>
+</div>
+  <div class="powered-by">Powered by love
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

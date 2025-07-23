@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kerisa.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="最近测试时发现代码中一处关于 std::function 函数对象的问题。在卸载某个 Dll（记为 A）的时候会触发该模块中一个单例对象的析构，在它析构内部的 std::function 成员时产生了内存访问异常（0xc0000005）。而触发这个异常的 std::function 其实是复制于另一个 Dll（记为 B），卸载 Dll A 时，Dll B 已经卸载掉了。 此时调用它关联的函数会抛异">
+<meta property="og:type" content="article">
+<meta property="og:title" content="卸载 Dll 过程中隐藏的异常">
+<meta property="og:url" content="https://kerisa.github.io/1562/index.html">
+<meta property="og:site_name" content="Re: Memory (mirror)">
+<meta property="og:description" content="最近测试时发现代码中一处关于 std::function 函数对象的问题。在卸载某个 Dll（记为 A）的时候会触发该模块中一个单例对象的析构，在它析构内部的 std::function 成员时产生了内存访问异常（0xc0000005）。而触发这个异常的 std::function 其实是复制于另一个 Dll（记为 B），卸载 Dll A 时，Dll B 已经卸载掉了。 此时调用它关联的函数会抛异">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-04-02T17:09:20.000Z">
+<meta property="article:modified_time" content="2025-07-21T18:42:00.687Z">
+<meta property="article:author" content="flandre">
+<meta property="article:tag" content="KiDispatchException">
+<meta property="article:tag" content="SEH">
+<meta property="article:tag" content="SIGILL">
+<meta property="article:tag" content="异常分发">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://flandre-scarlet.moe/blog/1562/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>卸载 Dll 过程中隐藏的异常 | Re: Memory (mirror)</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Re: Memory (mirror)</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/1562/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/sys-imgs/42553027_1.png">
+      <meta itemprop="name" content="flandre">
+      <meta itemprop="description" content="This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Re: Memory (mirror)">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          卸载 Dll 过程中隐藏的异常
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-04-03 01:09:20" itemprop="dateCreated datePublished" datetime="2021-04-03T01:09:20+08:00">2021-04-03</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-07-22 02:42:00" itemprop="dateModified" datetime="2025-07-22T02:42:00+08:00">2025-07-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/programs/" itemprop="url" rel="index"><span itemprop="name">programs</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/programs/Debug/" itemprop="url" rel="index"><span itemprop="name">Debug</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>6.4k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>6 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近测试时发现代码中一处关于 std::function 函数对象的问题。在卸载某个 Dll（记为 A）的时候会触发该模块中一个单例对象的析构，在它析构内部的 std::function 成员时产生了内存访问异常（0xc0000005）。而触发这个异常的 std::function 其实是复制于另一个 Dll（记为 B），卸载 Dll A 时，Dll B 已经卸载掉了。</p>
+<p>此时调用它关联的函数会抛异常容易理解，但这时并没有进行调用操作。原因在于函数对象析构时会调用关联的 _Delete_this 方法释放资源，而这个函数一般定义在 std 的 _Func_impl &#x2F; _Func_impl_no_alloc 模板类中。所以当实例化 function 时对应删除函数的代码也是属于当前模块里的（也就是 Dll B）。现在 Dll B 已经卸载，那么只要有任何触发相关代码执行的操作都会引发异常。</p>
+<span id="more"></span>
+<p>所以自己的屁股还是要自己擦干净，清理工作要记得做好。</p>
+<h2 id="未能觉察的异常"><a href="#未能觉察的异常" class="headerlink" title="未能觉察的异常"></a>未能觉察的异常</h2><p>看提交记录这个异常也存在有一段时间了，但还是在挂着调试器下时才被发现。软件中实际上包含了基于 signal 的异常捕获方式，显然这个场景下 SIGILL 的 handler 没有被触发、同时全局的 UnhandledExceptionFilter 也没有被调用，所以使用时注意不到这个异常。</p>
+<p>在代码中 signal 的捕获早在每个线程创建后就会注册完毕，而且显然也是正常在发挥作用的。此外最上层的 UnhandledExceptionFilter 也没有得到处理机会，这样考虑的话应该是系统在加载&#x2F;卸载动态库时附加了额外的异常处理器并处理掉了异常，所以我们自己的异常报告模块才感知不到有异常发生。</p>
+<h2 id="异常分发"><a href="#异常分发" class="headerlink" title="异常分发"></a>异常分发</h2><p>异常分发的核心函数是 <strong>KiDispatchException</strong>，它会首先尝试将异常发送给调试器。如果发送失败或者调试器没有处理，再调用异常处理块处理异常。用户态下异常处理由 ntdll 中的 <strong>KiUserExceptionDispatcher</strong> 函数进行。KiUserExceptionDispatcher 就会从 fs:[0] 开始遍历异常过滤器，直到有处理器处理异常或是执行 UnhandledExceptionFilter 函数。通过在代码里添加 __try &#x2F; __except 就可以添加自定义的 seh 异常处理器。</p>
+<p>因为异常注册信息存放在每个线程 TIB 的第一个字段 ExceptionList 中，而 x86 系统中的段寄存器 fs 总是指向线程的 TIB 结构。也就是说 fs:[0] 总是指向异常处理链表的表头，通过它就可以查看到线程上所有的异常处理器。在 windbg 中可以使用 <strong>!exchain</strong> 命令输出当前线程的异常处理链。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> BOOL \_\_cdecl dllmain\_dispatch( HINSTANCE <span class="type">const</span> instance, DWORD <span class="type">const</span> reason, LPVOID <span class="type">const</span> reserved ) &#123; \_\_try &#123; <span class="comment">// process thread attach 处理代码</span></span><br><span class="line"></span><br><span class="line">result = <span class="built_in">DllMain</span>(instance, reason, reserved);</span><br><span class="line"></span><br><span class="line"><span class="comment">// process attach failed 处理代码</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// process thread detach 处理代码 &#125; \_\_except(\_\_scrt\_dllmain\_exception\_filter( instance, reason, reserved, dllmain\_crt\_dispatch, GetExceptionCode(), GetExceptionInformation())) &#123; result = FALSE; &#125; return result; &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">extern</span> <span class="string">&quot;C&quot;</span> <span class="type">int</span> \_\_cdecl \_seh\_filter\_dll( <span class="type">unsigned</span> <span class="type">long</span> <span class="type">const</span> xcptnum, PEXCEPTION\_POINTERS <span class="type">const</span> pxcptinfoptrs ) &#123; <span class="keyword">if</span> (xcptnum != (<span class="string">&#x27;msc&#x27;</span> <span class="number">0xE0000000</span>)) <span class="keyword">return</span> EXCEPTION\_CONTINUE\_SEARCH; <span class="keyword">return</span> \_seh\_filter\_exe(xcptnum,pxcptinfoptrs); &#125;</span><br></pre></td></tr></table></figure> 在 crt\\src\\vcruntime\\dll\_dllmain.cpp 的 **dllmain\_dispatch** 函数中我们可以看到，crt 的初始化相关代码以及 DllMain 都被包含在运行库创建的 \_\_try / \_\_except 块里，负责过滤的是 **\_\_scrt\_dllmain\_exception\_filter** 函数。而 \_\_scrt\_dllmain\_exception\_filter 函数会调用 **\_seh\_filter\_dll**，后者又会调用 **\_seh\_filter\_exe** 进行实际处理。关键的 signal handler 触发是在 \_seh\_filter\_exe 函数中。然而区别在于 \_seh\_filter\_dll 中会判断当前的异常是不是一个 c++ 异常（异常代码为 0xe06d7363），是就直接跳过不处理。执行不可访问内存实际触发的是 0xc0000005，所以 \_seh\_filter\_dll 就会直接返回 EXCEPTION\_CONTINUE\_SEARCH。
+
+<h2 id="调试"><a href="#调试" class="headerlink" title="调试"></a>调试</h2><p>我写了个简单的测试程序来模拟异常发生的情况 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//-------------------- dll -------------------- #include &lt;Windows.h&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">typedef</span> <span class="title">void</span> <span class="params">(\*FN)</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Class1</span> &#123; <span class="keyword">public</span>: ~<span class="built_in">Class1</span>() &#123; ((FN)<span class="number">1000</span>)(); &#125; &#125;;</span><br><span class="line"></span><br><span class="line">Class1 c;</span><br><span class="line"></span><br><span class="line"><span class="function">BOOL APIENTRY <span class="title">DllMain</span><span class="params">(HMODULE hModule, DWORD ul\_reason\_for\_call, LPVOID lpReserved)</span> </span>&#123; <span class="keyword">return</span> TRUE; &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//-------------------- exe -------------------- #include &lt;csignal&gt; #include &lt;cstdio&gt; #include &lt;Windows.h&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">SigillHandler</span><span class="params">(<span class="type">int</span>)</span> </span>&#123; <span class="built_in">printf</span>(<span class="string">&quot;SigillHandler\\n&quot;</span>); &#125; <span class="function"><span class="type">void</span> <span class="title">SigsegvHandler</span><span class="params">(<span class="type">int</span>)</span> </span>&#123; <span class="built_in">printf</span>(<span class="string">&quot;SigsegvHandler\\n&quot;</span>); &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span>\*\* argv)</span> </span>&#123; <span class="built_in">signal</span>(SIGILL, SigillHandler); <span class="built_in">signal</span>(SIGSEGV, SigsegvHandler); <span class="keyword">auto</span> hd = <span class="built_in">LoadLibrary</span>(<span class="string">L&quot;Dll1.dll&quot;</span>); <span class="built_in">FreeLibrary</span>(hd); <span class="built_in">printf</span>(<span class="string">&quot;exit main\\n&quot;</span>); <span class="keyword">return</span> <span class="number">0</span>; &#125;</span><br></pre></td></tr></table></figure> 在调用 FreeLibrary 卸载 dll 时就会触发到全局变量析构函数中的内存访问异常。 调试器收到异常后查看当前的异常链： <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0:000&gt; !exchain 007ef438: Dll1!\_filter\_x86\_sse2\_floating\_point\_exception+12f0 (7bd37510) 007ef554: ucrtbased!\_aulldvrm+138 (78b03008) 007ef588: ucrtbased!\_except\_handler4+0 (78b02410) CRT scope 0, func: ucrtbased!\_\_crt\_seh\_guarded\_call&lt;int&gt;::operator()&lt;&lt;lambda\_d74cd35c3df28f16c733e6755eb03555&gt;,&lt;lambda\_d121dba8a4adeaf3a9819e48611155df&gt; &amp;,&lt;lambda\_ade73ae6aee997c6ba47ce5901b340f9&gt; &gt;+64 (78a56534) 007ef600: Dll1!\_except\_handler4+0 (7bd34330) CRT scope 1, 007ef658: Dll1!\_except\_handler4+0 (7bd34330) CRT scope 0, 007ef6d8: ntdll!\_except\_handler4+0 (7728af00) CRT scope 0, func: ntdll!LdrpCallInitRoutine+4b72c (772a92ad) 007ef740: ntdll!\_except\_handler4+0 (7728af00) CRT scope 1, filter: ntdll!LdrpProcessDetachNode+438a1 (772ade74) func: ntdll!LdrpProcessDetachNode+438aa (772ade7d) CRT scope 0, func: ntdll!LdrpProcessDetachNode+438b4 (772ade87) 007ef910: Tests!\_except\_handler4+0 (00143b80) CRT scope 0, 007ef98c: ntdll!\_except\_handler4+0 (7728af00) CRT scope 0, filter: ntdll!\_\_RtlUserThreadStart+3ca48 (772b4697) func: ntdll!\_\_RtlUserThreadStart+3cae1 (772b4730) 007ef9a4: ntdll!FinalExceptionHandlerPad56+0 (772988d8) Invalid exception stack at ffffffff</span><br></pre></td></tr></table></figure></p>
+<p>异常发生时的堆栈： <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">00 0x3e8 01 Dll1!Class1::~Class1+0x55 02 Dll1!\`dynamic atexit destructor for &#x27;c&#x27;&#x27;+0x28 03 ucrtbased!&lt;lambda\_d121dba8a4adeaf3a9819e48611155df&gt;::operator()+0x102 04 ucrtbased!\_\_crt\_seh\_guarded\_call&lt;int&gt;::operator()&lt;&lt;lambda\_d74cd35c3df28f16c733e6755eb03555&gt;,&lt;lambda\_d121dba8a4adeaf3a9819e48611155df&gt; &amp;,&lt;lambda\_ade73ae6aee997c6ba47ce5901b340f9&gt; &gt;+0x53 05 ucrtbased!\_\_acrt\_lock\_and\_call&lt;&lt;lambda\_d121dba8a4adeaf3a9819e48611155df&gt; &gt;+0x2e 06 ucrtbased!\_execute\_onexit\_table+0x1e 07 Dll1!\_\_scrt\_dllmain\_uninitialize\_c+0x16 08 Dll1!dllmain\_crt\_process\_detach+0x7f 09 Dll1!dllmain\_crt\_dispatch+0x48 0a Dll1!dllmain\_dispatch+0x10b 0b Dll1!\_DllMainCRTStartup+0x1f 0c ntdll!LdrxCallInitRoutine+0x16 0d ntdll!LdrpCallInitRoutine+0x51 0e ntdll!LdrpProcessDetachNode+0xb7 0f ntdll!LdrpUnloadNode+0xa2 10 ntdll!LdrpDecrementModuleLoadCountEx+0x4a 11 ntdll!LdrUnloadDll+0x103 12 KERNELBASE!FreeLibrary+0x16 13 Tests!main+0x64 14 Tests!invoke\_main+0x33 15 Tests!\_\_scrt\_common\_main\_seh+0x157 16 Tests!\_\_scrt\_common\_main+0xd 17 Tests!mainCRTStartup+0x8 18 KERNEL32!BaseThreadInitThunk+0x19 19 ntdll!\_\_RtlUserThreadStart+0x2f 1a ntdll!\_RtlUserThreadStart+0x1b</span><br></pre></td></tr></table></figure></p>
+<p>在 ntdll!ExecuteHandler2 中下断点观察，可以发现前面的过滤器都跳过了处理，最终是由 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">007ef740: ntdll!\_except\_handler4+0 (7728af00) CRT scope 1, filter: ntdll!LdrpProcessDetachNode+438a1 (772ade74) func: ntdll!LdrpProcessDetachNode+438aa (772ade7d) CRT scope 0, func: ntdll!LdrpProcessDetachNode+438b4 (772ade87)</span><br></pre></td></tr></table></figure> 处理了异常，处理异常时的堆栈 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0:000&gt; k 00 ntdll!SendMessageToWERService 01 ntdll!ReportExceptionInternal+0xde 02 ntdll!RtlReportExceptionHelper+0x202 03 ntdll!RtlReportException+0x61 04 ntdll!LdrpCalloutExceptionFilter+0x35 05 ntdll!LdrpProcessDetachNode+0x438a9 &lt;----- 它添加的处理函数 06 ntdll!LdrpUnloadNode+0xa2 07 ntdll!LdrpDecrementModuleLoadCountEx+0x4a 08 ntdll!LdrUnloadDll+0x103 09 KERNELBASE!FreeLibrary+0x16 0a Tests!main+0x64 0b Tests!invoke\_main+0x33 0c Tests!\_\_scrt\_common\_main\_seh+0x157 0d Tests!\_\_scrt\_common\_main+0xd 0e Tests!mainCRTStartup+0x8 0f KERNEL32!BaseThreadInitThunk+0x19 10 ntdll!\_\_RtlUserThreadStart+0x2f 11 ntdll!\_RtlUserThreadStart+0x1b</span><br></pre></td></tr></table></figure></p>
+<p>可以看到这里将异常报告发送给了 WER 服务，该操作完成后也就结束了本次的异常处理。在做完扫尾的栈展开后线程便会继续执行后续的代码。</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>flandre
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://kerisa.github.io/1562/" title="卸载 Dll 过程中隐藏的异常">https://kerisa.github.io/1562/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/KiDispatchException/" rel="tag"># KiDispatchException</a>
+              <a href="/tags/SEH/" rel="tag"># SEH</a>
+              <a href="/tags/SIGILL/" rel="tag"># SIGILL</a>
+              <a href="/tags/%E5%BC%82%E5%B8%B8%E5%88%86%E5%8F%91/" rel="tag"># 异常分发</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/1531/" rel="prev" title="夏空的英仙座——转型之作">
+      <i class="fa fa-chevron-left"></i> 夏空的英仙座——转型之作
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/1603/" rel="next" title="樱之杜†净梦者——一圆三吃">
+      樱之杜†净梦者——一圆三吃 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%AA%E8%83%BD%E8%A7%89%E5%AF%9F%E7%9A%84%E5%BC%82%E5%B8%B8"><span class="nav-number">1.</span> <span class="nav-text">未能觉察的异常</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%82%E5%B8%B8%E5%88%86%E5%8F%91"><span class="nav-number">2.</span> <span class="nav-text">异常分发</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B0%83%E8%AF%95"><span class="nav-number">3.</span> <span class="nav-text">调试</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt=""
+      src="/sys-imgs/42553027_1.png">
+  <p class="site-author-name" itemprop="name"></p>
+  <div class="site-description" itemprop="description">This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">247</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">flandre</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">328k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">4:58</span>
+</div>
+  <div class="powered-by">Powered by love
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

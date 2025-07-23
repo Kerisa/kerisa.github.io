@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kerisa.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="这是一份使用 vs2008 和 CMake 料理 libphonenumber 的食谱。 准备原料 vs2008 CMake-3.14.2 下载 libphonenumber-release-8.10.9 下载 protobuf-release-2.5.0 下载 icu4c-4.8.1 下载 googletest-release-1.6.0 下载">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用 CMake 编译 vc90 版 libphonenumber">
+<meta property="og:url" content="https://kerisa.github.io/723/index.html">
+<meta property="og:site_name" content="Re: Memory (mirror)">
+<meta property="og:description" content="这是一份使用 vs2008 和 CMake 料理 libphonenumber 的食谱。 准备原料 vs2008 CMake-3.14.2 下载 libphonenumber-release-8.10.9 下载 protobuf-release-2.5.0 下载 icu4c-4.8.1 下载 googletest-release-1.6.0 下载">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-04-16T11:41:04.000Z">
+<meta property="article:modified_time" content="2025-07-21T18:42:00.657Z">
+<meta property="article:author" content="flandre">
+<meta property="article:tag" content="boost">
+<meta property="article:tag" content="cmake">
+<meta property="article:tag" content="gtest">
+<meta property="article:tag" content="icu">
+<meta property="article:tag" content="libphonenumber">
+<meta property="article:tag" content="protobuf">
+<meta property="article:tag" content="vc90">
+<meta property="article:tag" content="vs2008">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://flandre-scarlet.moe/blog/723/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>使用 CMake 编译 vc90 版 libphonenumber | Re: Memory (mirror)</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Re: Memory (mirror)</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/723/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/sys-imgs/42553027_1.png">
+      <meta itemprop="name" content="flandre">
+      <meta itemprop="description" content="This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Re: Memory (mirror)">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          使用 CMake 编译 vc90 版 libphonenumber
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-04-16 19:41:04" itemprop="dateCreated datePublished" datetime="2019-04-16T19:41:04+08:00">2019-04-16</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-07-22 02:42:00" itemprop="dateModified" datetime="2025-07-22T02:42:00+08:00">2025-07-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%A8%8B%E5%BA%8F/" itemprop="url" rel="index"><span itemprop="name">程序</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>6.1k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>6 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>这是一份使用 vs2008 和 CMake 料理 libphonenumber 的食谱。</p>
+<h2 id="准备原料"><a href="#准备原料" class="headerlink" title="准备原料"></a>准备原料</h2><ul>
+<li>vs2008</li>
+<li>CMake-3.14.2 <a target="_blank" rel="noopener" href="https://github.com/Kitware/CMake/releases/download/v3.14.2/cmake-3.14.2-win32-x86.zip">下载</a></li>
+<li>libphonenumber-release-8.10.9 <a target="_blank" rel="noopener" href="https://github.com/googlei18n/libphonenumber/archive/v8.10.9.zip">下载</a></li>
+<li>protobuf-release-2.5.0 <a target="_blank" rel="noopener" href="https://github.com/protocolbuffers/protobuf/releases/download/v2.5.0/protobuf-2.5.0.zip">下载</a></li>
+<li>icu4c-4.8.1 <a target="_blank" rel="noopener" href="http://download.icu-project.org/files/icu4c/4.8.1/icu4c-4_8_1-Win32-msvc10.zip">下载</a></li>
+<li>googletest-release-1.6.0 <a target="_blank" rel="noopener" href="https://github.com/google/googletest/archive/release-1.6.0.zip">下载</a><span id="more"></span></li>
+<li>Java Runtime:jre-8u201-windows-x64.exe <a target="_blank" rel="noopener" href="https://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html">下载</a></li>
+<li>boost<ul>
+<li>boost_1_44_0.7z <a target="_blank" rel="noopener" href="https://sourceforge.net/projects/boost/files/boost/1.44.0/boost_1_44_0.7z/download">下载</a></li>
+<li>libboost_date_time-vc90-mt-gd-1_44.zip <a target="_blank" rel="noopener" href="https://sourceforge.net/projects/boost/files/boost-binaries/1.44.0/libboost_date_time-vc90-mt-gd-1_44.zip/download">下载</a></li>
+<li>libboost_system-vc90-mt-gd-1_44.zip <a target="_blank" rel="noopener" href="https://sourceforge.net/projects/boost/files/boost-binaries/1.44.0/libboost_system-vc90-mt-gd-1_44.zip/download">下载</a></li>
+<li>libboost_thread-vc90-mt-gd-1_44.zip <a target="_blank" rel="noopener" href="https://sourceforge.net/projects/boost/files/boost-binaries/1.44.0/libboost_thread-vc90-mt-gd-1_44.zip/download">下载</a></li>
+</ul>
+</li>
+</ul>
+<p>假设工作目录在 d:\libs，将各个压缩包解压至该目录下。后面编译生成的文件都放在默认位置，需要整理目录的将对应路径替换即可。</p>
+<h2 id="加工"><a href="#加工" class="headerlink" title="加工"></a>加工</h2><h3 id="gtest"><a href="#gtest" class="headerlink" title="gtest"></a>gtest</h3><p>定位到<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">googletest-release-1.6.0/msvc</span><br></pre></td></tr></table></figure>文件夹，打开 getst-md.sln 进行编译，-md 就是动态链接的 crt 库，静态链接就用不带 md 的 sln 文件，别点错了。编译后在<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">googletest-release-1.6.0/msvc/gtest-md/Debug</span><br></pre></td></tr></table></figure>目录下生成 gtestd.lib 文件。</p>
+<h3 id="protobuf"><a href="#protobuf" class="headerlink" title="protobuf"></a>protobuf</h3><p>定位到<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">protobuf-2.5.0/vsprojects</span><br></pre></td></tr></table></figure>目录，因为和上面 gtest 的项目不同，这里只有一个以 &#x2F;MD 配置好的解决方案文件，所以上面 gtest 也要选择 &#x2F;MD 模式的解决方案。打开 protobuf.sln 直接开始编译即可。文件在<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">protobuf-2.5.0/vsprojects/Debug</span><br></pre></td></tr></table></figure>中。估计是项目生成依赖有问题，一次性编译所有项目时部分会失败，多编译几次找到依赖后自然就成功了。</p>
+<h3 id="Icu"><a href="#Icu" class="headerlink" title="Icu"></a>Icu</h3><p>使用预编译的 vs2010 版，配上 2010 的运行库即可直接食用。</p>
+<h3 id="Boost"><a href="#Boost" class="headerlink" title="Boost"></a>Boost</h3><p>使用预编译的库，解压后摆好。libboost 的几个压缩包解压出来的 lib 可以整理到一起，boost_1_44_0 作为 include 目录单独放在 d:\libs 目录下即可。<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">D:\\libs\\boost\_1\_44\_0\\ D:\\libs\\libboost-vc90-mt-gd-1\_44\\libboost\_date\_time-vc90-mt-gd-1\_44.lib D:\\libs\\libboost-vc90-mt-gd-1\_44\\libboost\_system-vc90-mt-gd-1\_44.lib D:\\libs\\libboost-vc90-mt-gd-1\_44\\libboost\_thread-vc90-mt-gd-1\_44.lib</span><br></pre></td></tr></table></figure></p>
+<p>不同 crt 库链接方式对应的 boost 库：</p>
+<ul>
+<li>MTd &#x3D; mt-s</li>
+<li>MT &#x3D; mt-sgd</li>
+<li>MDd &#x3D; mt-gd</li>
+<li>MD &#x3D; mt</li>
+</ul>
+<p>详细可以看<a target="_blank" rel="noopener" href="https://www.boost.org/doc/libs/1_53_0/more/getting_started/unix-variants.html#library-naming">这里</a>。</p>
+<p>另外也可在 CMake 中分别指定 Boost_LIBRARY_DIR_RELEASE 和 Boost_LIBRARY_DIR_DEBUG 来代替单一的 BOOST_LIBRARYDIR。</p>
+<h3 id="libphonenumber"><a href="#libphonenumber" class="headerlink" title="libphonenumber"></a>libphonenumber</h3><p>打开cmake-gui.exe，source code 路径填入<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">d:/libs/libphonenumber-8.10.9/cpp</span><br></pre></td></tr></table></figure> build binaries 路径填入<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">d:/libs/libphonenumber-8.10.9/cpp/build（输出目录，也可以填任意其他路径）</span><br></pre></td></tr></table></figure></p>
+<p>其中 boost 的相关配置项需要手动加上。<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">BOOST\_LIBRARYDIR d:/libs/libboost-vc90-mt-gd-1\_44 BOOST\_INCLUDEDIR d:/libs/boost\_1\_44\_0</span><br></pre></td></tr></table></figure>额外添加 <em>Boost_FIND_REQUIRED</em> 可以使 CMake 在查找 boost 库失败时给出详细提示，方便排查。<br>之后就能顺利的配置、生成 sln 解决方案了。</p>
+<p>点击“configure”后选择编译器为 vs2008(vc90)，重复“点击 configure” - “填入配置项”直到配置成功，最后结果如下: <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">BUILD\_GEOCODER √ BUILD\_STATIC\_LIB √ Boost\_FIND\_REQUIRED √ CMAKE\_CONFIGURATION\_TYPES Debug;Release;MinSizeRel;RelWithDebInfo CMAKE\_INSTALL\_PREFIX d:/libs/libphonenumber-8.10.9/cpp/build GTEST\_INCLUDE\_DIR d:/libs/googletest-release-1.6.0/include GTEST\_LIB d:/libs/googletest-release-1.6.0/msvc/gtest-md/Debug/gtestd.lib GTEST\_SOURCE\_DIR d:/libs/googletest-release-1.6.0/src ICU\_I18N\_INCLUDE\_DIR d:/libs/icu4c-4\_8\_1\_1-Win32-msvc10/include ICU\_I18N\_LIB d:/libs/icu4c-4\_8\_1\_1-Win32-msvc10/lib/icuin.lib ICU\_UC\_INCLUDE\_DIR d:/libs/icu4c-4\_8\_1\_1-Win32-msvc10/include ICU\_UC\_LIB d:/libs/icu4c-4\_8\_1\_1-Win32-msvc10/lib/icuuc.lib JAVA\_BIN C:/Program Files/Java/jre1.8.0\_201/bin/java.exe PROTOBUF\_INCLUDE\_DIR d:/libs/protobuf-2.5.0/src PROTOBUF\_LIB d:/libs/protobuf-2.5.0/vsprojects/Debug/libprotobuf.lib PROTOC\_BIN d:/libs/protobuf-2.5.0/vsprojects/Debug/protoc.exe USE\_BOOST √（不勾也行，就是没有线程安全性了） USE\_ICU\_REGEXP √ USE\_ALTERNATE\_FORMATS √ USE\_RE2 x USE\_STD\_MAP x USE\_LITE\_METADATA x</span><br></pre></td></tr></table></figure></p>
+<h4 id="编译错误"><a href="#编译错误" class="headerlink" title="编译错误"></a>编译错误</h4><ul>
+<li>编译 geocoding 项目需要的头文件 dirent.h 可在<a target="_blank" rel="noopener" href="https://github.com/tronkko/dirent/blob/master/include/dirent.h">这里</a>下载一份，然后放到<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">libphonenumber-8.10.9/tools/cpp/src</span><br></pre></td></tr></table></figure>目录下。</li>
+<li>geocoding 和 generate_geocoding_data 项目的预处理器定义中加入 <em>COMPILER_MSVC</em> 来避免找不到头文件 stdint.h 的错误</li>
+<li>log10 二义性：改成 log10f。</li>
+<li>编译时跳 (unsigned)(c + 1) &lt;&#x3D; 256 断言失败（Debug）：在 generate_geocoding_data.cc L.189 和 L.190 处将 std::isspace(XXX) 改为 std::isspace((int)(unsigned char)XXX)。</li>
+<li>因为 vs2008 不支持 c++11，编译时 phonenumbermatcher.cc 中用到了 std::unique_ptr 会有报错，将 705 行处 std::unique_ptr 改为 boost::scoped_ptr，并在前面加上<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;boost/scoped\_ptr.hpp&gt;</span>。</span></span><br></pre></td></tr></table></figure></li>
+<li>提示 phonenumberutil.cc 中 PhoneNumberUtil::kMinLengthForNsn 等类静态常量重定义：将 57~60 行这四个静态常量改为枚举即可。</li>
+<li>phonenumberutil_test.cc 中使用 EXPECT_NE &#x2F; EXPECT_EQ 宏对迭代器进行比较产生模板推导错误，原因在于模板推断时将迭代器类型推断为容器类型，之后便开始调用它的 begin &#x2F; end 方法导致错误。 可以改为直接判断结果是否为 true，如将<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">EXPECT\_NE(types.find(PhoneNumberUtil::FIXED\_LINE), types.end());</span><br></pre></td></tr></table></figure>改为<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">EXPECT\_TRUE(types.find(PhoneNumberUtil::FIXED\_LINE) != types.end());</span><br></pre></td></tr></table></figure>或干脆注释掉。</li>
+<li>还有个 geocoding-shared 的链接错误需要在项目中加入<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">libphonenumber-8.10.9/cpp/src/phonenumbers</span><br></pre></td></tr></table></figure>目录和<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">libphonenumber-8.10.9/cpp/src/phonenumbers/utf</span><br></pre></td></tr></table></figure>目录下的 c&#x2F;cc 文件（但要排除 regexp_adapter_re2.cc、metadata.cc、lite-meta.cc，会导致符号重定义），另外还要加上 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">libphonenumber-8.10.9/cpp/src/phonenumbers/base/strings/string\_piece.cc</span><br></pre></td></tr></table></figure>的引用。</li>
+</ul>
+<p>这些都改掉之后就可以顺利编译了。</p>
+<p>Ex: 模板推导错误的原因估计在于 vc90 中将构造函数也作为类型参与推导了，结果造成了错误。样例如下，在 vs2008 中两个都会被推导为 1<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="type">int</span> IsContainer; <span class="keyword">typedef</span> <span class="type">char</span> IsNotContainer; <span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">C</span>&gt; <span class="function">IsContainer <span class="title">IsContainerTest</span><span class="params">( <span class="type">int</span> /\* dummy \*/, <span class="keyword">typename</span> C::iterator\* /\* it \*/ = <span class="literal">NULL</span>, <span class="keyword">typename</span> C::<span class="type">const</span>\_iterator\* /\* <span class="type">const</span>\_it \*/ = <span class="literal">NULL</span> )</span> </span>&#123; <span class="keyword">return</span> <span class="number">1</span>; &#125; <span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">C</span>&gt; <span class="function">IsNotContainer <span class="title">IsContainerTest</span><span class="params">( <span class="type">long</span> /\* dummy \*/ )</span> </span>&#123; <span class="keyword">return</span> <span class="string">&#x27;\\0&#x27;</span>; &#125; <span class="keyword">class</span> <span class="title class_">con</span> &#123; <span class="keyword">public</span>: <span class="keyword">class</span> <span class="title class_">const</span>\_iterator &#123; <span class="keyword">public</span>: <span class="type">const</span>\_iterator() &#123;&#125; &#125;; <span class="keyword">class</span> <span class="title class_">iterator</span> : <span class="keyword">public</span> <span class="type">const</span>\_iterator &#123; <span class="keyword">public</span>: <span class="built_in">iterator</span>() &#123;&#125; &#125;; &#125;; <span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123; <span class="type">int</span> res1 = <span class="built_in">IsContainerTest</span>&lt; con::iterator &gt;(<span class="number">0</span>); <span class="comment">// vc90 -&gt; 1, vc100 -&gt; 0 int res3 = IsContainerTest&lt; con &gt;(0); // vc90 -&gt; 1, vc100 -&gt; 1 std::cout &lt;&lt; res1&lt;&lt; res3 ; return 0; &#125;</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="尝菜"><a href="#尝菜" class="headerlink" title="尝菜"></a>尝菜</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span> #<span class="keyword">include</span> <span class="string">&lt;string&gt;</span> #<span class="keyword">include</span> <span class="string">&quot;phonenumbers/phonenumber.h&quot;</span> #<span class="keyword">include</span> <span class="string">&quot;phonenumbers/phonenumberutil.h&quot;</span> using i18n::phonenumbers::PhoneNumberUtil; using i18n::phonenumbers::PhoneNumber; int \_tmain(int argc, \_TCHAR\* argv\[\]) &#123; PhoneNumberUtil \*phoneUtil = PhoneNumberUtil::GetInstance(); <span class="comment">//初始化一个电话号码 PhoneNumber pn; pn.set\_country\_code(86); pn.set\_national\_number(13478808311); //判断电话号码是否有效 std::cout &lt;&lt; std::boolalpha &lt;&lt; phoneUtil-&gt;IsValidNumber(pn) &lt;&lt; std::endl; //判断电话号码所在的地区 std::string region; phoneUtil-&gt;GetRegionCodeForNumber(pn, &amp;region); std::cout &lt;&lt; region &lt;&lt; std::endl; std::string name; phoneUtil-&gt;GetNationalSignificantNumber(pn, &amp;name); std::cout &lt;&lt; name &lt;&lt; std::endl; //获取某个国家的国字区号 PhoneNumber example; phoneUtil-&gt;GetInvalidExampleNumber(&quot;CN&quot;, &amp;example); std::cout &lt;&lt; example.country\_code() &lt;&lt; std::endl; return 0; &#125;</span></span></span><br></pre></td></tr></table></figure>
+
+<p>然后加上 include 目录和附加的 lib 目录，以及导入库。<br>include<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">d:/libs/icu4c-4\_8\_1\_1-Win32-msvc10/include;d:/libs/libphonenumber-8.10.9/cpp/src;d:/libs/protobuf-2.5.0/src;d:/libs/boost\_1\_44\_0;</span><br></pre></td></tr></table></figure> libs<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">d:/libs/protobuf-2.5.0/vsprojects/Debug;d:/libs/icu4c-4\_8\_1\_1-Win32-msvc10/lib;d:/libs/googletest-release-1.6.0/msvc/gtest-md/Debug;D:/libs/boost-1.44-vc90-mt-gd-lib;d:/libs/libphonenumber-8.10.9/cpp/build/Debug;</span><br></pre></td></tr></table></figure> import<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">phonenumber.lib gtestd.lib icuin.lib icudt.lib icuuc.lib libprotobuf.lib libboost\_thread-vc90-mt-gd-1\_44.lib</span><br></pre></td></tr></table></figure></p>
+<p>运行后可以输出：<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">true CN 13478808311 86</span><br></pre></td></tr></table></figure></p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>flandre
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://kerisa.github.io/723/" title="使用 CMake 编译 vc90 版 libphonenumber">https://kerisa.github.io/723/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/boost/" rel="tag"># boost</a>
+              <a href="/tags/cmake/" rel="tag"># cmake</a>
+              <a href="/tags/gtest/" rel="tag"># gtest</a>
+              <a href="/tags/icu/" rel="tag"># icu</a>
+              <a href="/tags/libphonenumber/" rel="tag"># libphonenumber</a>
+              <a href="/tags/protobuf/" rel="tag"># protobuf</a>
+              <a href="/tags/vc90/" rel="tag"># vc90</a>
+              <a href="/tags/vs2008/" rel="tag"># vs2008</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/722/" rel="prev" title="[ 注册 vultr 赠送 $300 ]">
+      <i class="fa fa-chevron-left"></i> [ 注册 vultr 赠送 $300 ]
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/845/" rel="next" title="C++ 程序的逆向分析以及 RTTI 信息检索">
+      C++ 程序的逆向分析以及 RTTI 信息检索 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%87%86%E5%A4%87%E5%8E%9F%E6%96%99"><span class="nav-number">1.</span> <span class="nav-text">准备原料</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%A0%E5%B7%A5"><span class="nav-number">2.</span> <span class="nav-text">加工</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#gtest"><span class="nav-number">2.1.</span> <span class="nav-text">gtest</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#protobuf"><span class="nav-number">2.2.</span> <span class="nav-text">protobuf</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Icu"><span class="nav-number">2.3.</span> <span class="nav-text">Icu</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Boost"><span class="nav-number">2.4.</span> <span class="nav-text">Boost</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#libphonenumber"><span class="nav-number">2.5.</span> <span class="nav-text">libphonenumber</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%96%E8%AF%91%E9%94%99%E8%AF%AF"><span class="nav-number">2.5.1.</span> <span class="nav-text">编译错误</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%9D%E8%8F%9C"><span class="nav-number">3.</span> <span class="nav-text">尝菜</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt=""
+      src="/sys-imgs/42553027_1.png">
+  <p class="site-author-name" itemprop="name"></p>
+  <div class="site-description" itemprop="description">This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">247</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">flandre</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">328k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">4:58</span>
+</div>
+  <div class="powered-by">Powered by love
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

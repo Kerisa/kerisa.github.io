@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kerisa.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="大纲理论篇*   介绍区块链、比特币、以太坊（智能合约）相关概念和技术  共识问题。（FLP不可能：网络可靠但允许节点失败时不存在解决一致性问题的确定共识算法）（Paxos 算法、Raft 算法） CAP：一致性、可用性、分区容忍性（节点间的通讯不保障） 拜占庭问题——工作量证明（改进：权益证明（PoS）等） 智能合约：图灵完备，配合区块链来保存合约的运行结果，达到去中心化、不可篡改的效果  实践">
+<meta property="og:type" content="article">
+<meta property="og:title" content="区块链原理、设计与应用">
+<meta property="og:url" content="https://kerisa.github.io/1406/index.html">
+<meta property="og:site_name" content="Re: Memory (mirror)">
+<meta property="og:description" content="大纲理论篇*   介绍区块链、比特币、以太坊（智能合约）相关概念和技术  共识问题。（FLP不可能：网络可靠但允许节点失败时不存在解决一致性问题的确定共识算法）（Paxos 算法、Raft 算法） CAP：一致性、可用性、分区容忍性（节点间的通讯不保障） 拜占庭问题——工作量证明（改进：权益证明（PoS）等） 智能合约：图灵完备，配合区块链来保存合约的运行结果，达到去中心化、不可篡改的效果  实践">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-10-10T02:10:01.000Z">
+<meta property="article:modified_time" content="2025-07-21T17:32:47.074Z">
+<meta property="article:author" content="flandre">
+<meta property="article:tag" content="分布式系统">
+<meta property="article:tag" content="区块链">
+<meta property="article:tag" content="智能合约">
+<meta property="article:tag" content="比特币">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://flandre-scarlet.moe/blog/1406/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>区块链原理、设计与应用 | Re: Memory (mirror)</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Re: Memory (mirror)</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/1406/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/sys-imgs/42553027_1.png">
+      <meta itemprop="name" content="flandre">
+      <meta itemprop="description" content="This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Re: Memory (mirror)">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          区块链原理、设计与应用
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-10-10 10:10:01" itemprop="dateCreated datePublished" datetime="2020-10-10T10:10:01+08:00">2020-10-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-07-22 01:32:47" itemprop="dateModified" datetime="2025-07-22T01:32:47+08:00">2025-07-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">读书笔记</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.5k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="大纲"><a href="#大纲" class="headerlink" title="大纲"></a>大纲</h2><p>理论篇*   介绍区块链、比特币、以太坊（智能合约）相关概念和技术</p>
+<ul>
+<li>共识问题。（FLP不可能：网络可靠但允许节点失败时不存在解决一致性问题的确定共识算法）（Paxos 算法、Raft 算法）</li>
+<li>CAP：一致性、可用性、分区容忍性（节点间的通讯不保障）</li>
+<li>拜占庭问题——工作量证明（改进：权益证明（PoS）等）</li>
+<li>智能合约：图灵完备，配合区块链来保存合约的运行结果，达到去中心化、不可篡改的效果</li>
+</ul>
+<p>实践篇*   超级账本 Fabric 的部署、使用和技术架构</p>
+<ul>
+<li>智能合约（链码）和应用程序开发</li>
+<li>云区块链服务平台介绍<span id="more"></span></li>
+</ul>
+<p>PS：囫囵吞枣地看完了，哈哈。书的前半部分讲了分布式系统、密码学中的问题和算法理论，还有比特币以太坊里的设计，后者主要引入了智能合约。以太坊封装了底层的区块链逻辑，这样开发者便可以不用考虑审查等信任问题，专注于上层应用开发。应用和链码（智能合约）好比 web 的服务应用，背后的账本层则充当了 web 后端的存储。后半部分讲的都是超级账本的配置和使用。一些比较典型的问题摘录如下。  </p>
+<h2 id="通用问题"><a href="#通用问题" class="headerlink" title="通用问题"></a>通用问题</h2><h3 id="区块链是谁发明的，有什么特点？"><a href="#区块链是谁发明的，有什么特点？" class="headerlink" title="区块链是谁发明的，有什么特点？"></a>区块链是谁发明的，有什么特点？</h3><p>区块链相关的思想最早是比特币的发明者中本聪（化名）在论文中提出（但没有明确定义）作为比特币网络的核心支持技术。自那以后，区块链技术逐渐脱离比特币网络，成为一种通用的可以支持分布式记账能力的底层技术，具有去中心化和加密安全等特点。</p>
+<h3 id="区块链和比特币是什么关系？"><a href="#区块链和比特币是什么关系？" class="headerlink" title="区块链和比特币是什么关系？"></a>区块链和比特币是什么关系？</h3><p>比特币是基于区块链技术的一种数字现金（cash）应用；区块链技术最早在比特币分布式系统中得到应用和验证，确保了比特币系统于 2009 年上线后，在完全自治情况下可以正常运转。</p>
+<h3 id="区块链和分布式数据库是什么关系？"><a href="#区块链和分布式数据库是什么关系？" class="headerlink" title="区块链和分布式数据库是什么关系？"></a>区块链和分布式数据库是什么关系？</h3><p>两者定位完全不同。分布式数据库是解决高可用和可扩展场景下的数据存储问题；区块链则是在多方（无须中心化中介角色存在）之间提供一套可信的记账和合约履行机制。</p>
+<h3 id="区块链有哪些种类？"><a href="#区块链有哪些种类？" class="headerlink" title="区块链有哪些种类？"></a>区块链有哪些种类？</h3><p>根据部署场景公开程度，可以分为公有链（public chain）、联盟链（consortium chain）和私有链（private chain）；从功能上看，可以分为以支持数字货币为主的数字货币区块链（如比特币网络）、支持智能合约的通用区块链（如以太坊网络）、面向复杂商业应用场景支持权限管理的分布式账本平台（如超级账本）。</p>
+<h3 id="（公有链情况下）区块链是如何防止有人作恶的？"><a href="#（公有链情况下）区块链是如何防止有人作恶的？" class="headerlink" title="（公有链情况下）区块链是如何防止有人作恶的？"></a>（公有链情况下）区块链是如何防止有人作恶的？</h3><p>区块链并没有试图保障每一个人都不作恶，每个参与者都默认在最长的链上进行扩展。当某个作恶者尝试延续一个非法链的时候，实际上在跟所有的“非作恶”者进行竞争。因此，当作恶者超过一半（还要保持选择一致）时，在概率意义上才能破坏规则；而代价是一旦延续失败，所有付出的资源（例如算力）都将浪费掉。</p>
+<h3 id="区块链的智能合约应该怎么设计？"><a href="#区块链的智能合约应该怎么设计？" class="headerlink" title="区块链的智能合约应该怎么设计？"></a>区块链的智能合约应该怎么设计？</h3><p>首先，智能合约类似于其他应用程序，在架构上既可以采取 momolithic 的方式（一个合约针对一个具体商业应用，功能完善而复杂），也可以采取 microservice 的方式（即合约功能单一，多个合约一起构建应用）；选择哪种模式根本上取决于其上商业应用的特点。其次，从灵活性角度，推荐适当对应用代码进行切分，划分到若干个智能合约尽量保持智能合约的可复用性。</p>
+<h3 id="如何查看-PEM-格式证书内容？"><a href="#如何查看-PEM-格式证书内容？" class="headerlink" title="如何查看 PEM 格式证书内容？"></a>如何查看 PEM 格式证书内容？</h3><p>可以通过如下命令转换证书内容进行输出：</p>
+<p>openssl x509 -noout -text -in &lt;ca_file&gt;</p>
+<p>另外，还可以通过如下命令来快速从证书文件中提取所证明的公钥内容：</p>
+<p>openssl x509 -noout -pubkey -in &lt;ca_file&gt;</p>
+<h3 id="已知私钥，如何生成公钥？"><a href="#已知私钥，如何生成公钥？" class="headerlink" title="已知私钥，如何生成公钥？"></a>已知私钥，如何生成公钥？</h3><p>对于椭圆曲线加密算法，可以通过如下命令生成公钥:</p>
+<p>openssl ec -pubout -outform PEM -in &lt;private_key&gt;</p>
+<h3 id="如何校验某证书是否被根证书签名？"><a href="#如何校验某证书是否被根证书签名？" class="headerlink" title="如何校验某证书是否被根证书签名？"></a>如何校验某证书是否被根证书签名？</h3><p>已知“根证书文件”和“待验证证书文件”情况下，可以使用如下命令进行验证：</p>
+<p>openssl verify -CAfile &lt;root_cafile&gt; &lt;ca_to_verify&gt;</p>
+<h3 id="为何-Hash-函数将任意长的文本映射到定长的摘要，很少会发生冲突？"><a href="#为何-Hash-函数将任意长的文本映射到定长的摘要，很少会发生冲突？" class="headerlink" title="为何 Hash 函数将任意长的文本映射到定长的摘要，很少会发生冲突？"></a>为何 Hash 函数将任意长的文本映射到定长的摘要，很少会发生冲突？</h3><p>像 SHA-1 这样的 Hash 函数可以将任意长的文本映射到相对很短的定长摘要。从理论上讲，从一个很大的集合映射到一个小的集合上必然会出现冲突。Hash 函数之所以很少出现冲突的原因在于虽然输入的数据长度可以很大，但其实人类产生的数据并非全空间集合的，这些数据往往是相对有序（低嫡值）的，实际上也是一个相对较小的集合。当然，这个集合自身可能比输出的结果要大，但这个冲突的概率远没有输入是全空间集合时那么夸张。</p>
+<h2 id="比特币、以太坊相关"><a href="#比特币、以太坊相关" class="headerlink" title="比特币、以太坊相关"></a>比特币、以太坊相关</h2><h3 id="比特币区块链为何要设计为每-10-分钟才出来一个块，快一些不可以吗？"><a href="#比特币区块链为何要设计为每-10-分钟才出来一个块，快一些不可以吗？" class="headerlink" title="比特币区块链为何要设计为每 10 分钟才出来一个块，快一些不可以吗？"></a>比特币区块链为何要设计为每 10 分钟才出来一个块，快一些不可以吗？</h3><p>这主要是从公平的角度考虑的，当某一个新块被计算出来后，需要在全球的比特币网络内公布。临近的矿工将最先拿到消息并开始新一轮的计算，较远的矿工则较晚得到通知。最坏情况下，可能需要数十秒的延迟。为尽量确保矿工们都处在同一起跑线上，这个时间不能太短。但太长了又会导致每个交易的“最终”确认时间过长，目前看，10 分钟左右是一个相对合适的折中。另外，也是从存储代价的角度，让拥有不太大存储的普通节点可以参与到网的维护。</p>
+<h3 id="比特币区块链每个区块大小为何是-1MB，大一些不可以吗？"><a href="#比特币区块链每个区块大小为何是-1MB，大一些不可以吗？" class="headerlink" title="比特币区块链每个区块大小为何是 1MB，大一些不可以吗？"></a>比特币区块链每个区块大小为何是 1MB，大一些不可以吗？</h3><p>这也是折中的结果考虑的。区块产生的平均时间间隔是固定的 10 分钟，大一些，意味着发生交易的吐量可以增加，但节点进行验证的成本会提高（Hash 处理约为 100MB&#x2F;s），同时存储整个区块链的成本会快速上升。区块大小为 1MB，意味着每秒可以记录 1MB&#x2F;(10*60)&#x3D;1.7KB 的交易数据，而一般的交易数据大小在 0.2~1KB。 实际上，之前比特币社区也曾多次讨论过改变区块大小的提案，但都未被最终接受。</p>
+<h3 id="以太坊网络跟比特币网络有何关系？"><a href="#以太坊网络跟比特币网络有何关系？" class="headerlink" title="以太坊网络跟比特币网络有何关系？"></a>以太坊网络跟比特币网络有何关系？</h3><p>以太坊网络所采用的区块链结构源于比特币网络。基于同样设计原理，但以太坊提出了许多改善设计，包括支持更灵活的智能合约，支持除了 PoW 之外的更多共识机制（尚未实现）等。</p>
+<h2 id="超级账本项目"><a href="#超级账本项目" class="headerlink" title="超级账本项目"></a>超级账本项目</h2><h3 id="超级账本项目与传统公有区块链有何不同？"><a href="#超级账本项目与传统公有区块链有何不同？" class="headerlink" title="超级账本项目与传统公有区块链有何不同？"></a>超级账本项目与传统公有区块链有何不同？</h3><p>超级账本是首个面向联盟链场景的开源项目，在这种场景下，参与帐本的多方存在一定的信任前提，并十分看重对接入账本各方的权限管理、审计功能、传输数据的安全可靠等特性。超级账本在考虑了商业网络的这些复杂需求后，提出了创新的架构和设计，是首个在企业应用场景中得到大规模部署和验证的开源项目。</p>
+<h3 id="区块链最早是公有链形式，为何现在联盟链在很多场景下得到更多推崇？"><a href="#区块链最早是公有链形式，为何现在联盟链在很多场景下得到更多推崇？" class="headerlink" title="区块链最早是公有链形式，为何现在联盟链在很多场景下得到更多推崇？"></a>区块链最早是公有链形式，为何现在联盟链在很多场景下得到更多推崇？</h3><p>区块链技术出现以前，中心化的信任机制可以实现很高的性能和便捷的监管，但一旦中心机制出现故障，则导致系统的信任前提发生破坏。区块链技术可以提供无中介化情况下的信任保障。公有链情况下，任何人都可以参与监督，可以实现信任的最大化，但随之而来会有性能低下、缺乏监管等问题。 联盟链在两者之间取得了平衡。非中心化的联盟共识，让系统可信任度以指数形式增加；同时，联盟形成的信任前提，可以在不影响信任情况下实现更优化的性能，并支持权限管理。这对于复杂应用场景，特别是企业场景可以提供更好的支持。</p>
+<h3 id="采用-BFT-类共识算法时，节点掉线后重新加入网络，出现无法同步情况怎么办？"><a href="#采用-BFT-类共识算法时，节点掉线后重新加入网络，出现无法同步情况怎么办？" class="headerlink" title="采用 BFT 类共识算法时，节点掉线后重新加入网络，出现无法同步情况怎么办？"></a>采用 BFT 类共识算法时，节点掉线后重新加入网络，出现无法同步情况怎么办？</h3><p>这是某些算法设计导致的情况。掉线后的节点重新加入到网络中，其视图（view）会领先于其他节点。其他节点正常情况下不会发生视图的变更，发生的交易和区块内容不会同步到掉线节点。出现这种情况，可以有两种解决方案：一种方案是强迫其他节点出现视图变更，例如也发生掉线或者在一段时间内强制变更；另一种方案是等待再次产生足够多的区块后触发状态追赶。</p>
+<h3 id="超级账本-Fabric-里的安全性和隐私性是如何保证的？"><a href="#超级账本-Fabric-里的安全性和隐私性是如何保证的？" class="headerlink" title="超级账本 Fabric 里的安全性和隐私性是如何保证的？"></a>超级账本 Fabric 里的安全性和隐私性是如何保证的？</h3><p>首先，Fabric 1.0 及以后的版本提供了对多通道的支持，不同通道之间的链码和交易是不可见的，即交易只会发送到该通道内的 Peer 节点。此外，在进行背书阶段，客户端可以根据背书策略选择性地发送交易到通道内的某些特定 Peer 节点。其次，用户可以对交易的内容进行加密（基于证书的权限管理）或 Hash 处理，同时，只有得到授权的节点或用户才能访问到交易。另外，排序节点无须访问到交易内容，因此，可以选择不将完整交易（对交易输入数据进行隐藏，或者干脆进行加密或 Hash 处理）发送到排序节点。最后，所有数据在传输过程中可以通过 TLS 来进行安全保护。需要配合使用许多层级的保护来获得不同层级的安全性。 实践过程中，也需要对节点自身进行安全保护，通过防火墙、IDS 等防护措施避免节点自身的攻击；另外可以通过审计和分析系统对可疑行为进行探测和响应。</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>flandre
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://kerisa.github.io/1406/" title="区块链原理、设计与应用">https://kerisa.github.io/1406/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/" rel="tag"># 分布式系统</a>
+              <a href="/tags/%E5%8C%BA%E5%9D%97%E9%93%BE/" rel="tag"># 区块链</a>
+              <a href="/tags/%E6%99%BA%E8%83%BD%E5%90%88%E7%BA%A6/" rel="tag"># 智能合约</a>
+              <a href="/tags/%E6%AF%94%E7%89%B9%E5%B8%81/" rel="tag"># 比特币</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/1326/" rel="prev" title="ぼくの一人戦争 感想">
+      <i class="fa fa-chevron-left"></i> ぼくの一人戦争 感想
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/1810/" rel="next" title="《反欺骗的艺术——世界传奇黑客的经历分享》读书笔记">
+      《反欺骗的艺术——世界传奇黑客的经历分享》读书笔记 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%A7%E7%BA%B2"><span class="nav-number">1.</span> <span class="nav-text">大纲</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%9A%E7%94%A8%E9%97%AE%E9%A2%98"><span class="nav-number">2.</span> <span class="nav-text">通用问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8C%BA%E5%9D%97%E9%93%BE%E6%98%AF%E8%B0%81%E5%8F%91%E6%98%8E%E7%9A%84%EF%BC%8C%E6%9C%89%E4%BB%80%E4%B9%88%E7%89%B9%E7%82%B9%EF%BC%9F"><span class="nav-number">2.1.</span> <span class="nav-text">区块链是谁发明的，有什么特点？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8C%BA%E5%9D%97%E9%93%BE%E5%92%8C%E6%AF%94%E7%89%B9%E5%B8%81%E6%98%AF%E4%BB%80%E4%B9%88%E5%85%B3%E7%B3%BB%EF%BC%9F"><span class="nav-number">2.2.</span> <span class="nav-text">区块链和比特币是什么关系？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8C%BA%E5%9D%97%E9%93%BE%E5%92%8C%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93%E6%98%AF%E4%BB%80%E4%B9%88%E5%85%B3%E7%B3%BB%EF%BC%9F"><span class="nav-number">2.3.</span> <span class="nav-text">区块链和分布式数据库是什么关系？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8C%BA%E5%9D%97%E9%93%BE%E6%9C%89%E5%93%AA%E4%BA%9B%E7%A7%8D%E7%B1%BB%EF%BC%9F"><span class="nav-number">2.4.</span> <span class="nav-text">区块链有哪些种类？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%EF%BC%88%E5%85%AC%E6%9C%89%E9%93%BE%E6%83%85%E5%86%B5%E4%B8%8B%EF%BC%89%E5%8C%BA%E5%9D%97%E9%93%BE%E6%98%AF%E5%A6%82%E4%BD%95%E9%98%B2%E6%AD%A2%E6%9C%89%E4%BA%BA%E4%BD%9C%E6%81%B6%E7%9A%84%EF%BC%9F"><span class="nav-number">2.5.</span> <span class="nav-text">（公有链情况下）区块链是如何防止有人作恶的？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8C%BA%E5%9D%97%E9%93%BE%E7%9A%84%E6%99%BA%E8%83%BD%E5%90%88%E7%BA%A6%E5%BA%94%E8%AF%A5%E6%80%8E%E4%B9%88%E8%AE%BE%E8%AE%A1%EF%BC%9F"><span class="nav-number">2.6.</span> <span class="nav-text">区块链的智能合约应该怎么设计？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E6%9F%A5%E7%9C%8B-PEM-%E6%A0%BC%E5%BC%8F%E8%AF%81%E4%B9%A6%E5%86%85%E5%AE%B9%EF%BC%9F"><span class="nav-number">2.7.</span> <span class="nav-text">如何查看 PEM 格式证书内容？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B7%B2%E7%9F%A5%E7%A7%81%E9%92%A5%EF%BC%8C%E5%A6%82%E4%BD%95%E7%94%9F%E6%88%90%E5%85%AC%E9%92%A5%EF%BC%9F"><span class="nav-number">2.8.</span> <span class="nav-text">已知私钥，如何生成公钥？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E6%A0%A1%E9%AA%8C%E6%9F%90%E8%AF%81%E4%B9%A6%E6%98%AF%E5%90%A6%E8%A2%AB%E6%A0%B9%E8%AF%81%E4%B9%A6%E7%AD%BE%E5%90%8D%EF%BC%9F"><span class="nav-number">2.9.</span> <span class="nav-text">如何校验某证书是否被根证书签名？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BD%95-Hash-%E5%87%BD%E6%95%B0%E5%B0%86%E4%BB%BB%E6%84%8F%E9%95%BF%E7%9A%84%E6%96%87%E6%9C%AC%E6%98%A0%E5%B0%84%E5%88%B0%E5%AE%9A%E9%95%BF%E7%9A%84%E6%91%98%E8%A6%81%EF%BC%8C%E5%BE%88%E5%B0%91%E4%BC%9A%E5%8F%91%E7%94%9F%E5%86%B2%E7%AA%81%EF%BC%9F"><span class="nav-number">2.10.</span> <span class="nav-text">为何 Hash 函数将任意长的文本映射到定长的摘要，很少会发生冲突？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%AF%94%E7%89%B9%E5%B8%81%E3%80%81%E4%BB%A5%E5%A4%AA%E5%9D%8A%E7%9B%B8%E5%85%B3"><span class="nav-number">3.</span> <span class="nav-text">比特币、以太坊相关</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AF%94%E7%89%B9%E5%B8%81%E5%8C%BA%E5%9D%97%E9%93%BE%E4%B8%BA%E4%BD%95%E8%A6%81%E8%AE%BE%E8%AE%A1%E4%B8%BA%E6%AF%8F-10-%E5%88%86%E9%92%9F%E6%89%8D%E5%87%BA%E6%9D%A5%E4%B8%80%E4%B8%AA%E5%9D%97%EF%BC%8C%E5%BF%AB%E4%B8%80%E4%BA%9B%E4%B8%8D%E5%8F%AF%E4%BB%A5%E5%90%97%EF%BC%9F"><span class="nav-number">3.1.</span> <span class="nav-text">比特币区块链为何要设计为每 10 分钟才出来一个块，快一些不可以吗？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AF%94%E7%89%B9%E5%B8%81%E5%8C%BA%E5%9D%97%E9%93%BE%E6%AF%8F%E4%B8%AA%E5%8C%BA%E5%9D%97%E5%A4%A7%E5%B0%8F%E4%B8%BA%E4%BD%95%E6%98%AF-1MB%EF%BC%8C%E5%A4%A7%E4%B8%80%E4%BA%9B%E4%B8%8D%E5%8F%AF%E4%BB%A5%E5%90%97%EF%BC%9F"><span class="nav-number">3.2.</span> <span class="nav-text">比特币区块链每个区块大小为何是 1MB，大一些不可以吗？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%A5%E5%A4%AA%E5%9D%8A%E7%BD%91%E7%BB%9C%E8%B7%9F%E6%AF%94%E7%89%B9%E5%B8%81%E7%BD%91%E7%BB%9C%E6%9C%89%E4%BD%95%E5%85%B3%E7%B3%BB%EF%BC%9F"><span class="nav-number">3.3.</span> <span class="nav-text">以太坊网络跟比特币网络有何关系？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B6%85%E7%BA%A7%E8%B4%A6%E6%9C%AC%E9%A1%B9%E7%9B%AE"><span class="nav-number">4.</span> <span class="nav-text">超级账本项目</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B6%85%E7%BA%A7%E8%B4%A6%E6%9C%AC%E9%A1%B9%E7%9B%AE%E4%B8%8E%E4%BC%A0%E7%BB%9F%E5%85%AC%E6%9C%89%E5%8C%BA%E5%9D%97%E9%93%BE%E6%9C%89%E4%BD%95%E4%B8%8D%E5%90%8C%EF%BC%9F"><span class="nav-number">4.1.</span> <span class="nav-text">超级账本项目与传统公有区块链有何不同？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8C%BA%E5%9D%97%E9%93%BE%E6%9C%80%E6%97%A9%E6%98%AF%E5%85%AC%E6%9C%89%E9%93%BE%E5%BD%A2%E5%BC%8F%EF%BC%8C%E4%B8%BA%E4%BD%95%E7%8E%B0%E5%9C%A8%E8%81%94%E7%9B%9F%E9%93%BE%E5%9C%A8%E5%BE%88%E5%A4%9A%E5%9C%BA%E6%99%AF%E4%B8%8B%E5%BE%97%E5%88%B0%E6%9B%B4%E5%A4%9A%E6%8E%A8%E5%B4%87%EF%BC%9F"><span class="nav-number">4.2.</span> <span class="nav-text">区块链最早是公有链形式，为何现在联盟链在很多场景下得到更多推崇？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%87%E7%94%A8-BFT-%E7%B1%BB%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95%E6%97%B6%EF%BC%8C%E8%8A%82%E7%82%B9%E6%8E%89%E7%BA%BF%E5%90%8E%E9%87%8D%E6%96%B0%E5%8A%A0%E5%85%A5%E7%BD%91%E7%BB%9C%EF%BC%8C%E5%87%BA%E7%8E%B0%E6%97%A0%E6%B3%95%E5%90%8C%E6%AD%A5%E6%83%85%E5%86%B5%E6%80%8E%E4%B9%88%E5%8A%9E%EF%BC%9F"><span class="nav-number">4.3.</span> <span class="nav-text">采用 BFT 类共识算法时，节点掉线后重新加入网络，出现无法同步情况怎么办？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B6%85%E7%BA%A7%E8%B4%A6%E6%9C%AC-Fabric-%E9%87%8C%E7%9A%84%E5%AE%89%E5%85%A8%E6%80%A7%E5%92%8C%E9%9A%90%E7%A7%81%E6%80%A7%E6%98%AF%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E7%9A%84%EF%BC%9F"><span class="nav-number">4.4.</span> <span class="nav-text">超级账本 Fabric 里的安全性和隐私性是如何保证的？</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt=""
+      src="/sys-imgs/42553027_1.png">
+  <p class="site-author-name" itemprop="name"></p>
+  <div class="site-description" itemprop="description">This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">247</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">flandre</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">328k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">4:58</span>
+</div>
+  <div class="powered-by">Powered by love
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kerisa.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="函数监视器可以监视代码中对外部函数的调用情况，通过这些调用信息可以让我们方便理解程序的意图。类似的实现思路可以用 dll 转发或者微软的 detour 库实现 api hook。最近我自己写了一个函数监视器，可以监视进程内所有模块导出函数的调用情况，并且可以自行选择需要监视和设置断点的函数。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="实现函数监视器">
+<meta property="og:url" content="https://kerisa.github.io/1205/index.html">
+<meta property="og:site_name" content="Re: Memory (mirror)">
+<meta property="og:description" content="函数监视器可以监视代码中对外部函数的调用情况，通过这些调用信息可以让我们方便理解程序的意图。类似的实现思路可以用 dll 转发或者微软的 detour 库实现 api hook。最近我自己写了一个函数监视器，可以监视进程内所有模块导出函数的调用情况，并且可以自行选择需要监视和设置断点的函数。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2020/05/%E5%AE%9E%E7%8E%B0%E5%87%BD%E6%95%B0%E7%9B%91%E8%A7%86%E5%99%A8-%E5%9B%BE3.png">
+<meta property="article:published_time" content="2020-05-01T12:25:12.000Z">
+<meta property="article:modified_time" content="2025-07-21T18:42:00.702Z">
+<meta property="article:author" content="flandre">
+<meta property="article:tag" content="api">
+<meta property="article:tag" content="hook">
+<meta property="article:tag" content="monitor">
+<meta property="article:tag" content="函数监视器">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kerisa.github.io/assets/imgs/2020/05/%E5%AE%9E%E7%8E%B0%E5%87%BD%E6%95%B0%E7%9B%91%E8%A7%86%E5%99%A8-%E5%9B%BE3.png">
+
+<link rel="canonical" href="https://flandre-scarlet.moe/blog/1205/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>实现函数监视器 | Re: Memory (mirror)</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Re: Memory (mirror)</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/1205/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/sys-imgs/42553027_1.png">
+      <meta itemprop="name" content="flandre">
+      <meta itemprop="description" content="This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Re: Memory (mirror)">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          实现函数监视器
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-05-01 20:25:12" itemprop="dateCreated datePublished" datetime="2020-05-01T20:25:12+08:00">2020-05-01</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-07-22 02:42:00" itemprop="dateModified" datetime="2025-07-22T02:42:00+08:00">2025-07-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%A8%8B%E5%BA%8F/" itemprop="url" rel="index"><span itemprop="name">程序</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.8k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>函数监视器可以监视代码中对外部函数的调用情况，通过这些调用信息可以让我们方便理解程序的意图。<br>类似的实现思路可以用 dll 转发或者微软的 detour 库实现 api hook。<br>最近我自己写了一个函数监视器，可以监视进程内所有模块导出函数的调用情况，并且可以自行选择需要监视和设置断点的函数。</p>
+<span id="more"></span>
+<h2 id="方案确定"><a href="#方案确定" class="headerlink" title="方案确定"></a>方案确定</h2><p>既然是监视调用情况，那么必须在目标函数被调用前将控制权转交给监视器。常见思路有：</p>
+<ol>
+<li>中断。即在入口设置断点，这样调用时被会产生软件异常。随后可以选择在进程内处理异常或者通过调试器接管异常。</li>
+<li>中转。其实就是常说的 hook。通过改变代码的执行流程达到获取控制权的效果。可以直接 hook 入口代码，也可以 hook 导出表。</li>
+</ol>
+<p>两种方法都各有优缺点。但总的来说中转法的处理效率较高，而且不会搞出异常来干扰调试。我的函数监视器也是使用 hook 的方案。</p>
+<p>因为 hook 必然是在目标进程内处理的。因此也有不同的注入方式：</p>
+<ol>
+<li>模块注入。注入自己的 dll 模块来执行代码，处理函数的 hook。</li>
+<li>代码注入。不通过加载额外模块的形式，不显眼一些。</li>
+</ol>
+<p>如果用模块注入的话在开发过程中可以比较方便的调试，代码注入就麻烦多了。此外如果用模块注入，因为模块是由系统加载的，根据实现的不同，系统可能在加载模块时已经加载了其他模块，这样可能会错过对这些模块的函数调用的监视。因此要监视系统对外部函数的调用情况就要用代码注入的方式。这里我也用了代码注入的方式。</p>
+<p>接下来确定工作方式。因为监视器要有交互和输出，所以可以选：</p>
+<ol>
+<li>内挂。在目标进程中创建窗口，输出数据，同时函数监视的工作也在目标进程内完成。</li>
+<li>C&#x2F;S模式。把目标进程当作客户端，另实现一个用于操作和输出数据的程序，两者通过 ipc 进行交互。</li>
+</ol>
+<p>显然 C&#x2F;S 模式的好处更明显。</p>
+<p>因为使用了代码 hook，所以使用汇编是不可避免的，但是剩下大部分的功能还是可以使用高级语言来开发。界面部分其实我是想偷懒用了 MFC，也可以用其他 UI 框架来实现。我只处理了 32 位程序的监控，64 位的还不支持。</p>
+<h2 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h2><p>主要分为两个工程，即注入部分和监控部分，分别称为 PayLoad 和 ApiMonitor。PayLoad 是注入目标进程执行的，因此要将 crt 修改为静态链接。ApiMonitor 则没有什么特殊的需求。UI 的布局如下，左侧列出进程中的模块、导出函数和断点等相关数据，右侧记录了函数的调用信息，如调用序号、调用线程、返回地址、函数名等，因为调用记录相当的多，界面上应该用虚表避免刷新效率低下。另外可以看到系统 dll 就有一堆，我简单地用配置文件记录了各个模块 api 的 hook 情况和断点设置，可以在勾选后通过菜单选项保存到磁盘上，避免一次次浪费时间确认要 hook 哪些函数。<img src="/assets/imgs/2020/05/%E5%AE%9E%E7%8E%B0%E5%87%BD%E6%95%B0%E7%9B%91%E8%A7%86%E5%99%A8-%E5%9B%BE3.png">PS：左侧函数 va 和弹窗里的不同是因为左侧的是 kernel32 里的函数。</p>
+<h3 id="启动目标进程并注入-PayLoad-模块"><a href="#启动目标进程并注入-PayLoad-模块" class="headerlink" title="启动目标进程并注入 PayLoad 模块"></a>启动目标进程并注入 PayLoad 模块</h3><p>为了抢占最好的代码注入时机，所以使用监视器来启动目标进程，等到程序运行后再注入就比较受限，也会错过许多函数的调用监视。设定好目标进程的路径、启动参数和启动目录等参数就可以了，当然根据 CreateProcess 的参数我们也可以相当提供更多的设置项，这里我就放了个目标路径。随后以 CREATE_SUSPEND 方式启动，然后就可以注入代码了。注入代码需要自己实现重定位，偷懒的话直接注入到默认加载地址 0x10000000 上应该也行，毕竟进程空间还是空荡荡的。因为 ntdll 在同一个 session 中的基址是固定的，所以一些数据可以直接从监控端自己进程中的 ntdll 来获得。另外一些必要的参数也可以在创建目标进程后由监控端直接写入进程的固定地址，简化操作。</p>
+<h3 id="hook"><a href="#hook" class="headerlink" title="hook"></a>hook</h3><p>静态依赖的 dll 是在进程启动时由 LdrpInitializeProcess 解析 dll 的导入表，并由 LdrpLoadDependentModule 递归加载，加载到进程空间时会调用 NtMapViewOfSection 进行映射，可以选择在这里做 hook。因为动态加载 dll 时也会经过 LdrLoadDll 来到 NtMapViewOfSection，所以只要在这里拦住就可以处理所有的 dll 了。另外，在所有依赖的 dll 都映射到内存空间后就会根据顺序通过 LdrpCallInitRoutine 逐个调用他们的入口函数。</p>
+<p>; 递归加载静态依赖的 dll<br>00 02f9e710 77853631 ntdll!NtMapViewOfSection<br>01 02f9e768 7785340f ntdll!LdrpMinimalMapModule+0x93<br>02 02f9e790 7785549d ntdll!LdrpMapDllWithSectionHandle+0x15<br>03 02f9e7c0 778604eb ntdll!LdrpLoadKnownDll+0xf4<br>04 02f9e7e4 77847925 ntdll!LdrpFindOrPrepareLoadingModule+0x80<br>05 02f9ee00 77846700 ntdll!LdrpLoadDependentModule+0x1175<br>06 02f9ee48 77853565 ntdll!LdrpMapAndSnapDependency+0x190<br>07 02f9ee70 7785549d ntdll!LdrpMapDllWithSectionHandle+0x16b<br>08 02f9eea0 778604eb ntdll!LdrpLoadKnownDll+0xf4<br>09 02f9eec4 77847925 ntdll!LdrpFindOrPrepareLoadingModule+0x80<br>0a 02f9f4e0 77846700 ntdll!LdrpLoadDependentModule+0x1175<br>0b 02f9f528 778b91f2 ntdll!LdrpMapAndSnapDependency+0x190<br>0c 02f9f788 77861dc1 ntdll!LdrpInitializeProcess+0x1b32<br>0d 02f9f7e0 77861cb1 ntdll!_LdrpInitialize+0xba<br>0e 02f9f7ec 00000000 ntdll!LdrInitializeThunk+0x11</p>
+<p>; LdrpLoadDll 的路径，加载 dll 最终也会通过 NtMapViewOfSection 进行映射<br>00 02f9f228 77853631 ntdll!NtMapViewOfSection<br>01 02f9f280 7785340f ntdll!LdrpMinimalMapModule+0x93<br>02 02f9f2a8 7785549d ntdll!LdrpMapDllWithSectionHandle+0x15<br>03 02f9f2d8 778604eb ntdll!LdrpLoadKnownDll+0xf4<br>04 02f9f2fc 77845029 ntdll!LdrpFindOrPrepareLoadingModule+0x80<br>05 02f9f358 77854e8c ntdll!LdrpLoadDllInternal+0xbd<br>06 02f9f498 77854db3 ntdll!LdrpLoadDll+0x7e<br>07 02f9f518 778b8d85 ntdll!LdrLoadDll+0x93</p>
+<p>hook 导出函数则通过 hook 导出表来实现，这样可以避免修改原始函数，稍微隐蔽一些。hook 导出表也有两种，一种是直接替换原始导出表中 AddressOfFunctions 表的 rva 地址。在 32 位程序中，可以利用整数溢出来跳转到任何地址，也就是说我们的中转函数地址可以小于模块的基址；64 位程序就要用其他办法了，比如模块重定位之类的。另一种则是新建一个导出表，然后替换 PE 头里导出表的地址为新表的地址。甚至还可以在 RtlImageDirectoryEntryToData 中替换获取到的导出表地址。因为像 GetProcAddress 会使用这个 api 来定位导出表。接管这个函数我们就可以实现无模块修改的导出表 hook。除非是那些自己实现了 GetProcAddress 的程序，这样可能会遗漏掉。</p>
+<h3 id="通信"><a href="#通信" class="headerlink" title="通信"></a>通信</h3><p>通信采用命名管道。另外，还要定义收发消息的数据结构。这里简单地采用一个枚举作为消息的类型，并自行做消息体的封包和解包。 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">ModuleFilter</span> &#123; Allocator::string name; <span class="type">bool</span> filter; std::vector&lt;<span class="type">char</span>, Allocator::allocator&lt;<span class="type">char</span>&gt;&gt; <span class="built_in">Serial</span>() &#123; std::vector&lt;<span class="type">char</span>, Allocator::allocator&lt;<span class="type">char</span>&gt;&gt; vec; <span class="built_in">SerialInit</span>(vec); <span class="built_in">SerialItem</span>(vec, name); <span class="comment">// 逐个附加字段即可 SerialItem(vec, filter); CalFinalLength(vec); return vec; &#125; void Unserial(std::vector&lt;char, Allocator::allocator&lt;char&gt;&gt;&amp; str) &#123; size\_t idx = GetFirstItemIndex(str); idx = ExtractItem(str, idx, name); // 保持相同顺序，逐个附加字段即可 idx = ExtractItem(str, idx, filter); &#125; &#125;;</span></span><br></pre></td></tr></table></figure> 这里有一点，虽然我在 PayLoad 里启动了读写线程来进行简单的批量收发数据和缓存，但实际上实现的还是服务端被动回复模式，如果要求支持更多的操作，实现全双工模式的话，就需要修改服务端的实现，从而进行主动发送消息。PayLoad 端也需要修改，比如使用完成端口等更加高效的方式，这会增加了不少工作量；另外这在目标进程里的动作也更大了，可能要考虑是否会被保护代码检测到。总之，现在就是 PayLoad 主动发消息，监控端处理并只在此时发送回复消息。</p>
+<h3 id="消息"><a href="#消息" class="headerlink" title="消息"></a>消息</h3><p>主要设置了以下几个事件：发送模块导出函数消息、回复函数过滤消息、函数调用消息这三个。监控端收到模块导出函数消息后会在 UI 上提供是否 hook 相应函数的选择，同时也可以设置断点，然后一并回复给 PayLoad。目标进程在调用了监控的函数时则发送函数调用消息给监控端，这里也利用了 PayLoad 会等待监控端回复的特点，如果触发了“断点”，监控端可以先不回复，那么目标线程就会一直等待消息，此时可以做附加调试器等操作了。</p>
+<h3 id="要注意的一些点"><a href="#要注意的一些点" class="headerlink" title="要注意的一些点"></a>要注意的一些点</h3><ul>
+<li>因为系统 dll 的 hook 发生在进程早期，crt 的设施都没有初始化，要使用容器的话需要自行创建堆，实现 stl 的内存分配器。</li>
+<li>初期 kernel32 的上层接口不一定可用，最好是用 ntdll 的 ntapi。</li>
+<li>在调试的时候因为附加调试器也会触发系统 dll 的加载，观察到的执行流程和没有调试器时相比会有变化，不过对代码执行影响倒不大，该崩的时候还是得崩。。。。作为对比，可以通过命令行的 windbg 来加载，比如可以用 <em>windbg.exe -xe cpr notepad.exe</em> 创建进程观察一番。</li>
+</ul>
+<p>通过上面介绍的几个要点就能建立一个可用的监视器了，但要使软件更加易用仍需要大量的开发工作，比如 UI 的可操作性，监视器设置的保存载入，提高函数过滤的稳定性等。比方说如果目标进程有大量线程在输出日志，其中一个命中了断点开始等待监控端回复，但是其他线程仍在大量输出，而监控端没能及时收走，这就可能会使管道的缓存爆满，进而数据丢失、消息破坏。又比如我在监控一个大一点的软件时 hook 的函数太多，软件还没启动完就收到了 100w+ 的记录，爆内存了。。。虽说实际使用中只会 hook 必要的函数，但是实现上的缺陷还是需要避免的。因此要达到工具级别就需要更多枯燥的编码和测试工作，工作量至少 x9，因此这里也就仅仅实现了一些必要的功能。</p>
+<p>代码见<a target="_blank" rel="noopener" href="https://github.com/Kerisa/ApiMonitor">这里</a></p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>flandre
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://kerisa.github.io/1205/" title="实现函数监视器">https://kerisa.github.io/1205/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/api/" rel="tag"># api</a>
+              <a href="/tags/hook/" rel="tag"># hook</a>
+              <a href="/tags/monitor/" rel="tag"># monitor</a>
+              <a href="/tags/%E5%87%BD%E6%95%B0%E7%9B%91%E8%A7%86%E5%99%A8/" rel="tag"># 函数监视器</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/1784/" rel="prev" title="《软件保护及分析技术——原理与实践》读书笔记">
+      <i class="fa fa-chevron-left"></i> 《软件保护及分析技术——原理与实践》读书笔记
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/1245/" rel="next" title="世界と世界の真ん中で 感想">
+      世界と世界の真ん中で 感想 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B9%E6%A1%88%E7%A1%AE%E5%AE%9A"><span class="nav-number">1.</span> <span class="nav-text">方案确定</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B7%E4%BD%93%E5%AE%9E%E7%8E%B0"><span class="nav-number">2.</span> <span class="nav-text">具体实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8%E7%9B%AE%E6%A0%87%E8%BF%9B%E7%A8%8B%E5%B9%B6%E6%B3%A8%E5%85%A5-PayLoad-%E6%A8%A1%E5%9D%97"><span class="nav-number">2.1.</span> <span class="nav-text">启动目标进程并注入 PayLoad 模块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#hook"><span class="nav-number">2.2.</span> <span class="nav-text">hook</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%9A%E4%BF%A1"><span class="nav-number">2.3.</span> <span class="nav-text">通信</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B6%88%E6%81%AF"><span class="nav-number">2.4.</span> <span class="nav-text">消息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A6%81%E6%B3%A8%E6%84%8F%E7%9A%84%E4%B8%80%E4%BA%9B%E7%82%B9"><span class="nav-number">2.5.</span> <span class="nav-text">要注意的一些点</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt=""
+      src="/sys-imgs/42553027_1.png">
+  <p class="site-author-name" itemprop="name"></p>
+  <div class="site-description" itemprop="description">This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">247</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">flandre</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">328k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">4:58</span>
+</div>
+  <div class="powered-by">Powered by love
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

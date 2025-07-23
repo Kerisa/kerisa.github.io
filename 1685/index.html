@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kerisa.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="[mathjax] 在看 CTF 时发现了 zip 明文攻击的攻击方式，然而举的例子里基本都是使用工具——也就是 ARCHPR 简单完成破解，转而进行下一步操作，对明文攻击本身并没有做更多解释。本想看看 ARCHPR 的明文攻击实现的，结果发现这东西是商业软件……于是开始找其他资料。 简单搜了一圈发现这种攻击是基于 Biham 和 Kocher 在 94 年发表的论文《A Known Plaint">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ZIP 明文攻击原理">
+<meta property="og:url" content="https://kerisa.github.io/1685/index.html">
+<meta property="og:site_name" content="Re: Memory (mirror)">
+<meta property="og:description" content="[mathjax] 在看 CTF 时发现了 zip 明文攻击的攻击方式，然而举的例子里基本都是使用工具——也就是 ARCHPR 简单完成破解，转而进行下一步操作，对明文攻击本身并没有做更多解释。本想看看 ARCHPR 的明文攻击实现的，结果发现这东西是商业软件……于是开始找其他资料。 简单搜了一圈发现这种攻击是基于 Biham 和 Kocher 在 94 年发表的论文《A Known Plaint">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-12-14T14:41:19.000Z">
+<meta property="article:modified_time" content="2025-07-21T18:42:00.581Z">
+<meta property="article:author" content="flandre">
+<meta property="article:tag" content="CTF">
+<meta property="article:tag" content="ZIP">
+<meta property="article:tag" content="ZipCrypto">
+<meta property="article:tag" content="密码学">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://flandre-scarlet.moe/blog/1685/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>ZIP 明文攻击原理 | Re: Memory (mirror)</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Re: Memory (mirror)</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/1685/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/sys-imgs/42553027_1.png">
+      <meta itemprop="name" content="flandre">
+      <meta itemprop="description" content="This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Re: Memory (mirror)">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ZIP 明文攻击原理
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-12-14 22:41:19" itemprop="dateCreated datePublished" datetime="2021-12-14T22:41:19+08:00">2021-12-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-07-22 02:42:00" itemprop="dateModified" datetime="2025-07-22T02:42:00+08:00">2025-07-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%A8%8B%E5%BA%8F/" itemprop="url" rel="index"><span itemprop="name">程序</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>[mathjax]</p>
+<p>在看 CTF 时发现了 zip 明文攻击的攻击方式，然而举的例子里基本都是使用工具——也就是 ARCHPR 简单完成破解，转而进行下一步操作，对明文攻击本身并没有做更多解释。本想看看 ARCHPR 的明文攻击实现的，结果发现这东西是商业软件……于是开始找其他资料。</p>
+<p>简单搜了一圈发现这种攻击是基于 Biham 和 Kocher 在 94 年发表的论文<a target="_blank" rel="noopener" href="https://link.springer.com/content/pdf/10.1007/3-540-60590-8_12.pdf">《A Known Plaintext Attack on the PKZIP Stream Cipher》</a>实现的。 明文攻击主要利用大于 12 字节的一段已知明文数据进行攻击，从而获取整个加密文档的数据。也就是说，如果我手里有一个未知密码的压缩包和压缩包内某个文件的一部分明文（不一定非要从头开始，能确定偏移就行），那么我就可以通过这种攻击来解开整个压缩包。比如压缩包里有一个常见的 license 文件，或者是某个常用的 dll 库，或者是带有固定头部的文件（比如 xml、exe、png 等容易推导出原始内容的文件），那么就可以运用这种攻击。当然，前提是压缩包要用 ZipCrypto 加密。</p>
+<span id="more"></span>
+<p>也就是说从明文到密文的这个流程中我们有了头尾两端的数据，再利用加密算法中的弱点还原出加密密钥，从而解密整个压缩包（同一个压缩包的文件都是用同一个密钥加密）。但是仍然要注意，如果文件在加密前经过了压缩，加密算法的输入不再是我们所知道的明文而是压缩后的数据，明文攻击会失败（在压缩包里查看文件的属性可以看到压缩方式，比如“ZipCrypto Deflate”就是加密压缩，“ZipCrypto Store”就是加密储存）。这就多了找出明文压缩后的数据这样一个额外步骤。</p>
+<h2 id="ZipCrypto"><a href="#ZipCrypto" class="headerlink" title="ZipCrypto"></a>ZipCrypto</h2><p>要想攻击首先需要知道 ZipCrypto 的加密方式。这个加密算法是面向字节流的（而现代对称加密算法是对一个分组进行加密），它内部使用了 3 个 32 比特的整数来表示密钥，可以将它们称为 key0，key1 和 key2。通常我们在打包文件时输入的密码会被转换成这 3 个 dword。算法基本就是用一个循环来加密数据，加密函数记为 UpdateKeys，cpp 代码如下： [cpp] &#x2F;&#x2F; p 是用来更新内部 key 的明文 &#x2F;&#x2F; lsb、msb 分别表示取 dword 的最低和最高字节（不是位） void PKCipher::UpdateKeys(uint8_t p) { k0 &#x3D; crc::Crc32(k0, p); k1 &#x3D; (k1 + crc::lsb(k0)) * 134775813 + 1; &#x2F;&#x2F; 134775813 是 magic number k2 &#x3D; crc::Crc32(k2, crc::msb(k1)); } uint8_t PKCipher::GetK3() { uint16_t tmp &#x3D; k2 3; return crc::lsb((tmp * (tmp ^ 1)) &gt;&gt; 8); } void PKCipher::Encrypt(std::vector&lt;uint8_t&gt;&amp; data) { for (uint8_t&amp; p : data) { uint8_t c &#x3D; p ^ GetK3(); UpdateKeys(p); p &#x3D; c; } } [&#x2F;cpp] UpdateKeys 仅仅是更新了内部 key，真正对明文进行加密用的是从 key2 派生出来的 16 比特的 key3。可以看到，不仅 key3 只有 16 比特长，它的低两位因为和 3 做了位与操作所以必然是 1，使得 key3 的取值范围缩小到 <figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">2<span class="built_in">^</span>&#123;14&#125;</span><br></pre></td></tr></table></figure>，这就有了反推的基础。</p>
+<h2 id="明文攻击"><a href="#明文攻击" class="headerlink" title="明文攻击"></a>明文攻击</h2><p>先将明文的序列记为 P，下标从 1 到 n，这里的 <figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">P<span class="keyword">\_</span>1</span><br></pre></td></tr></table></figure> 是指序列中的第一个，并不一定代表这是第一个明文字节。同样有密文序列记为 <figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">C<span class="keyword">\_</span>&#123;1 <span class="keyword">\\</span>ldots n&#125;</span><br></pre></td></tr></table></figure>，密钥序列 <figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Key0<span class="keyword">\_</span>&#123;1 <span class="keyword">\\</span>ldots n&#125;</span><br></pre></td></tr></table></figure>，<figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Key1<span class="keyword">\_</span>&#123;1 <span class="keyword">\\</span>ldots n&#125;</span><br></pre></td></tr></table></figure> 和 <figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Key2<span class="keyword">\_</span>&#123;1 <span class="keyword">\\</span>ldots n&#125;</span><br></pre></td></tr></table></figure>。根据 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">uint8\<span class="type">_t</span> c = p ^ <span class="built_in">GetK3</span>();</span><br></pre></td></tr></table></figure> 我们首先就能得到相应的 <figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Key3<span class="keyword">\_</span>&#123;1 <span class="keyword">\\</span>ldots n&#125;</span><br></pre></td></tr></table></figure> 序列。</p>
+<h2 id="Key2"><a href="#Key2" class="headerlink" title="Key2"></a>Key2</h2><p>Key3 只受 Key2 的 [2..16) 位影响，所以 Key2 一共有 <figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">2<span class="built_in">^</span>&#123;14&#125;=16384</span><br></pre></td></tr></table></figure> 个可能，而 Key3 只有一个字节，即 256 个不同的值，那么反过来从一个已知的 Key3 平均可以映射到 <figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;16384 <span class="keyword">\\</span>over 256&#125;=64</span><br></pre></td></tr></table></figure> 个可能的 Key2[2..16)，剩下的比特位仍然未知。 由 crc32 的逆运算可以得到 $$\begin{align} Key2_i &amp; &#x3D; crc32^{-1}(Key2_{i+1}, MSB(Key1_{i+1})) \\\\ &amp; &#x3D; (Key2_{i+1} &lt;&lt; 8) \bigoplus crcinvtab[MSB(Key2_{i+1})] \bigoplus MSB(Key1_{i+1}) \end{align}$$ 来看公式右边的三个部分：</p>
+<ol>
+<li>在 <figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Key2<span class="keyword">\_</span>&#123;i+1&#125;</span><br></pre></td></tr></table></figure> &lt;&lt; 8 中它的低 8 位总是 0，而 Key2 的最低两位在 Key3 逆推时也没有考虑在内，所以计算结果的 [10,32) 是“有效”的，会影响下一个迭代的 Key2</li>
+<li><figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">crcinvtab<span class="keyword">\[</span>MSB(Key2<span class="keyword">\_</span>&#123;i+1&#125;)<span class="keyword">\]</span></span><br></pre></td></tr></table></figure> 的值对每个可能的 Key2 都是确定的，并且 \[0,32) 位都有效</li>
+<li><figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MSB(Key1<span class="keyword">\_</span>&#123;i+1&#125;)</span><br></pre></td></tr></table></figure> 它的结果是一个字节，那么 \[8,32) 都是 0，只有 \[0,8) 会影响 Key2</li>
+</ol>
+<p>这样等式两侧的比特位取个交集可以看到 Key2[10,16) 的比特位是两边都知道的，而我们也知道每个 <figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Key2<span class="keyword">\_</span>i</span><br></pre></td></tr></table></figure> 在 [2,16) 范围里都有 64 个可能的值，那么通过对比相邻 Key2 的 [10,16) 部分，找不到相等值的 Key2 就可以排除掉，从而减少我们的搜索空间。比如从 64 个结果中取出一个可能的 <figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Key2<span class="keyword">\_</span>i</span><br></pre></td></tr></table></figure>，遍历 64 个 <figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Key2<span class="keyword">\_</span>&#123;i-1&#125;</span><br></pre></td></tr></table></figure>，如果所有 <figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Key2<span class="keyword">\_</span>&#123;i-1&#125;</span><br></pre></td></tr></table></figure> 的 [10,16) 部分和当前的 <figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Key2<span class="keyword">\_</span>i</span><br></pre></td></tr></table></figure> 都不相等，那么就可以排除掉这个 <figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Key2<span class="keyword">\_</span>i</span><br></pre></td></tr></table></figure>。显然 Key2 的序列越多，能排除的值也越多，实际操作中只要使用二十多个字节就能大幅缩小可能的值。</p>
+<h2 id="Key1"><a href="#Key1" class="headerlink" title="Key1"></a>Key1</h2><p>缩小 Key2 的数量后就要开始一个个枚举了，中间计算出的所有可能值最终都要一个个验证并排除。继续根据公式倒推。迭代 Key2 时有个 <figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MSB(Key1<span class="keyword">\_</span>&#123;i+1&#125;<span class="keyword">\]</span>)</span><br></pre></td></tr></table></figure> 在里面，现在我们在逐个枚举 Key2，那么这个过程中我们也可以得到所有 Key1 的最高字节（准确说是从第三个 Key1 开始，因为倒推 Key2 时我们只能倒推到第二个为止，根据公式第一个 Key2 需要第零个 Key2，算不了）。 再看 Key1 的。$$Key1_{n-1} + LSB(Key0_n) &#x3D; (Key1_n - 1) * 134775813^{-1}$$ <figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">134775813<span class="built_in">^</span>&#123;-1&#125;</span><br></pre></td></tr></table></figure> 是 134775813 的<a target="_blank" rel="noopener" href="https://oi-wiki.org/math/number-theory/inverse/">乘法逆元</a>，可以计算出它的真实值是 0xd94fa8cd，并不是它的倒数。 因为我们现在已经确定 Key1 的最高字节，那么在公式两边同时取 MSB 就可以建立 <figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Key1<span class="keyword">\_</span>n</span><br></pre></td></tr></table></figure> 和 <figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Key1<span class="keyword">\_</span>&#123;n-1&#125;</span><br></pre></td></tr></table></figure> 之间的关系。因为 <figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">LSB(Key0<span class="keyword">\_</span>n)</span><br></pre></td></tr></table></figure> 只是一个字节，在左边整体取完 MSB 后它最多只会使最终结果加一或减一，在实际比较中只要加上这个处理就行。然后如法炮制，遍历 Key1 的 [0,24)，找到可能的 Key1 值，然后继续搜索下一个可能值即可（这部分可以打表大幅优化速度）。</p>
+<h2 id="Key0"><a href="#Key0" class="headerlink" title="Key0"></a>Key0</h2><p>同样上面遍历 Key1 时我们也得到了相匹配的 Key0 （可能的）最低字节序列。然后计算 <figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Key0<span class="keyword">\_</span>&#123;n+1&#125;</span><br></pre></td></tr></table></figure> 则直接根据 UpdateKeys 函数计算 crc 即可。 论文里提到说 crc32 是线性函数，只要有四个连续的 LSB(Key0) 和与它配对的明文就可以完整还原出四个 Key0 的值。然后只要有了一个完整的 Key0，所有 <figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Key0<span class="keyword">\_</span>&#123;1 <span class="keyword">\\</span>ldots n&#125;</span><br></pre></td></tr></table></figure> 的值也都能推出来。 因为 UpdateKeys 里那个 crc32 展开后是 $$Key0_{n+1} &#x3D; (Key0_n &gt;&gt; 8) \bigoplus crctab[LSB(Key0_n \bigoplus P_n)]$$（其中 P 代表明文）。<figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">LSB(Key0<span class="keyword">\_</span>n)</span><br></pre></td></tr></table></figure> 和 <figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">P<span class="keyword">\_</span>n</span><br></pre></td></tr></table></figure> 已知，那么可以得到唯一的 <figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MSB(Key0<span class="keyword">\_</span>&#123;n+1&#125;)</span><br></pre></td></tr></table></figure>。然后已知 <figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Key0<span class="keyword">\_</span>&#123;n+1&#125;</span><br></pre></td></tr></table></figure> 的 [0,8) 和 [24,32)，再计算，可以得到 <figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Key0<span class="keyword">\_</span>&#123;n+2&#125;</span><br></pre></td></tr></table></figure> 的 [0,8) 和 [16,32)。再下一个就是完整的 [0,32) 了，所以能全部还原出来。<a target="_blank" rel="noopener" href="https://github.com/kimci86/bkcrack">bkcrack</a> 的代码中是</p>
+<ol>
+<li>直接从 <figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Key0<span class="keyword">\_</span>5</span><br></pre></td></tr></table></figure> 算到 <figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Key0<span class="keyword">\_</span>8</span><br></pre></td></tr></table></figure>（算出了完整的 <figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Key0<span class="keyword">\_</span>8</span><br></pre></td></tr></table></figure>）</li>
+<li>然后用已知的 <figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Key0<span class="keyword">\_</span>8</span><br></pre></td></tr></table></figure> 到 <figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Key0<span class="keyword">\_</span>&#123;11&#125;</span><br></pre></td></tr></table></figure> 的 LSB 验证上一步的结果</li>
+<li>再从 <figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Key0<span class="keyword">\_</span>8</span><br></pre></td></tr></table></figure> 倒推至 <figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Key0<span class="keyword">\_</span>4</span><br></pre></td></tr></table></figure></li>
+<li>利用 Key2 的迭代公式，代入 <figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Key2<span class="keyword">\_</span>2</span><br></pre></td></tr></table></figure> 倒推出 <figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Key1<span class="keyword">\_</span>2</span><br></pre></td></tr></table></figure> 的 [26,32) 位（因为推导 Key2 时低两位没参与，所以这里得到的 Key1 也抠掉了两位）</li>
+<li>利用 Key1 的迭代公式配合得到的 Key0，将 <figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Key1<span class="keyword">\_</span>4</span><br></pre></td></tr></table></figure> 和 <figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Key0<span class="keyword">\_</span>4</span><br></pre></td></tr></table></figure> 代入并倒推两次得到 <figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Key1<span class="keyword">\_</span>2</span><br></pre></td></tr></table></figure></li>
+<li>比较上面两步各自得到的 <figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Key1<span class="keyword">\_</span>2</span><br></pre></td></tr></table></figure> 的差，如果小于 <figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">2<span class="built_in">^</span>&#123;27&#125;-1+256</span><br></pre></td></tr></table></figure> 则通过验证（因为公式里还有个 LSB(Key0)，所以再加上 256）</li>
+</ol>
+<h2 id="原始-Key"><a href="#原始-Key" class="headerlink" title="原始 Key"></a>原始 Key</h2><p>全部算完后就可以开始算最初的三个 key 了。将 3 个 key 的第八次迭代值作为初始值，配合明文进行 UpdateKeys 的逆运算。这里倒推时除了明文的部分（比如这里从第八个字节的明文开始）遍历完之外，还有 12 个字节的 ZIP 头部也要接着遍历，这才把原始 key 都拿到手。  </p>
+<p>我写的<a target="_blank" rel="noopener" href="https://github.com/Kerisa/zipcrack">样例代码</a>也是参考 <a target="_blank" rel="noopener" href="https://github.com/kimci86/bkcrack">bkcrack</a>，虽然能也能跑出结果但是因为没做优化所以慢得一批，姑且留了一份。</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>flandre
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://kerisa.github.io/1685/" title="ZIP 明文攻击原理">https://kerisa.github.io/1685/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/CTF/" rel="tag"># CTF</a>
+              <a href="/tags/ZIP/" rel="tag"># ZIP</a>
+              <a href="/tags/ZipCrypto/" rel="tag"># ZipCrypto</a>
+              <a href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" rel="tag"># 密码学</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/1658/" rel="prev" title="pwnable.kr 练习（二）">
+      <i class="fa fa-chevron-left"></i> pwnable.kr 练习（二）
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/1820/" rel="next" title="《闪之轨迹》通关心得">
+      《闪之轨迹》通关心得 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#ZipCrypto"><span class="nav-number">1.</span> <span class="nav-text">ZipCrypto</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%98%8E%E6%96%87%E6%94%BB%E5%87%BB"><span class="nav-number">2.</span> <span class="nav-text">明文攻击</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Key2"><span class="nav-number">3.</span> <span class="nav-text">Key2</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Key1"><span class="nav-number">4.</span> <span class="nav-text">Key1</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Key0"><span class="nav-number">5.</span> <span class="nav-text">Key0</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8E%9F%E5%A7%8B-Key"><span class="nav-number">6.</span> <span class="nav-text">原始 Key</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt=""
+      src="/sys-imgs/42553027_1.png">
+  <p class="site-author-name" itemprop="name"></p>
+  <div class="site-description" itemprop="description">This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">247</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">flandre</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">328k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">4:58</span>
+</div>
+  <div class="powered-by">Powered by love
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

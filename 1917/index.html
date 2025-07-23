@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kerisa.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="非常短小精悍的剧本，没有什么注水剧情反而比较讨喜。大概花 10 小时就能走完全部剧情。 整体上是由 BE 铺出的 TE 之路，通过不断解锁 BE 后最终达到真路线。实际在玩的过程中路线是以单一方式解锁的，另外系统自带了剧本的流程图，所处的分支也一目了然。一开始我以为剧本和选项里会带有推理情节，剧本前段还提到了男主有特殊能力。但后面发现基本没有推理要素。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="月影のシミュラクル-解放の羽- 感想">
+<meta property="og:url" content="https://kerisa.github.io/1917/index.html">
+<meta property="og:site_name" content="Re: Memory (mirror)">
+<meta property="og:description" content="非常短小精悍的剧本，没有什么注水剧情反而比较讨喜。大概花 10 小时就能走完全部剧情。 整体上是由 BE 铺出的 TE 之路，通过不断解锁 BE 后最终达到真路线。实际在玩的过程中路线是以单一方式解锁的，另外系统自带了剧本的流程图，所处的分支也一目了然。一开始我以为剧本和选项里会带有推理情节，剧本前段还提到了男主有特殊能力。但后面发现基本没有推理要素。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2022/04/%E6%9C%88%E5%BD%B1%E3%81%AE%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%A9%E3%82%AF%E3%83%AB-%E8%A7%A3%E6%94%BE%E3%81%AE%E7%BE%BD-_17.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2022/04/%E6%9C%88%E5%BD%B1%E3%81%AE%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%A9%E3%82%AF%E3%83%AB-%E8%A7%A3%E6%94%BE%E3%81%AE%E7%BE%BD-_05.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2022/04/%E6%9C%88%E5%BD%B1%E3%81%AE%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%A9%E3%82%AF%E3%83%AB-%E8%A7%A3%E6%94%BE%E3%81%AE%E7%BE%BD-_06.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2022/04/%E6%9C%88%E5%BD%B1%E3%81%AE%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%A9%E3%82%AF%E3%83%AB-%E8%A7%A3%E6%94%BE%E3%81%AE%E7%BE%BD-_01.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2022/04/%E6%9C%88%E5%BD%B1%E3%81%AE%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%A9%E3%82%AF%E3%83%AB-%E8%A7%A3%E6%94%BE%E3%81%AE%E7%BE%BD-_08.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2022/04/%E6%9C%88%E5%BD%B1%E3%81%AE%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%A9%E3%82%AF%E3%83%AB-%E8%A7%A3%E6%94%BE%E3%81%AE%E7%BE%BD-_09.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2022/04/%E6%9C%88%E5%BD%B1%E3%81%AE%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%A9%E3%82%AF%E3%83%AB-%E8%A7%A3%E6%94%BE%E3%81%AE%E7%BE%BD-_12.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2022/04/%E6%9C%88%E5%BD%B1%E3%81%AE%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%A9%E3%82%AF%E3%83%AB-%E8%A7%A3%E6%94%BE%E3%81%AE%E7%BE%BD-_02.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2022/04/%E6%9C%88%E5%BD%B1%E3%81%AE%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%A9%E3%82%AF%E3%83%AB-%E8%A7%A3%E6%94%BE%E3%81%AE%E7%BE%BD-_03.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2022/04/%E6%9C%88%E5%BD%B1%E3%81%AE%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%A9%E3%82%AF%E3%83%AB-%E8%A7%A3%E6%94%BE%E3%81%AE%E7%BE%BD-_11.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2022/04/%E6%9C%88%E5%BD%B1%E3%81%AE%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%A9%E3%82%AF%E3%83%AB-%E8%A7%A3%E6%94%BE%E3%81%AE%E7%BE%BD-_10.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2022/04/%E6%9C%88%E5%BD%B1%E3%81%AE%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%A9%E3%82%AF%E3%83%AB-%E8%A7%A3%E6%94%BE%E3%81%AE%E7%BE%BD-_04.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2022/04/%E6%9C%88%E5%BD%B1%E3%81%AE%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%A9%E3%82%AF%E3%83%AB-%E8%A7%A3%E6%94%BE%E3%81%AE%E7%BE%BD-_13.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2022/04/%E6%9C%88%E5%BD%B1%E3%81%AE%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%A9%E3%82%AF%E3%83%AB-%E8%A7%A3%E6%94%BE%E3%81%AE%E7%BE%BD-_14.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2022/04/%E6%9C%88%E5%BD%B1%E3%81%AE%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%A9%E3%82%AF%E3%83%AB-%E8%A7%A3%E6%94%BE%E3%81%AE%E7%BE%BD-_15.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2022/04/%E6%9C%88%E5%BD%B1%E3%81%AE%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%A9%E3%82%AF%E3%83%AB-%E8%A7%A3%E6%94%BE%E3%81%AE%E7%BE%BD-_19.jpg">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2022/04/%E6%9C%88%E5%BD%B1%E3%81%AE%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%A9%E3%82%AF%E3%83%AB-%E8%A7%A3%E6%94%BE%E3%81%AE%E7%BE%BD-_18.jpg">
+<meta property="article:published_time" content="2022-04-19T13:50:30.000Z">
+<meta property="article:modified_time" content="2025-07-21T17:32:47.087Z">
+<meta property="article:author" content="flandre">
+<meta property="article:tag" content="あっぷりけ">
+<meta property="article:tag" content="月影のシミュラクル-解放の羽-">
+<meta property="article:tag" content="月影魅像">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kerisa.github.io/assets/imgs/2022/04/%E6%9C%88%E5%BD%B1%E3%81%AE%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%A9%E3%82%AF%E3%83%AB-%E8%A7%A3%E6%94%BE%E3%81%AE%E7%BE%BD-_17.jpg">
+
+<link rel="canonical" href="https://flandre-scarlet.moe/blog/1917/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>月影のシミュラクル-解放の羽- 感想 | Re: Memory (mirror)</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Re: Memory (mirror)</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/1917/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/sys-imgs/42553027_1.png">
+      <meta itemprop="name" content="flandre">
+      <meta itemprop="description" content="This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Re: Memory (mirror)">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          月影のシミュラクル-解放の羽- 感想
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-04-19 21:50:30" itemprop="dateCreated datePublished" datetime="2022-04-19T21:50:30+08:00">2022-04-19</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-07-22 01:32:47" itemprop="dateModified" datetime="2025-07-22T01:32:47+08:00">2025-07-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/acg/" itemprop="url" rel="index"><span itemprop="name">acg</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/acg/galgame/" itemprop="url" rel="index"><span itemprop="name">galgame</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.5k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><img src="/assets/imgs/2022/04/%E6%9C%88%E5%BD%B1%E3%81%AE%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%A9%E3%82%AF%E3%83%AB-%E8%A7%A3%E6%94%BE%E3%81%AE%E7%BE%BD-_17.jpg"></p>
+<p>非常短小精悍的剧本，没有什么注水剧情反而比较讨喜。大概花 10 小时就能走完全部剧情。</p>
+<p>整体上是由 BE 铺出的 TE 之路，通过不断解锁 BE 后最终达到真路线。实际在玩的过程中路线是以单一方式解锁的，另外系统自带了剧本的流程图，所处的分支也一目了然。一开始我以为剧本和选项里会带有推理情节，剧本前段还提到了男主有特殊能力。但后面发现基本没有推理要素。</p>
+<span id="more"></span>
+<p>男主角卯月诚一在暑假时受表妹如月零邀约来到她家参加她父亲的生日宴会。 如月家位于避暑胜地伊泽外围的森林中，是历史悠久的机关人偶匠人世家，家里有一大堆各类机关和人偶。</p>
+<p><img src="/assets/imgs/2022/04/%E6%9C%88%E5%BD%B1%E3%81%AE%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%A9%E3%82%AF%E3%83%AB-%E8%A7%A3%E6%94%BE%E3%81%AE%E7%BE%BD-_05.jpg"></p>
+<p>专门邀请诚一来除了参加生日宴会，还有个主要目的，如月家想请诚一出席本家的传统仪式。出于政治因素考量，才邀请了在家族中最没有利益相关的卯月家。</p>
+<p>传说初代如月当家有个与真人无异的自动人偶（夜夜：你叫我？），她能哭能笑感情丰富，而其中的机巧无人能够参透。此后在他们身边渐渐聚集起当时的机关人偶师和各种各样的人，最后也成就了整个如月家族。</p>
+<p>而这种一看就满是 flag 的古老仪式是不可能平安收场的。八年前的仪式之后就引发了一场大火，烧得如月当家兼定至今脸上还缠着纱布只能坐轮椅。诚一家当时被烧掉了他爷爷的工作室，后来也成为他们搬家的契机。</p>
+<p>此外诚一在镇上和朋友叙旧时了解到这个镇上还有悬而未决的吸血鬼事件。</p>
+<p>显然如月家也不傻，但为何这么久的时间下来仍然不放弃这满是 debuff 的古老仪式，而活人偶到底是什么存在？</p>
+<p><img src="/assets/imgs/2022/04/%E6%9C%88%E5%BD%B1%E3%81%AE%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%A9%E3%82%AF%E3%83%AB-%E8%A7%A3%E6%94%BE%E3%81%AE%E7%BE%BD-_06.jpg"></p>
+<h2 id="共通线"><a href="#共通线" class="headerlink" title="共通线"></a>共通线</h2><p>第一条线主要向玩家介绍各种要素，然后进 BE 重开。</p>
+<p>8&#x2F;3 洋馆中除了当家兼定，零和诚一外，还有管家水无月纱英婆婆和被婆婆收养的水无月一叶。一叶家人正是在八年前的火灾中离世。</p>
+<p>8&#x2F;4 仪式前日诚一到镇上买生活用品，顺便去见以前的老同学一条忍和野上美优。通过帮美优修手表提到诚一的异能，只要是他拆解过、理解了构造的物品，之后就可以发起透视脑内观察它们的内部结构，并发现其中的问题。</p>
+<p>8&#x2F;5 仪式。因为如月家的活人偶和零长得几乎一样，诚一误以为人偶是零扮演的。半夜诚一夜游时在屋里遇到了人偶，追上去后来到放置活人偶的人偶间。诚一在人偶的诱导下念出她的名字红（クレナイ）。</p>
+<p><img src="/assets/imgs/2022/04/%E6%9C%88%E5%BD%B1%E3%81%AE%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%A9%E3%82%AF%E3%83%AB-%E8%A7%A3%E6%94%BE%E3%81%AE%E7%BE%BD-_01.jpg">你是我的 Master 吗</p>
+<p>正统的仪式实际上还有后续，其一就是给人偶取名，另外还有补魔仪式。因为是共通线，最后红吸了点血凑合了。</p>
+<p>8&#x2F;6 诚一向零询问关于红的事，零解释说红（コウ）是人偶的《号》，如月家自始至终将她视为道具，避免触发起名流程。而对诚一昨晚的遭遇，零将它解释为梦，参加了仪式的诚一被催眠然后“做了梦”。</p>
+<p>下午诚一出门和一条忍见面。一条问到伤口的事，并翻出老新闻说到镇上的吸血鬼谜案，有三人在住宅街和森林失血过多而死，受害者之一还是一条的母亲。（两个配角同学在游戏里作用不大）</p>
+<p>半夜下雨，诚一上厕所夜游时发现兼定已经遇害。大厅的水渍通向兼定房间，又通向人偶间。发现现场时一叶掉了把菜刀在书房，后又被纱英婆婆捡走。</p>
+<p>8&#x2F;7 警察调查。</p>
+<p>8&#x2F;8 纱英婆婆不见了。诚一搜索洋馆时在走廊上遇到红，红告诉诚一纱英人在森林。诚一在红走后还特地去零的房间看了一眼，发现零不在房里（加剧诚一疑神疑鬼）。</p>
+<p>森林里纱英婆婆已经身亡，而零伫立在一旁。警察调查后认定纱英系自杀，还附有遗书。结合后面的剧本可以推测，纱英担心一叶是凶手，而她的心理被红诱导，纱英从而选择自杀来“包庇”一叶。</p>
+<p>当晚，零为了亲手终结红和如月家的命运，将整个洋馆化为火海，最后自己也消失在火海中。</p>
+<p>如月家全灭的最惨结局。而且红还活着。诚一没有坚持信任零&#x2F;怀疑红，态度不断摇摆最后导致了失败。</p>
+<h3 id="零线-《净化》"><a href="#零线-《净化》" class="headerlink" title="零线 - 《净化》"></a>零线 - 《净化》</h3><p>连着说下零结局之一《净化》。</p>
+<p>回到共通线 8&#x2F;8 诚一和零来到人偶间调查时，如果此时诚一表明了对零的信任，那么零也会坦白出他们后面的炸房子计划。共通线中红之所以能从火海中逃生，是因为那时的零没能和诚一互相理解，还有心愿未了，零的求生念头就会映射到红的身上，最终让她逃出生天。</p>
+<p>晚一步回到洋馆的诚一闯进大厅来到零的身边，陪在她身边直到最后一刻。 但诚一失去意识后似乎被红丢出洋馆外，捡回一条命。（红受到零的意识影响救下了诚一）</p>
+<p><img src="/assets/imgs/2022/04/%E6%9C%88%E5%BD%B1%E3%81%AE%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%A9%E3%82%AF%E3%83%AB-%E8%A7%A3%E6%94%BE%E3%81%AE%E7%BE%BD-_08.jpg"></p>
+<p>这条线里也解释了活人偶的由来。</p>
+<p>如月家祖先来到无人踏足的伊泽大森林，向那里的蜘蛛神祈求，希望能让人类生活在此。蜘蛛则好奇提出想做人类观察，于是将一部分灵魂注入如月家主的人偶中。而为了表现地像个人类，蜘蛛开始了模仿。</p>
+<p>但受限于机能，只能模仿眼前人类的心理和行为。另外还要定期举办仪式，否则人类和蜘蛛的联系就会断开，一起举行仪式的人类最能影响蜘蛛（人偶）的感情。</p>
+<p>因为灵魂留在人偶体内时，蜘蛛自己就不能活动，反之就会醒来。醒来的蜘蛛作为进食的一环会捕食人类，这也是吸血鬼事件的真相。</p>
+<p>之前零之所以不透露给诚一更多情报是担心诚一听后心中怀有愤怒和憎恨，一旦被红模仿后就会惹出祸端。</p>
+<p>兼定被杀害就是他自己对人偶的杀意被红模仿，最后反噬了自己。八年前的大火亦是如此。</p>
+<h2 id="美优线"><a href="#美优线" class="headerlink" title="美优线"></a>美优线</h2><p>兼定被害后零为了保护诚一将他支开到镇上，诚一和美优过了短暂的快活日子，随后</p>
+<p><img src="/assets/imgs/2022/04/%E6%9C%88%E5%BD%B1%E3%81%AE%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%A9%E3%82%AF%E3%83%AB-%E8%A7%A3%E6%94%BE%E3%81%AE%E7%BE%BD-_09.jpg"></p>
+<h2 id="一叶线"><a href="#一叶线" class="headerlink" title="一叶线"></a>一叶线</h2><p>一叶在八年前的火灾后就一直想扒出如月家的黑料。于是在仪式后给诚一送炮，想以此请他一起帮忙调查如月家。</p>
+<p>炮后第二天光速公开恋人身份，开始在屋里调查。一叶其实是之前就受到了红的教唆开始对如月家怀恨，同样，兼定也从红那里收到了一叶的动向。了解原委的兼定告知他俩自己的爆破计划，让诚一他们赶紧跑路。然而跑路的两人在森林里不断被红的蛛丝缠上……</p>
+<p>另外要是选择不炮一叶的话她就会杀了兼定然后自己变身晴天娃娃。</p>
+<p><img src="/assets/imgs/2022/04/%E6%9C%88%E5%BD%B1%E3%81%AE%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%A9%E3%82%AF%E3%83%AB-%E8%A7%A3%E6%94%BE%E3%81%AE%E7%BE%BD-_12.jpg"></p>
+<h2 id="零线"><a href="#零线" class="headerlink" title="零线"></a>零线</h2><p>（净化结局就跳过了） 重开之 8 月 3 号，相当于整个流程重新走了。</p>
+<p>诚一到达后就和兼定还有零一起参观活人偶，这样同时和兼定还有零建立起了信赖关系，消除了后续可能的疑神疑鬼。</p>
+<p><img src="/assets/imgs/2022/04/%E6%9C%88%E5%BD%B1%E3%81%AE%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%A9%E3%82%AF%E3%83%AB-%E8%A7%A3%E6%94%BE%E3%81%AE%E7%BE%BD-_02.jpg">房间内充满了快活的空气</p>
+<p>8&#x2F;4 诚一和兼定一起招待虎视眈眈的旁系客人们，兼定好感 up，零入手概率 up。 诚一在梦里并念出红的名字，强行完成了起名。</p>
+<p>8&#x2F;5 诚一在仪式中对分家人感到不爽，站起来直球嘲讽在座各位，然后抱着红离场。已经拥有名字的红开始适当活动，随后消失到森林之中。</p>
+<p>8&#x2F;6 零和诚一到森林里找（约）人（会）。</p>
+<p>当天得到消息某分家的家主已被红枭首。</p>
+<p><img src="/assets/imgs/2022/04/%E6%9C%88%E5%BD%B1%E3%81%AE%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%A9%E3%82%AF%E3%83%AB-%E8%A7%A3%E6%94%BE%E3%81%AE%E7%BE%BD-_03.jpg"></p>
+<p>零和诚一提防着红巡视房子时发现红在工房里。交谈一番后红要他俩好好考虑今后的计划。</p>
+<p>8&#x2F;7 两人和兼定商量后决定先安顿好一叶和纱英，兼定再执行他的老计划。</p>
+<p>零和诚一还没考虑好，于是决定先到森林里打一炮调节下情绪。充分感受到零的重要性后诚一决定两人一起跑路，去过不受束缚的生活。</p>
+<p>随后如月宅邸被爆破，兼定和旁系族人死亡，零和诚一远走高飞。</p>
+<p><img src="/assets/imgs/2022/04/%E6%9C%88%E5%BD%B1%E3%81%AE%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%A9%E3%82%AF%E3%83%AB-%E8%A7%A3%E6%94%BE%E3%81%AE%E7%BE%BD-_11.jpg"></p>
+<p>而 8&#x2F;6 晚要是不去和零待在一起的话就会发生鬼故事。红一如零所推测回来寻仇。</p>
+<p><img src="/assets/imgs/2022/04/%E6%9C%88%E5%BD%B1%E3%81%AE%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%A9%E3%82%AF%E3%83%AB-%E8%A7%A3%E6%94%BE%E3%81%AE%E7%BE%BD-_10.jpg"></p>
+<h2 id="红线"><a href="#红线" class="headerlink" title="红线"></a>红线</h2><p>在零线的 8&#x2F;5 分叉，诚一抱着红回人偶间后开始用木头红给自己鸡儿刮痧。在体液的反复滋润下木质的身体逐渐软化，红的外表变得像个人类。</p>
+<p><img src="/assets/imgs/2022/04/%E6%9C%88%E5%BD%B1%E3%81%AE%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%A9%E3%82%AF%E3%83%AB-%E8%A7%A3%E6%94%BE%E3%81%AE%E7%BE%BD-_04.jpg"></p>
+<p>日子一天天过去，诚一白天过着普通生活，夜里则跟红亲密交流。</p>
+<p>某天早上，零和兼定留住诚一，说他被人偶附身了。兼定自然是打算毁掉人偶。</p>
+<p>如果选择和红一起逃跑，会进入隐居结局，两人在森林里过着世外桃源的生活，并在远处守望人类。</p>
+<p>如果选和如月家谈判的话会先进一次 BE。如月家叫来旁系帮手一起围攻红，而红忍住没有还手，带着诚一逃进森林。</p>
+<p>好不容易能让红理解了自己，但此时红已经不行了，在最后失去活力前红将自己的蜘蛛之魂分给了诚一。诚一得到了红的能力变成了蜘蛛侠。他杀光了炮灰们，又倍感凄凉，最后放弃挣扎死在零的手下。</p>
+<p><img src="/assets/imgs/2022/04/%E6%9C%88%E5%BD%B1%E3%81%AE%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%A9%E3%82%AF%E3%83%AB-%E8%A7%A3%E6%94%BE%E3%81%AE%E7%BE%BD-_13.jpg"></p>
+<p>蜘蛛神当初给了人类两样东西。为理解人类，将灵魂注入人偶；为让人类理解蜘蛛，又将蜘蛛之感赐给人类。而现在二者合而为一，当诚一死去时会同时回到蜘蛛神身上。</p>
+<p>诚一在蜘蛛之感上记下了关于人类各种各样的情报，确信理解了这些的蜘蛛神将不再会对人类出手，如月家将得到真正的解放。</p>
+<p><img src="/assets/imgs/2022/04/%E6%9C%88%E5%BD%B1%E3%81%AE%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%A9%E3%82%AF%E3%83%AB-%E8%A7%A3%E6%94%BE%E3%81%AE%E7%BE%BD-_14.jpg"></p>
+<p>第二次选谈判时会增加新的选项，诚一打算和红去说服蜘蛛神。</p>
+<p>但并没人知道蜘蛛神在哪，就算持有大量资料的如月本家长年间也没找到突破口。红说要找到蜘蛛还是要利用诚一的蜘蛛之感。然后就靠着诚一的感觉在森林中找到了一个不起眼的空间。</p>
+<p>趁蜘蛛进攻的间隙，诚一向其归还了蜘蛛之感所获取的人类情报。蜘蛛神乖乖离开了。</p>
+<p>最后红还变成了真正的人类身体，可喜可贺，没有人受伤的世界就这样完成了。</p>
+<p><img src="/assets/imgs/2022/04/%E6%9C%88%E5%BD%B1%E3%81%AE%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%A9%E3%82%AF%E3%83%AB-%E8%A7%A3%E6%94%BE%E3%81%AE%E7%BE%BD-_15.jpg"></p>
+<p>最后还是想再提下这个系统，在分支多的游戏里搞这样一个分支图真的很赞。</p>
+<p><img src="/assets/imgs/2022/04/%E6%9C%88%E5%BD%B1%E3%81%AE%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%A9%E3%82%AF%E3%83%AB-%E8%A7%A3%E6%94%BE%E3%81%AE%E7%BE%BD-_19.jpg"></p>
+<p>OP、ED 分别是《自由の翅》和《イノチの灯し方》，同样不容错过，不如说我是先听了音乐才去了解游戏的。</p>
+<p><img src="/assets/imgs/2022/04/%E6%9C%88%E5%BD%B1%E3%81%AE%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%A9%E3%82%AF%E3%83%AB-%E8%A7%A3%E6%94%BE%E3%81%AE%E7%BE%BD-_18.jpg"></p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>flandre
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://kerisa.github.io/1917/" title="月影のシミュラクル-解放の羽- 感想">https://kerisa.github.io/1917/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E3%81%82%E3%81%A3%E3%81%B7%E3%82%8A%E3%81%91/" rel="tag"># あっぷりけ</a>
+              <a href="/tags/%E6%9C%88%E5%BD%B1%E3%81%AE%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%A9%E3%82%AF%E3%83%AB-%E8%A7%A3%E6%94%BE%E3%81%AE%E7%BE%BD/" rel="tag"># 月影のシミュラクル-解放の羽-</a>
+              <a href="/tags/%E6%9C%88%E5%BD%B1%E9%AD%85%E5%83%8F/" rel="tag"># 月影魅像</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/1820/" rel="prev" title="《闪之轨迹》通关心得">
+      <i class="fa fa-chevron-left"></i> 《闪之轨迹》通关心得
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/1941/" rel="next" title="Charles 破解">
+      Charles 破解 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B1%E9%80%9A%E7%BA%BF"><span class="nav-number">1.</span> <span class="nav-text">共通线</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9B%B6%E7%BA%BF-%E3%80%8A%E5%87%80%E5%8C%96%E3%80%8B"><span class="nav-number">1.1.</span> <span class="nav-text">零线 - 《净化》</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BE%8E%E4%BC%98%E7%BA%BF"><span class="nav-number">2.</span> <span class="nav-text">美优线</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E5%8F%B6%E7%BA%BF"><span class="nav-number">3.</span> <span class="nav-text">一叶线</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9B%B6%E7%BA%BF"><span class="nav-number">4.</span> <span class="nav-text">零线</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BA%A2%E7%BA%BF"><span class="nav-number">5.</span> <span class="nav-text">红线</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt=""
+      src="/sys-imgs/42553027_1.png">
+  <p class="site-author-name" itemprop="name"></p>
+  <div class="site-description" itemprop="description">This is a mirror/backup site of flandre-scarlet.moe. It serves as a fallback when the original site is inaccessible.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">247</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">flandre</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">328k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">4:58</span>
+</div>
+  <div class="powered-by">Powered by love
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

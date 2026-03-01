@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="n4HzIaQ2ebAeP_VrwiqS7s6qfe8RKXwGfnHiPjz3Z20">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kerisa.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="VPS 需要定期续费，域名也是，万一我哪天嘎了，域名过期主机欠费，我的博客也就销声匿迹了。我希望它能活得久一点，毕竟是自己一手带大的。眼下最好的选择应该就是托管 github pages 了吧，比起被随意关停的产品，作为世界上最大的代码托管网站和开源社区，github 可以被转手，但绝不会轻易消失。除非哪天说要 archive 长期不活跃的仓库和账号，哈哈。不管怎么说，目前来看都是相当好的选择了。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="为本站添加 github pages 备份">
+<meta property="og:url" content="https://kerisa.github.io/2329/index.html">
+<meta property="og:site_name" content="Re: Memory (mirror)">
+<meta property="og:description" content="VPS 需要定期续费，域名也是，万一我哪天嘎了，域名过期主机欠费，我的博客也就销声匿迹了。我希望它能活得久一点，毕竟是自己一手带大的。眼下最好的选择应该就是托管 github pages 了吧，比起被随意关停的产品，作为世界上最大的代码托管网站和开源社区，github 可以被转手，但绝不会轻易消失。除非哪天说要 archive 长期不活跃的仓库和账号，哈哈。不管怎么说，目前来看都是相当好的选择了。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-07-25T18:00:02.000Z">
+<meta property="article:modified_time" content="2025-07-25T18:00:02.000Z">
+<meta property="article:author" content="flandre">
+<meta property="article:tag" content="canonical">
+<meta property="article:tag" content="github pages">
+<meta property="article:tag" content="hexo">
+<meta property="article:tag" content="noindex">
+<meta property="article:tag" content="wordpress">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://flandre-scarlet.moe/blog/2329/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>为本站添加 github pages 备份 | Re: Memory (mirror)</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Re: Memory (mirror)</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/2329/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/assets/imgs/fr.png">
+      <meta itemprop="name" content="flandre">
+      <meta itemprop="description" content="This is a mirror/backup site of <a target="_blank" rel="noopener" href="https://flandre-scarlet.moe/blog">flandre-scarlet.moe</a>. It serves as a fallback when the original site is inaccessible.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Re: Memory (mirror)">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          为本站添加 github pages 备份
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-07-26 02:00:02" itemprop="dateCreated datePublished" datetime="2025-07-26T02:00:02+08:00">2025-07-26</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Programs/" itemprop="url" rel="index"><span itemprop="name">Programs</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.6k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>1 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>VPS 需要定期续费，域名也是，万一我哪天嘎了，域名过期主机欠费，我的博客也就销声匿迹了。我希望它能活得久一点，毕竟是自己一手带大的。眼下最好的选择应该就是托管 github pages 了吧，比起被随意关停的产品，作为世界上最大的代码托管网站和开源社区，github 可以被转手，但绝不会轻易消失。除非哪天说要 archive 长期不活跃的仓库和账号，哈哈。不管怎么说，目前来看都是相当好的选择了。用户多、服务稳定还免费。</p>
+<span id="more"></span>
+<p>于是开始着手备份。之前听到过 Hugo 和 Hexo 这些静态网站框架，没多想，选了 Hexo，先上手搞起来再说。</p>
+<h3 id="迁移文章"><a href="#迁移文章" class="headerlink" title="迁移文章"></a>迁移文章</h3><p>首先到 wordpress 后台自带工具里导出所有数据，得到一个 xml 文件。</p>
+<p>然后安装 hexo 还有导入工具 hexo-migrator-wordpress。并将 wordpress 的 xml 导入成 hexo 的文章。 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install hexo-migrator-wordpress --save hexo migrate wordpress WordPress.xml --paragraph-fix --import-image --skipduplicate</span><br></pre></td></tr></table></figure> 导入完后其实还是要检查下。比如有些文章的图片链接没有识别出来，变成 markdown 后还是指向原站，就要查找替换成新站的图片目录。导入后的图片是散落在 source 目录下的，把图片归类之后又要批量替换掉 .md 里的所有链接。</p>
+<p>代码块也要修复，还好是<a target="_blank" rel="noopener" href="https://hexo.io/docs/syntax-highlight#Configuration">原生支持</a>的，把标签替换成 <figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">... </span><br></pre></td></tr></table></figure> 就好了。</p>
+<p>用 migrator 导入进来有个问题，wp 里代码块的换行全消失不生效了，应该是没处理换行符。所以副站现在的代码块还是一片狼藉。不知道是不是我导入时有什么参数没指定好，有机会再搞吧。</p>
+<p>还有 post 的固定链接，导入后是以文章名为永久链接的，地址栏里一堆 %XX 看得我头疼。观察到导入的 .md 文件中含有 wp 的 id，比如文件开头就有文章元数据id: ‘2329’，于是到 hexo 的配置文件 _config.yml 里找到 permalink 改掉就好 permalink: :id&#x2F;。</p>
+<p>总之就是这样，一点点修改文章的数据和分类，让它尽量跟原来一样。</p>
+<h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><p>主题就选用了 Next。暂时没有太多需求，就先用着了。</p>
+<p>至于评论，现在博客里的评论其实挺少。而且只是建一个备份站，并不是完全迁移，所以评论就先不处理了。等到哪一天主站也不用 wp 时再一块转移吧。</p>
+<p>有一两篇文章里用了数学公式，这个暂时也没搞，似乎可以用 hexo-renderer-pandoc 这个插件。</p>
+<p>最后再处理一下 SEO，因为现在原站和副站同时运行了，搜索引擎检查到重复内容可能会降权之类乱七八槽的，所以打算把副站禁用爬虫。 一开始我是添加了 canonical 规范，把副站的页面尽可能对应到原站页面，文章自不必说，还有分类目录、tags 和分页页面，都加上了原站地址。这里还要吐槽下，hexo 添加的 canonical 地址域名似乎只能是副站的地址（即 _config.yml 里的 url: ），导致我不得不再搞个脚本替换域名和一些 url path 上的差异。</p>
+<p>然后又担心只设置 canonical 会不会有意外状况导致副站仍然被索引，万一搜索引擎不讲武德呢。要是两个页面同时出现那也挺头疼。所以最后又打算加上 noindex 和 robots.txt 限制。 robots.txt 里设置 Disallow。然后所有 html 页面的 head 里都加上 <figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">&quot;robots&quot;</span> <span class="attr">content</span>=<span class="string">&quot;noindex, nofollow, noarchive, nosnippet, noimageindex&quot;</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>到这里就算差不多搭完了，push 到 github 上<a href="https://kerisa.github.io/">看看效果</a>。</p>
+<p>副站的网址也已经添加到网站底部了👇</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>flandre
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://kerisa.github.io/2329/" title="为本站添加 github pages 备份">https://kerisa.github.io/2329/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/canonical/" rel="tag"># canonical</a>
+              <a href="/tags/github-pages/" rel="tag"># github pages</a>
+              <a href="/tags/hexo/" rel="tag"># hexo</a>
+              <a href="/tags/noindex/" rel="tag"># noindex</a>
+              <a href="/tags/wordpress/" rel="tag"># wordpress</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2313/" rel="prev" title="河西走廊之行 7">
+      <i class="fa fa-chevron-left"></i> 河西走廊之行 7
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2338/" rel="next" title="工作中的一些总结">
+      工作中的一些总结 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%81%E7%A7%BB%E6%96%87%E7%AB%A0"><span class="nav-number">1.</span> <span class="nav-text">迁移文章</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B6%E4%BB%96"><span class="nav-number">2.</span> <span class="nav-text">其他</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt=""
+      src="/assets/imgs/fr.png">
+  <p class="site-author-name" itemprop="name"></p>
+  <div class="site-description" itemprop="description">This is a mirror/backup site of <a target="_blank" rel="noopener" href="https://flandre-scarlet.moe/blog">flandre-scarlet.moe</a>. It serves as a fallback when the original site is inaccessible.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">112</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">281</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">flandre</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">389k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">5:54</span>
+</div>
+  <div class="powered-by">Powered by love
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

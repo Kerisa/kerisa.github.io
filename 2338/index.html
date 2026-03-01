@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="n4HzIaQ2ebAeP_VrwiqS7s6qfe8RKXwGfnHiPjz3Z20">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kerisa.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="在一家公司干久了，面对一成不变的工作模式，难免会有精疲力尽的时候。而且作为开发，时间越久，经手的东西越多，维护的东西也会不断增加，已有的功能想要 retire 也到经过很长一段时间，包袱就会越来越重。然后新需求只增不减，各个组件推陈出新，需要接入，领导们时不时还会再来加点料，同事们也会不断问不同的问题，有些还是几年前，你已经忘光了的东西。每到下班时还放不下干了一半的活，早上醒来不到一分钟脑子里涌入">
+<meta property="og:type" content="article">
+<meta property="og:title" content="工作中的一些总结">
+<meta property="og:url" content="https://kerisa.github.io/2338/index.html">
+<meta property="og:site_name" content="Re: Memory (mirror)">
+<meta property="og:description" content="在一家公司干久了，面对一成不变的工作模式，难免会有精疲力尽的时候。而且作为开发，时间越久，经手的东西越多，维护的东西也会不断增加，已有的功能想要 retire 也到经过很长一段时间，包袱就会越来越重。然后新需求只增不减，各个组件推陈出新，需要接入，领导们时不时还会再来加点料，同事们也会不断问不同的问题，有些还是几年前，你已经忘光了的东西。每到下班时还放不下干了一半的活，早上醒来不到一分钟脑子里涌入">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-07-31T17:21:45.000Z">
+<meta property="article:modified_time" content="2025-07-31T17:20:34.000Z">
+<meta property="article:author" content="flandre">
+<meta property="article:tag" content="工作干扰">
+<meta property="article:tag" content="工作效率">
+<meta property="article:tag" content="项目管理">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://flandre-scarlet.moe/blog/2338/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>工作中的一些总结 | Re: Memory (mirror)</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Re: Memory (mirror)</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/2338/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/assets/imgs/fr.png">
+      <meta itemprop="name" content="flandre">
+      <meta itemprop="description" content="This is a mirror/backup site of <a target="_blank" rel="noopener" href="https://flandre-scarlet.moe/blog">flandre-scarlet.moe</a>. It serves as a fallback when the original site is inaccessible.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Re: Memory (mirror)">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          工作中的一些总结
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-08-01 01:21:45 / 修改时间：01:20:34" itemprop="dateCreated datePublished" datetime="2025-08-01T01:21:45+08:00">2025-08-01</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Work/" itemprop="url" rel="index"><span itemprop="name">Work</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在一家公司干久了，面对一成不变的工作模式，难免会有精疲力尽的时候。而且作为开发，时间越久，经手的东西越多，维护的东西也会不断增加，已有的功能想要 retire 也到经过很长一段时间，包袱就会越来越重。然后新需求只增不减，各个组件推陈出新，需要接入，领导们时不时还会再来加点料，同事们也会不断问不同的问题，有些还是几年前，你已经忘光了的东西。每到下班时还放不下干了一半的活，早上醒来不到一分钟脑子里涌入的就是今天的计划。 我们需要一些方法来避开这种螺旋下降，否则这班真的上不下去。生活质量也会大受影响。</p>
+<span id="more"></span>
+<h2 id="处理工作中的打断"><a href="#处理工作中的打断" class="headerlink" title="处理工作中的打断"></a>处理工作中的打断</h2><p>首先尽量避免自己经常处理被打断的状态，这将极大影响工作效率，思路打断后再重新加载需要耗费不少能量。次数多了就会明显感觉注意不集中，什么思考问题浮于表面，什么事都不想做只想划水。下面这些都是工作中比较频繁出现的打断。</p>
+<p>组内代码 review，流程审批。通常有多个人可以 approve，不一定非要停下手中的事。而且紧急的时候通常也会发消息过来，这时候几秒钟点点鼠标即可。如果觉得这个代码改动比较重要或者值得一看的，可以忙完手头的事情后再看，代码虽然已经提交，但也不意味着有问题改不了了。</p>
+<p>领导的问话。这个不太好装死，通常只能停下来处理领导的安排。如果是要花较长时间的，那就当作一项任务统一对待。</p>
+<p>来自其他同事的 IM 消息。可以每过一两小时查看，收到消息时大概瞟一眼预览，如果是紧急或者简单的问题都可以快速回答下，不会耽搁太久。其实这也是为同事考虑，也许你的一句简单的回答就能让他们继续进行手中的任务，剩下的理由见下一点。其他消息再定期回复。</p>
+<p>视频会议。这种最烦，很多人就是打字都懒得打，屁大点事也一个 call 打过来。或者发了消息，看你半分钟没回，反手就 call 过来。所以我通常会回复得快一点，发个在看都行，以免被迫接电话。</p>
+<p>如果不是处于 on call 状态其实很多事情都可以不用实时处理，而且就算大家爱直接发起会议，但只要你把状态设置成勿扰也能阻止大部分。拒接一般是不会，毕竟绝大部分同事人都很好，而且也是为了工作嘛，不用苦大仇深的。说不定人家的问题还是自己的代码引起的，算是帮你找出问题了。反过来我自己找人问比较复杂的问题也会提前发消息问问对方有没有空，简要地给出问题和背景，尽量不直接拉会。</p>
+<p>如果你不幸被打断工作拉到会里，那么当你的那部分完成后你可以打个招呼退出会议，而不是陪在一旁等其他人解决完所有问题。</p>
+<h2 id="对于工作内容"><a href="#对于工作内容" class="headerlink" title="对于工作内容"></a>对于工作内容</h2><p>需求是无穷无尽的，虽然现在项目管理中都流行 sprint，但是我们自己并不能一直冲刺。容易让人精疲力竭不说，总是追求快糙猛也容易累积技术债。</p>
+<h3 id="首先离不开领导们的支持"><a href="#首先离不开领导们的支持" class="headerlink" title="首先离不开领导们的支持"></a>首先离不开领导们的支持</h3><p>领导最好是能和你同一条战线，能支持你对工作内容做出合理预估及排期的，而不是给你继续上强度。一个称职的领导能成为你的助力。</p>
+<p>好领导会为你考虑，给你提供建议和指导，烂领导只会让你背锅把你当牛马，而且给你的回报（就是绩效升职这些啦）也少得可怜。领导在很大程度上影响了你在这家公司的打工体验。可惜的事比较看运气，这种事比较难改变。有些公司可以转岗，有机会的话也可以考虑。总之，钱、自己对工作内容的热情、领导&#x2F;周围同事是否可靠，这三个至少要占俩，这家公司才值得待下去。</p>
+<p>领导的安排或者建议也不是说全部都要听，不认可的要给出自己的意见。通常理性讨论且意见合理那就到此为止了，如果还是坚持可能不得不做了（除非领导给你安排了一个大东西，那就不好稀里糊涂的接了。可以想点对策比如求助其他有话语权的人，暴露出更多的问题，或者向领导要求更多的资源来完成此事）</p>
+<h3 id="判断手头任务的优先级"><a href="#判断手头任务的优先级" class="headerlink" title="判断手头任务的优先级"></a>判断手头任务的优先级</h3><p>对于自己手头上的任务要有合理安排，每个任务的大致方案，会花多少时间完成编码调试。然后再根据轻重缓急、是否依赖其他同事的任务等安排出优先顺序。每个 owner 都会觉得他们的项目最重要，要优先做他们的，但是我们还是要根据自己掌握的信息来判断先后。实在纠缠不下的话也可以说现在手头在做项目 A 抽不开身，想插队的话找 A 的 owner 商量，把锅甩出去。</p>
+<p>只要不是线上的紧急问题很多是有缓冲余地的，并不是非得加班加点的赶。有些 PM 可能随意定了一个时间，但是找开发沟通后发现大家手中都有活，或者玩意实际没有想象中那样简单等等，说明这种 deadline 一开始就是不合理的。</p>
+<p>当然如果最后插队成功的话还要通知其他项目的相关同事：你手上的活都要相应延后交付，让他们有个预期。</p>
+<h3 id="任务的进行"><a href="#任务的进行" class="headerlink" title="任务的进行"></a>任务的进行</h3><p>对没有接触过的代码、项目，在做出一定尝试后如果还是有一堆问题，不要一个人死磕，及时求助其他同事，他们一两句话可能就会节省下你的大量试错成本。</p>
+<p>如果你是项目 owner，一个推荐的做法是用文档整理出每个人&#x2F;每个模块需要做的事情，每周或每两周收集各方进度并记录文档。可以问的具体一点，目前实现了哪些功能，正在处理什么，哪些功能的处理遇到问题等等。有 block 的点及时发现并清除，作为 owner，你需要帮助其他人解决困难，自己处理不了的就要摇人来帮忙。</p>
+<p>项目推进遇到阻碍，一定要及时提出来，比如某一方进度总是晚于预期，没有时间投入等。可以和你的领导反馈，由领导出面；或者直接向对方领导反馈，确保对方有足够的资源投入到项目中。通常到对方领导一级就可以解决了，如果对方领导也是混子，那就继续向上 escalate。</p>
+<h3 id="任务的挑选"><a href="#任务的挑选" class="headerlink" title="任务的挑选"></a>任务的挑选</h3><p>项目列表里经常会出现一些优化&#x2F;重构性质的工作，要提前预估好是不是值得做。比如从老旧框架迁移到新框架，优化一类功能的调用链，这种算是比较立竿见影的。因为只要完成了第一步之后，其他同事便可基于你修改后的范式添加代码，形成规模效应。比如只要对比迁移前后，增加一个新功能时的代码修改量，这是有目共睹的。而其他一些只是修改内部代码结构之类模模糊糊的重构项目就不是特别看好，改动前后的效果也不容易衡量。而且重构本身也是一个高风险活动，没事就动老代码只能说还是太闲了。</p>
+<p>同样也经常会有各种紧急的小改动，实现上只是 crud，传传数据而已，那种活尽量少接——特别是当你的手头有比它更重要的活时。就算你经验丰富，该花的时间还是少不了，需求分析、进度同步、编码测试，一套下来花不少时间，而产出却不值一提，大家都知道这东西纯纯体力活，都摆不上台面。当这类任务早已不适合你时，就不要一直陷在它们的泥潭中了。</p>
+<p>救火的事可以积极做，不仅仅是利好团队、项目，还正是表现自己的好时候。比如接手一个略有挑战，又时间紧迫的修改，跟上面提到的 crud 还是有些区别。临危受命、力挽狂澜都是好剧本，算是一个奖励丰厚的支线任务，但切记不要搞砸了，哈哈。</p>
+<p>观察观察组内同事在做什么项目。通常组内例会大家都会分享自己手头的活以及进度，可以在这时候好好听一听。如果有项目变动可以看看是否值得一做，让自己参与其中。或者有人在实现某个功能，而你正好需要或者它可以很大程度简化你的工作量，这个时候也可以果断用起来，不要浪费精力在同一件事情上。</p>
+<h2 id="优化提升工作效率"><a href="#优化提升工作效率" class="headerlink" title="优化提升工作效率"></a>优化提升工作效率</h2><p>主要就是降低日常一些重复劳动的东西，比如更新代码仓库，下载依赖包，dump 初步分析等等。思考下简单写个脚本能不能把一些手工活自动化了，累积下来就是你的开发小助手。</p>
+<p>其他同事经常来问你的问题，比如询问接口规范、查问题分析日志等。对于碰到两次以上的，可以考虑写个简要的接口文档，或者列出某个问题应该查什么关键日志。这样问问题的人就可以通过关键字自己做个排查，说不定就发现原来问题是出在其他模块，就转头找别人去了。只是太低频的情况我觉得没必要一一写文档，费时间不说、还要持续维护，要是文档没能让人一下子读懂或者并不完全适用某个情况，最后还是要来问。 PS：代码的接口文档可以写在接口注释里，随时可以更新。</p>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>既然无法避免打工，那么至少打工时也能尽量保持良好心情心态，毕竟一天至少八小时的活动占了我们生命中的一大部分。希望大家在工作中都能顺顺利利的。</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>flandre
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://kerisa.github.io/2338/" title="工作中的一些总结">https://kerisa.github.io/2338/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%B7%A5%E4%BD%9C%E5%B9%B2%E6%89%B0/" rel="tag"># 工作干扰</a>
+              <a href="/tags/%E5%B7%A5%E4%BD%9C%E6%95%88%E7%8E%87/" rel="tag"># 工作效率</a>
+              <a href="/tags/%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86/" rel="tag"># 项目管理</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2329/" rel="prev" title="为本站添加 github pages 备份">
+      <i class="fa fa-chevron-left"></i> 为本站添加 github pages 备份
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2341/" rel="next" title="配置 PVE 服务器">
+      配置 PVE 服务器 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%84%E7%90%86%E5%B7%A5%E4%BD%9C%E4%B8%AD%E7%9A%84%E6%89%93%E6%96%AD"><span class="nav-number">1.</span> <span class="nav-text">处理工作中的打断</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%B9%E4%BA%8E%E5%B7%A5%E4%BD%9C%E5%86%85%E5%AE%B9"><span class="nav-number">2.</span> <span class="nav-text">对于工作内容</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A6%96%E5%85%88%E7%A6%BB%E4%B8%8D%E5%BC%80%E9%A2%86%E5%AF%BC%E4%BB%AC%E7%9A%84%E6%94%AF%E6%8C%81"><span class="nav-number">2.1.</span> <span class="nav-text">首先离不开领导们的支持</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A4%E6%96%AD%E6%89%8B%E5%A4%B4%E4%BB%BB%E5%8A%A1%E7%9A%84%E4%BC%98%E5%85%88%E7%BA%A7"><span class="nav-number">2.2.</span> <span class="nav-text">判断手头任务的优先级</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%BB%E5%8A%A1%E7%9A%84%E8%BF%9B%E8%A1%8C"><span class="nav-number">2.3.</span> <span class="nav-text">任务的进行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%BB%E5%8A%A1%E7%9A%84%E6%8C%91%E9%80%89"><span class="nav-number">2.4.</span> <span class="nav-text">任务的挑选</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BC%98%E5%8C%96%E6%8F%90%E5%8D%87%E5%B7%A5%E4%BD%9C%E6%95%88%E7%8E%87"><span class="nav-number">3.</span> <span class="nav-text">优化提升工作效率</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E8%AF%AD"><span class="nav-number">4.</span> <span class="nav-text">结语</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt=""
+      src="/assets/imgs/fr.png">
+  <p class="site-author-name" itemprop="name"></p>
+  <div class="site-description" itemprop="description">This is a mirror/backup site of <a target="_blank" rel="noopener" href="https://flandre-scarlet.moe/blog">flandre-scarlet.moe</a>. It serves as a fallback when the original site is inaccessible.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">112</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">281</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">flandre</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">389k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">5:54</span>
+</div>
+  <div class="powered-by">Powered by love
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

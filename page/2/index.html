@@ -10,6 +10,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
   <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="n4HzIaQ2ebAeP_VrwiqS7s6qfe8RKXwGfnHiPjz3Z20">
 
 <link rel="stylesheet" href="/css/main.css">
 
@@ -158,7 +159,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/2105/">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/2329/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/assets/imgs/fr.png">
@@ -172,7 +173,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2105/" class="post-title-link" itemprop="url">被 Zscaler 干扰的 WebRTC 连接</a>
+            <a href="/2329/" class="post-title-link" itemprop="url">为本站添加 github pages 备份</a>
         </h2>
 
         <div class="post-meta">
@@ -182,214 +183,8 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2024-11-24 16:58:42" itemprop="dateCreated datePublished" datetime="2024-11-24T16:58:42+08:00">2024-11-24</time>
+              <time title="创建时间：2025-07-26 02:00:02" itemprop="dateCreated datePublished" datetime="2025-07-26T02:00:02+08:00">2025-07-26</time>
             </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-07-25 02:02:15" itemprop="dateModified" datetime="2025-07-25T02:02:15+08:00">2025-07-25</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Programs/" itemprop="url" rel="index"><span itemprop="name">Programs</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Programs/Debug/" itemprop="url" rel="index"><span itemprop="name">Debug</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>2.7k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>2 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>公司前段时间做了个功能，本地客户端会启动一个 webview 窗口，并通过它和本机浏览器上的一个页面建立 WebRTC 通信，然后互相交换数据。本地的 webview 会借助客户端的通信能力，和浏览器上的网页各自接收服务器的消息，满足条件后就可以借助服务器交换 icecandidate 和 sdp，随后建立连接。 但是我们在使用过程中发现了问题，Mac 机器的 WebRTC 无法成功建立。因为公司的机器上安装了 Zscaler，它是个网络流量监控和代理的工具，所以很快怀疑到它身上，测试一下发现把它退了后就能成功连接了。另外 windows 系统并没有受到它影响，退不退 Zscaler 都可以连接。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2105/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/2088/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/assets/imgs/fr.png">
-      <meta itemprop="name" content="flandre">
-      <meta itemprop="description" content="This is a mirror/backup site of <a target="_blank" rel="noopener" href="https://flandre-scarlet.moe/blog">flandre-scarlet.moe</a>. It serves as a fallback when the original site is inaccessible.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Re: Memory (mirror)">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2088/" class="post-title-link" itemprop="url">部分 Crash 分析记录</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2024-07-13 14:54:45" itemprop="dateCreated datePublished" datetime="2024-07-13T14:54:45+08:00">2024-07-13</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-07-25 02:02:15" itemprop="dateModified" datetime="2025-07-25T02:02:15+08:00">2025-07-25</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Programs/" itemprop="url" rel="index"><span itemprop="name">Programs</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Programs/Debug/" itemprop="url" rel="index"><span itemprop="name">Debug</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>4.8k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>4 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>想着记录一下平时分析过的 crash dump，作为一个总结和参考。不过因为涉及到公司代码，所以一些细节没法描述太明白，crash 堆栈和对应的源代码也不方便贴出来了。这里先整理了几个比较有代表性的，其他一眼就能看出问题的就不写到这里了。</p>
-<h3 id="2023-Q3-ui-代码没有清理-framework-api-指针"><a href="#2023-Q3-ui-代码没有清理-framework-api-指针" class="headerlink" title="2023.Q3 ui 代码没有清理 framework api 指针"></a>2023.Q3 ui 代码没有清理 framework api 指针</h3><p>当用户开启计算机锁屏时自动切断 channel 的策略并触发了锁屏行为后，UI 会调用 api 切断所有 channel，并且立即清理上层保存的数据，但问题就在这个清理上。 原本调用触发切断的 api 后会有一个回调通知，上层是在回调里做清理动作的。但是现在代码中主动调用了一个 _channel_mgr.Clear();_，这个 <em>Clear()</em> 函数里清理的不完全，相比之下另一个成员函数 <em>Delete(channel_id)</em> 才是做到了彻底清理。同时回调函数里还做了许多额外的清理操作，这里一个 <em>Clear()</em> 把其他操作也都忽略掉了。 其实究其原因就是外部保存了 ChannelItem 的裸指针，但是又存在这样一个 corner case 没有将它清理掉，等 ChannelItem 实例析构后这个指针就野了。关键在于怎么发现这个代码路径。 因为 framework 层在释放前总是会通过回调函数通知 UI 清理，费好大劲排除 framework 没有漏掉的地方后把目标放到了 UI 上。来来回回翻代码后才发现这个地方。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2088/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/2074/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/assets/imgs/fr.png">
-      <meta itemprop="name" content="flandre">
-      <meta itemprop="description" content="This is a mirror/backup site of <a target="_blank" rel="noopener" href="https://flandre-scarlet.moe/blog">flandre-scarlet.moe</a>. It serves as a fallback when the original site is inaccessible.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Re: Memory (mirror)">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2074/" class="post-title-link" itemprop="url">C++ 异步编程框架</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2024-04-07 21:21:40" itemprop="dateCreated datePublished" datetime="2024-04-07T21:21:40+08:00">2024-04-07</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-07-25 02:02:12" itemprop="dateModified" datetime="2025-07-25T02:02:12+08:00">2025-07-25</time>
-              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -406,500 +201,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>3k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>3 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>之前公司项目中一直没有方便好用的异步编程框架，在开发过程中会遇到一些问题。比如多线程编码时开发需要自己管理线程，并在两侧同步数据。一些操作也会被直接放在主线程中，就算单个操作的耗时并不明显，长此以往也会积少成多，最终拖慢了 UI 的速度。</p>
-<p>但好在公司的代码库已经支持 C++11，我们基于 C++11 开发了一个仅使用标准库的框架。这样既能简化业务开发时的代码工作量，也可以提高代码的可读性，而且使用 std 组件实现也方便支持所有平台。更进一步的话还可以给框架加入其他支持，如：</p>
-<ul>
-<li>task 优先级</li>
-<li>task 延迟调用、重复调用，并可自定义调用间隔等属性</li>
-<li>指定多个 task 在同一个线程中运行
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2074/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/2069/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/assets/imgs/fr.png">
-      <meta itemprop="name" content="flandre">
-      <meta itemprop="description" content="This is a mirror/backup site of <a target="_blank" rel="noopener" href="https://flandre-scarlet.moe/blog">flandre-scarlet.moe</a>. It serves as a fallback when the original site is inaccessible.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Re: Memory (mirror)">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2069/" class="post-title-link" itemprop="url">《白夜行》读书笔记</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2023-10-02 17:10:53" itemprop="dateCreated datePublished" datetime="2023-10-02T17:10:53+08:00">2023-10-02</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-07-25 02:00:28" itemprop="dateModified" datetime="2025-07-25T02:00:28+08:00">2025-07-25</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Book-notes/" itemprop="url" rel="index"><span itemprop="name">Book-notes</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>3.9k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>4 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <ol>
-<li>桐原洋介被杀害，警官笹垣润三和古贺开始调查。桐原家开着当铺，雇了松浦在当掌柜，警方对松浦，桐原妻子弥生子和孩子桐原亮司问话。调查洋介行踪发现他和西本文代有接触，警察便开始走访西本和她女儿西本雪穗。同时松浦和桐原太太还有亮司的不在场证明被接受，他们逐渐排除了嫌疑。寺崎忠夫进入警方视野，他以批发日用品为业，被怀疑为西本太太的同谋。一天雪穗称忘带钥匙，与房东一起进门，目睹西本文代死亡。</li>
-<li>秋吉雄一接单偷怕雪穗，以此来赚外快。雪穗已经上初三，亲妈死后她被姑姑唐泽礼子收养，改名唐泽雪穗。秋吉以前意外拍到一张桐原弥生子和松浦的外遇照片，被同学菊池文彦借走。菊池本意应该是想帮桐原调查他爸的悬案，但却遭到亮司拒绝。雪穗的同学藤村都子跟她关系不好，但有一天她却突然被诱拐并被拍下裸照，雪穗和川岛江利子发现了现场，随后的照顾使藤村和雪穗关系变得极其亲密。警方在调查藤村的案件过程中找到了秋吉，秋吉认出了不知何故落在现场的菊池的钥匙扣，导致菊池被重点怀疑，但亮司出面替他做了不在场证明，菊池因此感激涕零。</li>
-<li>转眼到了高中。亮司约园村友彦和同年级的村下在咖啡馆见面，表面上给两人提供女性陪聊的打工，实则是在拉皮条。除此之外友彦也会自己开发电脑游戏。亮司开始了倒卖盗版游戏的路子，寻春三人组中的西口奈美江后面被亮司拉拢作为他公司的会计。友彦不顾亮司的警告，偷偷跟三人组中的花冈夕子私下交欢，结果夕子在床上人被干没了。友彦向亮司求助，亮司本想弃之不顾，但偶然发现友彦会写程序，于是决定帮他。亮司找人假扮了夕子混淆死亡时间，并把自己的精液装到了夕子体内。渡过一劫后亮司的公司正式运行，靠着偷来的程序开始赚钱，友彦也对他死心塌地。
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2069/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/2059/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/assets/imgs/fr.png">
-      <meta itemprop="name" content="flandre">
-      <meta itemprop="description" content="This is a mirror/backup site of <a target="_blank" rel="noopener" href="https://flandre-scarlet.moe/blog">flandre-scarlet.moe</a>. It serves as a fallback when the original site is inaccessible.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Re: Memory (mirror)">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2059/" class="post-title-link" itemprop="url">《被讨厌的勇气》读书笔记</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2023-07-15 22:30:39" itemprop="dateCreated datePublished" datetime="2023-07-15T22:30:39+08:00">2023-07-15</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-07-25 02:00:28" itemprop="dateModified" datetime="2025-07-25T02:00:28+08:00">2025-07-25</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Book-notes/" itemprop="url" rel="index"><span itemprop="name">Book-notes</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>5.5k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>5 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>阿德勒心理学中提出了几个反直觉的观点，通过它们也许可以缓解我们的思维定势，帮助解决内心的矛盾。</p>
-<h3 id="勇气"><a href="#勇气" class="headerlink" title="勇气"></a>勇气</h3><ol>
-<li>原因论和目的论。明确否定“心理创伤”，认为决定我们自己的不是“经验本身”而是“赋予经验的意义”，也就是我们现在的“目的”，“原因”是为了实现“目的”而被使用的伪装。不是说没有影响，而是产生了什么结果取决于自己。 书中提到一个例子，青年在咖啡店里被服务员洒到咖啡而发怒，他认为这是原因导致的行为。那这个时候如果手里有刀就会一怒之下捅人吗，当然不会。那么这时候选择“发怒”是一种手段，为了能快速地震慑服务员，让他听自己的话。虽然讲道理也可以，但是还是选择了这种更加快捷的方式，于是挑选了“愤怒”。而且怒愤并不是无法控制的，当你对一个人发火的中途要对另外的人交谈，那通常都会把怒气收起来，等结束之后继续发火。</li>
-<li>想变得像其他人一样外向开朗 → 为什么想变 → 因为这样更优秀&#x2F;更能获得幸福 → 你觉得现在的自己不够优秀&#x2F;不够幸福，或者说你不喜欢现在的自己 → 你要有所改变，但并不是要变成别人 → 想变成别人是因为你在关注“被给予了什么”，其实应该把注意力放在“如何利用被给予的东西”上 → 一味关注“被给予了什么”对改变现状并没有帮助 → 你觉得痛苦觉得不幸，甚至想要变成别人，而这正是你自己选择的结果，你觉得痛苦&#x2F;不幸对你自己而言“有好处”（好处或许就是人生有什么不顺利的就可以归咎到性格上）→ 缺乏改变的勇气，所以捏造了一个做不到的借口，然后心安理得的保持着不幸</li>
-<li>阿德勒心理学用“生活方式”来描述人的性格和秉性，思考或行为的倾向。性格一词或许会带有“不可改变”这一感觉，但如果是生活方式的话，那就有改变的可能
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2059/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/2016/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/assets/imgs/fr.png">
-      <meta itemprop="name" content="flandre">
-      <meta itemprop="description" content="This is a mirror/backup site of <a target="_blank" rel="noopener" href="https://flandre-scarlet.moe/blog">flandre-scarlet.moe</a>. It serves as a fallback when the original site is inaccessible.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Re: Memory (mirror)">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2016/" class="post-title-link" itemprop="url">用虚拟机搭建 OpenWrt 透明代理</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2023-06-01 01:40:54" itemprop="dateCreated datePublished" datetime="2023-06-01T01:40:54+08:00">2023-06-01</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-07-25 02:02:15" itemprop="dateModified" datetime="2025-07-25T02:02:15+08:00">2025-07-25</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Programs/" itemprop="url" rel="index"><span itemprop="name">Programs</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>8.2k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>7 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>因为有些软件不支持主动设置代理，所以有时候还得开个透明代理，在实际买设备前先用虚拟机安装 OpenWrt 实验一把。 一开始想着去找那些有一键设置的工具或脚本，结果来回折腾花了不少时间，最后还是参考<a target="_blank" rel="noopener" href="https://guide.v2fly.org/app/tproxy.html">这里</a>的教程搞定了。</p>
-<h2 id="准备镜像"><a href="#准备镜像" class="headerlink" title="准备镜像"></a>准备镜像</h2><ol>
-<li>下载<a target="_blank" rel="noopener" href="https://downloads.openwrt.org/releases/22.03.5/targets/x86/64/openwrt-22.03.5-x86-64-generic-squashfs-combined.img.gz">目前最新的 OpenWrt 镜像</a></li>
-<li>解压得到 <code>*.img</code>，记为 <code>op.img</code></li>
-<li>（可选）用这个镜像安装后的默认可用空间只有 100M，比较捉鸡。为了方便后续安装各种软件先做个扩容：到 Linux 系统下或用 wsl，运行 <code>dd if=/dev/zero bs=1M count=2048 &gt;&gt; op.img</code>，将镜像扩容到 2G
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2016/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/1994/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/assets/imgs/fr.png">
-      <meta itemprop="name" content="flandre">
-      <meta itemprop="description" content="This is a mirror/backup site of <a target="_blank" rel="noopener" href="https://flandre-scarlet.moe/blog">flandre-scarlet.moe</a>. It serves as a fallback when the original site is inaccessible.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Re: Memory (mirror)">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/1994/" class="post-title-link" itemprop="url">使用 Cmake 生成项目的工程文件</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2022-12-20 22:00:56" itemprop="dateCreated datePublished" datetime="2022-12-20T22:00:56+08:00">2022-12-20</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-07-25 02:02:14" itemprop="dateModified" datetime="2025-07-25T02:02:14+08:00">2025-07-25</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Programs/" itemprop="url" rel="index"><span itemprop="name">Programs</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>12k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>11 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>构建系统描述了如何使用构建工具从项目的源代码构建项目的可执行文件和库，从而自动执行该过程。例如，构建系统可以是用于命令行 make 工具的 Makefile 或用于集成开发环境的项目文件。为了避免维护多个这样的构建系统，项目可以使用以 CMake 语言编写的文件抽象地指定其构建系统。从这些文件中，CMake 通过称为生成器的后端为每个使用者在本地生成一个首选的构建系统。</p>
-<p>另外，在 c++ 代码的跨平台使用中，包括增减文件在内，任何其他涉及项目工程的改动都要各个平台的开发同步处理各自平台的工程。而一旦某个平台没有及时更新项目文件就可能会导致 CI&#x2F;CD 自动化流程失败，非常影响工作效率。</p>
-<p>为避免费时费力地维护多个这样的构建系统，可以选择用 CMake 对其进行抽象。这样我们只需要维护一个 CMakeLists.txt，它就可以为你生成指定的 vcxproj 文件或者 makefile 文件。然后调用 MSBuild 或者 make 进行编译就可以。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/1994/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/1979/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/assets/imgs/fr.png">
-      <meta itemprop="name" content="flandre">
-      <meta itemprop="description" content="This is a mirror/backup site of <a target="_blank" rel="noopener" href="https://flandre-scarlet.moe/blog">flandre-scarlet.moe</a>. It serves as a fallback when the original site is inaccessible.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Re: Memory (mirror)">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/1979/" class="post-title-link" itemprop="url">Pixel 7 到了</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2022-12-17 16:52:15" itemprop="dateCreated datePublished" datetime="2022-12-17T16:52:15+08:00">2022-12-17</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-07-25 02:00:40" itemprop="dateModified" datetime="2025-07-25T02:00:40+08:00">2025-07-25</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Life/" itemprop="url" rel="index"><span itemprop="name">Life</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>972</span>
+              <span>1.6k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -918,10 +220,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>之前纠结了一段时间，最终还是决定入手 pixel 尝尝鲜。随后赶着黑五下单了 pixel 7。其实在这之前我就一直用小米刷着 Pixel Experience 做主力机在用，所以 Android 13 倒没什么新鲜感，主要还是想体验 google 的 ai 相机。 另外正式迁移数据前还要先 root 处理下 VoLTE。</p>
+          <p>VPS 需要定期续费，域名也是，万一我哪天嘎了，域名过期主机欠费，我的博客也就销声匿迹了。我希望它能活得久一点，毕竟是自己一手带大的。眼下最好的选择应该就是托管 github pages 了吧，比起被随意关停的产品，作为世界上最大的代码托管网站和开源社区，github 可以被转手，但绝不会轻易消失。除非哪天说要 archive 长期不活跃的仓库和账号，哈哈。不管怎么说，目前来看都是相当好的选择了。用户多、服务稳定还免费。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/1979/#more" rel="contents">
+              <a class="btn" href="/2329/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -945,7 +247,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/1941/">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/2313/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/assets/imgs/fr.png">
@@ -959,7 +261,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/1941/" class="post-title-link" itemprop="url">Charles 破解</a>
+            <a href="/2313/" class="post-title-link" itemprop="url">河西走廊之行 7</a>
         </h2>
 
         <div class="post-meta">
@@ -968,27 +270,21 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
+              
 
-              <time title="创建时间：2022-07-07 22:32:30" itemprop="dateCreated datePublished" datetime="2022-07-07T22:32:30+08:00">2022-07-07</time>
+              <time title="创建时间：2025-06-27 02:04:49 / 修改时间：02:04:45" itemprop="dateCreated datePublished" datetime="2025-06-27T02:04:49+08:00">2025-06-27</time>
             </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-07-25 02:05:46" itemprop="dateModified" datetime="2025-07-25T02:05:46+08:00">2025-07-25</time>
-              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Programs/" itemprop="url" rel="index"><span itemprop="name">Programs</span></a>
+                  <a href="/categories/Life/" itemprop="url" rel="index"><span itemprop="name">Life</span></a>
                 </span>
                   ，
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Programs/Reverse-engineering/" itemprop="url" rel="index"><span itemprop="name">Reverse-engineering</span></a>
+                  <a href="/categories/Life/Travel-notes/" itemprop="url" rel="index"><span itemprop="name">Travel-notes</span></a>
                 </span>
             </span>
 
@@ -998,14 +294,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>3k</span>
+              <span>2.1k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>3 分钟</span>
+              <span>2 分钟</span>
             </span>
 
         </div>
@@ -1017,16 +313,11 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>Charles 是常用的抓包软件，可以用于分析 http(s) 流量，使用 Java 编写。目前最新版是 4.6.2，来试下它的破解。</p>
-<h3 id="工具"><a href="#工具" class="headerlink" title="工具"></a>工具</h3><p>Java Decompiler</p>
-<p>反编译 Java 字节码</p>
-<p><a target="_blank" rel="noopener" href="https://github.com/java-decompiler/jd-gui/releases">https://github.com/java-decompiler/jd-gui/releases</a></p>
-<p>Recaf</p>
-<p>编辑 Java 字节码</p>
-<p><a target="_blank" rel="noopener" href="https://github.com/Col-E/Recaf/releases">https://github.com/Col-E/Recaf/releases</a></p>
+          <h2 id="Day-7"><a href="#Day-7" class="headerlink" title="Day 7"></a>Day 7</h2><p>早上在步行街吃了驴肉火烧，味道挺不错。驴肉有嚼劲，但是又不像牛肉那样嚼得腮帮子酸，入口下肚非常丝滑，可以说不知不觉就吃完了。不过驴肉只吃了这一次，印象还没有那么强烈，主要是这里得手抓羊肉太香太可口了。 饭后就去雅丹地质公园。雅丹和玉门关是同一条路，玉门关比较近差不多就在半路，而且闭园时间比较晚，可以在雅丹回来后再去。在路上还看到了光棱塔（误），其实是个光电产业园。 <img src="/assets/imgs/2025/06/%E6%B2%B3%E8%A5%BF%E8%B5%B0%E5%BB%8A-121.jpg" alt="光伏电站"></p>
+<p>1 点多到了玉门关。我们还是直接过去了，因为这时天气稍微变好，有蓝天也露了点太阳出来。这么几天下来总算有体会了，天气好的时间基本都在中午到下午一两点这段时间，也就是一天最热的时候。而到傍晚时分，云层通常就会变厚，大前天在月牙泉看到的估计就是唯一的日落了。如今云朵在高空的强风里摇曳，如素纱丝絮，夏空也伴随着阳光在这纤薄的云丝中显现。时不我待，鬼知道回来时还有没有这蓝天了，果断一把方向拐到停车场去。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/1941/#more" rel="contents">
+              <a class="btn" href="/2313/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -1050,7 +341,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/1917/">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/2286/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/assets/imgs/fr.png">
@@ -1064,7 +355,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/1917/" class="post-title-link" itemprop="url">月影のシミュラクル-解放の羽- 感想</a>
+            <a href="/2286/" class="post-title-link" itemprop="url">河西走廊之行 6</a>
         </h2>
 
         <div class="post-meta">
@@ -1073,27 +364,21 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
+              
 
-              <time title="创建时间：2022-04-19 21:50:30" itemprop="dateCreated datePublished" datetime="2022-04-19T21:50:30+08:00">2022-04-19</time>
+              <time title="创建时间：2025-06-25 03:13:38 / 修改时间：03:15:58" itemprop="dateCreated datePublished" datetime="2025-06-25T03:13:38+08:00">2025-06-25</time>
             </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-07-25 02:00:05" itemprop="dateModified" datetime="2025-07-25T02:00:05+08:00">2025-07-25</time>
-              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/ACG/" itemprop="url" rel="index"><span itemprop="name">ACG</span></a>
+                  <a href="/categories/Life/" itemprop="url" rel="index"><span itemprop="name">Life</span></a>
                 </span>
                   ，
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/ACG/Galgame/" itemprop="url" rel="index"><span itemprop="name">Galgame</span></a>
+                  <a href="/categories/Life/Travel-notes/" itemprop="url" rel="index"><span itemprop="name">Travel-notes</span></a>
                 </span>
             </span>
 
@@ -1103,7 +388,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>3.5k</span>
+              <span>3.3k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -1122,12 +407,674 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p><img src="/assets/imgs/2022/04/%E6%9C%88%E5%BD%B1%E3%81%AE%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%A9%E3%82%AF%E3%83%AB-%E8%A7%A3%E6%94%BE%E3%81%AE%E7%BE%BD-_17.jpg"></p>
-<p>非常短小精悍的剧本，没有什么注水剧情反而比较讨喜。大概花 10 小时就能走完全部剧情。</p>
-<p>整体上是由 BE 铺出的 TE 之路，通过不断解锁 BE 后最终达到真路线。实际在玩的过程中路线是以单一方式解锁的，另外系统自带了剧本的流程图，所处的分支也一目了然。一开始我以为剧本和选项里会带有推理情节，剧本前段还提到了男主有特殊能力。但后面发现基本没有推理要素。</p>
+          <h2 id="Day-6"><a href="#Day-6" class="headerlink" title="Day 6"></a>Day 6</h2><p>今天准备去榆林窟，那边离敦煌有 160+ 公里，所以早一点起床了。早饭去吃的抿节，味道挺好的而且量大管饱。面加小菜只要 18 一人。首先店家会端一盘小菜和调料上来，然后每人都会逐一上玉米面、荞麦面、莜麦面等，只有吃完了上一碗才会端下一碗上来，只要吃得下，面是无限续的。不过 6 碗面我们只吃到第 3 碗就已经吃饱了。 <img src="/assets/imgs/2025/06/%E6%B2%B3%E8%A5%BF%E8%B5%B0%E5%BB%8A-101.jpg" alt="抿节"></p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/1917/#more" rel="contents">
+              <a class="btn" href="/2286/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/2262/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/assets/imgs/fr.png">
+      <meta itemprop="name" content="flandre">
+      <meta itemprop="description" content="This is a mirror/backup site of <a target="_blank" rel="noopener" href="https://flandre-scarlet.moe/blog">flandre-scarlet.moe</a>. It serves as a fallback when the original site is inaccessible.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Re: Memory (mirror)">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2262/" class="post-title-link" itemprop="url">河西走廊之行 5</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-06-24 20:25:11 / 修改时间：20:24:13" itemprop="dateCreated datePublished" datetime="2025-06-24T20:25:11+08:00">2025-06-24</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Life/" itemprop="url" rel="index"><span itemprop="name">Life</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Life/Travel-notes/" itemprop="url" rel="index"><span itemprop="name">Travel-notes</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.8k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="Day-5"><a href="#Day-5" class="headerlink" title="Day 5"></a>Day 5</h2><p>今天的行程是莫高窟，我们中午起床，吃完午饭再过去。午饭吃的是胡羊焖饼。说是饼，其实是手工擀的薄面片，撕成小块后层层铺在羊肉上焖熟。焖完后既有面片的弹性又有羊汤的浓郁。</p>
+<p>莫高窟的票价很高，常规票 238 每人，包括 8 个实体窟（180r）数字电影（48r）交通费（10r）；应急票则是 100 每人，包括 4 个实体窟（90r）交通费（10r）从游客中心。按预约的常规票和应急票分流，某一天的常规票被预约完后就会放出应急票。六月是淡季，就算提前一个星期也还能约到常规票。这两天六月下旬看了看，不提前一个月确实是约不到常规票了。提高票价试图减少人数似乎并不奏效，不过好歹是创收了。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2262/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/2243/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/assets/imgs/fr.png">
+      <meta itemprop="name" content="flandre">
+      <meta itemprop="description" content="This is a mirror/backup site of <a target="_blank" rel="noopener" href="https://flandre-scarlet.moe/blog">flandre-scarlet.moe</a>. It serves as a fallback when the original site is inaccessible.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Re: Memory (mirror)">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2243/" class="post-title-link" itemprop="url">河西走廊之行 4</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-06-23 02:58:00 / 修改时间：02:57:58" itemprop="dateCreated datePublished" datetime="2025-06-23T02:58:00+08:00">2025-06-23</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Life/" itemprop="url" rel="index"><span itemprop="name">Life</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Life/Travel-notes/" itemprop="url" rel="index"><span itemprop="name">Travel-notes</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>1 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="Day-4"><a href="#Day-4" class="headerlink" title="Day 4"></a>Day 4</h2><p>昨天喝了咖啡后睡不着，干脆放飞自我刷手机到四点半，早上十一点才起床，等收拾完毕退房离开已经是十二点了。 今天的午饭是羊肉粉汤，点了牛肉清汤和带更多肉的羊肉清汤，套餐里搭配有饼可以蘸着辣酱吃，没加面或粉主要是怕吃不完，又点了两串牛肉大串。最后将将吃完，味道挺不错，再多就要浪费了。 然后开车去看嘉峪关三兄弟景点的最后一个长城第一墩。它的位置在讨赖河大峡谷北岸的悬崖峭壁上，俯瞰深约80米的讨赖河峡谷，形成易守难攻的天然屏障。它与嘉峪关关城、悬壁长城共同构成嘉峪关长城防御体系的”三足鼎立”之势。 <img src="/assets/imgs/2025/06/%E6%B2%B3%E8%A5%BF%E8%B5%B0%E5%BB%8A-63.jpg" alt="长城第一墩"></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2243/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/2226/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/assets/imgs/fr.png">
+      <meta itemprop="name" content="flandre">
+      <meta itemprop="description" content="This is a mirror/backup site of <a target="_blank" rel="noopener" href="https://flandre-scarlet.moe/blog">flandre-scarlet.moe</a>. It serves as a fallback when the original site is inaccessible.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Re: Memory (mirror)">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2226/" class="post-title-link" itemprop="url">河西走廊之行 3</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-06-23 02:07:43 / 修改时间：02:06:58" itemprop="dateCreated datePublished" datetime="2025-06-23T02:07:43+08:00">2025-06-23</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Life/" itemprop="url" rel="index"><span itemprop="name">Life</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Life/Travel-notes/" itemprop="url" rel="index"><span itemprop="name">Travel-notes</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="Day-3"><a href="#Day-3" class="headerlink" title="Day 3"></a>Day 3</h2><p>因为昨天临时去了康乐草原，原有行程略有影响，原计划中的平山湖大峡谷我们打算跳过了。这样对后续计划影响会小一点。 今天天气没有昨天那么好了，虽然也是大太阳但是云多了，没有看到蓝天。早起出发去七彩丹霞。昨晚提了个西瓜回去，吃不完剩了一半，早上围着啃西瓜，今天的牛肉面就先跳过了。 再次开上张肃一级公路，昨天经过这里一到收费站是直接收费的，我还愣了一会，想着高速不是先领卡出去才收钱么。不过费用不高，区区 6 元。随后拐进丹霞路，这时已经能看到路边出现的丹霞地貌了，不过颜色还不是那么鲜艳。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2226/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/2208/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/assets/imgs/fr.png">
+      <meta itemprop="name" content="flandre">
+      <meta itemprop="description" content="This is a mirror/backup site of <a target="_blank" rel="noopener" href="https://flandre-scarlet.moe/blog">flandre-scarlet.moe</a>. It serves as a fallback when the original site is inaccessible.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Re: Memory (mirror)">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2208/" class="post-title-link" itemprop="url">河西走廊之行 2</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-06-23 01:38:05 / 修改时间：01:34:28" itemprop="dateCreated datePublished" datetime="2025-06-23T01:38:05+08:00">2025-06-23</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Life/" itemprop="url" rel="index"><span itemprop="name">Life</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Life/Travel-notes/" itemprop="url" rel="index"><span itemprop="name">Travel-notes</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.9k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="Day2"><a href="#Day2" class="headerlink" title="Day2"></a>Day2</h2><p>昨晚饭后开车赶夜路，从武威到了张掖。早上起床后在酒店附近的清真店吃了牛肉面。通常我是吃不完的，但这里的辣子香的很，难得把一整碗全干完了。今天不同于天气预报是个好天气，太阳高高挂着天也很蓝，不过代价就是紫外线暴表，再热也得穿好衣服了。<img src="/assets/imgs/2025/06/%E6%B2%B3%E8%A5%BF%E8%B5%B0%E5%BB%8A-29-1.jpg" alt="辣子"></p>
+<p>吃完面差不多已经十二点，先去大佛寺看卧佛。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2208/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/2180/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/assets/imgs/fr.png">
+      <meta itemprop="name" content="flandre">
+      <meta itemprop="description" content="This is a mirror/backup site of <a target="_blank" rel="noopener" href="https://flandre-scarlet.moe/blog">flandre-scarlet.moe</a>. It serves as a fallback when the original site is inaccessible.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Re: Memory (mirror)">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2180/" class="post-title-link" itemprop="url">河西走廊之行 1</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-06-20 03:13:11 / 修改时间：03:12:38" itemprop="dateCreated datePublished" datetime="2025-06-20T03:13:11+08:00">2025-06-20</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Life/" itemprop="url" rel="index"><span itemprop="name">Life</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Life/Travel-notes/" itemprop="url" rel="index"><span itemprop="name">Travel-notes</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="Day-0"><a href="#Day-0" class="headerlink" title="Day 0"></a>Day 0</h2><p>打工人的出游可太难了，假期机票死贵，短途可以开车或高铁，长途真被卡得死死的，真的很羡慕那些可以随时请假出去玩的人了。端午假期里机票酒店都没有贵得很离谱，这就难得有了一个旅游的好借口。</p>
+<p>这次打算去西北河西四郡，走一遍河西走廊。找攻略的时候就发现很多帖子都推荐《河西走廊》这部纪录片，确实非常值得一看。它是央视和甘肃宣传部在 2022 年联合拍的，系统梳理了河西走廊甚至整个中国西部的历史，呈现出了西北那跨越千年的雄壮、辉煌与苍凉。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2180/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/2152/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/assets/imgs/fr.png">
+      <meta itemprop="name" content="flandre">
+      <meta itemprop="description" content="This is a mirror/backup site of <a target="_blank" rel="noopener" href="https://flandre-scarlet.moe/blog">flandre-scarlet.moe</a>. It serves as a fallback when the original site is inaccessible.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Re: Memory (mirror)">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2152/" class="post-title-link" itemprop="url">舟山自驾 2 日游</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-05-18 20:31:13" itemprop="dateCreated datePublished" datetime="2025-05-18T20:31:13+08:00">2025-05-18</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-05-25 00:35:41" itemprop="dateModified" datetime="2025-05-25T00:35:41+08:00">2025-05-25</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Life/" itemprop="url" rel="index"><span itemprop="name">Life</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Life/Travel-notes/" itemprop="url" rel="index"><span itemprop="name">Travel-notes</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>五一避开了人群，选择宅家休息，假期过了后准备出门玩玩。周末跑不了太远的地方，这次就先去舟山吧。</p>
+<p>我们周六早上十点半左右才出发的，还是不想太特种兵，悠哉一点好了。开车一路上没怎么休息，花了几小时直接开到了舟山。在朱家尖海峡大桥上就看到了黄黄的海水，到底靠近长江入海口，海底泥浆翻涌。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2152/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/2141/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/assets/imgs/fr.png">
+      <meta itemprop="name" content="flandre">
+      <meta itemprop="description" content="This is a mirror/backup site of <a target="_blank" rel="noopener" href="https://flandre-scarlet.moe/blog">flandre-scarlet.moe</a>. It serves as a fallback when the original site is inaccessible.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Re: Memory (mirror)">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2141/" class="post-title-link" itemprop="url">当裁员成为日常</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-04-20 20:29:04" itemprop="dateCreated datePublished" datetime="2025-04-20T20:29:04+08:00">2025-04-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-05-06 21:21:11" itemprop="dateModified" datetime="2025-05-06T21:21:11+08:00">2025-05-06</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Work/" itemprop="url" rel="index"><span itemprop="name">Work</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.4k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>一个原本普通的下午，却随着同事 A 突然开始整理工位而打破了平静。没想到今年还有第二次。年初时公司范围内就有过一次小规模的裁员，各个组都领到指标，请走了一两位同事。但这次更像是针对性的优化，老员工离开，并且后续计划补充新鲜血液。</p>
+<p>伴随着年后毫无征兆的裁员，领导层又陆续推出了一些新花样。All hands 上老板提出一些新的守则，指导员工们要勤勤恳恳做好工作，同时提升自我。换句话也可以说是让牛马们卷起来，别暗戳戳想着自己可以混日子养老了。同时也提出了配套的 KPI。以前公司虽然也强调快速迭代让大家都卷起来，其实还是略有余地的，这次又继续上了强度。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2141/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -1150,7 +1097,7 @@
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/10/">10</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 
@@ -1218,20 +1165,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">96</span>
+          <span class="site-state-item-count">112</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-count">17</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">247</span>
+        <span class="site-state-item-count">281</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -1258,7 +1205,7 @@
 <div class="copyright">
   
   &copy; 2016 – 
-  <span itemprop="copyrightYear">2025</span>
+  <span itemprop="copyrightYear">2026</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
@@ -1268,13 +1215,13 @@
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">328k</span>
+    <span title="站点总字数">389k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">4:58</span>
+    <span title="站点阅读时长">5:54</span>
 </div>
   <div class="powered-by">Powered by love
   </div>

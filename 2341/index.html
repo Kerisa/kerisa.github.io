@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="n4HzIaQ2ebAeP_VrwiqS7s6qfe8RKXwGfnHiPjz3Z20">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kerisa.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="新买了一台主机，准备搭个 PVE 服务器，在这记录一下过程。 安装 PVEPVE 本身基于 Debian 系统，安装起来并不会十分复杂。下载最新版的 PVE 镜像，还有最新版引导盘制作软件 Rufus，将镜像写入 U 盘后再从 U 盘启动即可。遇到一个比较坑的问题，引导进入 PVE 安装界面后却提示 no device with valid ISO found, please check your">
+<meta property="og:type" content="article">
+<meta property="og:title" content="配置 PVE 服务器">
+<meta property="og:url" content="https://kerisa.github.io/2341/index.html">
+<meta property="og:site_name" content="Re: Memory (mirror)">
+<meta property="og:description" content="新买了一台主机，准备搭个 PVE 服务器，在这记录一下过程。 安装 PVEPVE 本身基于 Debian 系统，安装起来并不会十分复杂。下载最新版的 PVE 镜像，还有最新版引导盘制作软件 Rufus，将镜像写入 U 盘后再从 U 盘启动即可。遇到一个比较坑的问题，引导进入 PVE 安装界面后却提示 no device with valid ISO found, please check your">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2025/10/pve-03.png">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2025/10/pve-04.png">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2025/10/pve-02.png">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2025/10/pve-01.png">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2025/10/pve-05.png">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2025/10/pve-06.png">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2025/10/pve-07.png">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2025/10/pve-08.png">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2025/10/pve-10.png">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2025/10/pve-09.png">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2025/10/pve-11.png">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2025/10/pve-12.png">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2025/10/pve-13.png">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2025/09/pve-1.png">
+<meta property="article:published_time" content="2025-09-10T12:35:33.000Z">
+<meta property="article:modified_time" content="2025-09-10T13:13:48.000Z">
+<meta property="article:author" content="flandre">
+<meta property="article:tag" content="LUKS">
+<meta property="article:tag" content="lxc">
+<meta property="article:tag" content="Passthrough">
+<meta property="article:tag" content="proxmox">
+<meta property="article:tag" content="PVE">
+<meta property="article:tag" content="Samba">
+<meta property="article:tag" content="Syncthing">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kerisa.github.io/assets/imgs/2025/10/pve-03.png">
+
+<link rel="canonical" href="https://flandre-scarlet.moe/blog/2341/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>配置 PVE 服务器 | Re: Memory (mirror)</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Re: Memory (mirror)</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kerisa.github.io/2341/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/assets/imgs/fr.png">
+      <meta itemprop="name" content="flandre">
+      <meta itemprop="description" content="This is a mirror/backup site of <a target="_blank" rel="noopener" href="https://flandre-scarlet.moe/blog">flandre-scarlet.moe</a>. It serves as a fallback when the original site is inaccessible.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Re: Memory (mirror)">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          配置 PVE 服务器
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-09-10 20:35:33 / 修改时间：21:13:48" itemprop="dateCreated datePublished" datetime="2025-09-10T20:35:33+08:00">2025-09-10</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Programs/" itemprop="url" rel="index"><span itemprop="name">Programs</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>15k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>14 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>新买了一台主机，准备搭个 PVE 服务器，在这记录一下过程。</p>
+<h2 id="安装-PVE"><a href="#安装-PVE" class="headerlink" title="安装 PVE"></a>安装 PVE</h2><p><a target="_blank" rel="noopener" href="https://www.proxmox.com/en/">PVE</a> 本身基于 Debian 系统，安装起来并不会十分复杂。下载最新版的 PVE 镜像，还有最新版引导盘制作软件 Rufus，将镜像写入 U 盘后再从 U 盘启动即可。遇到一个比较坑的问题，引导进入 PVE 安装界面后却提示 no device with valid ISO found, please check your installation medium。因为我这 U 盘拿来做各种启动盘也挺久了所以一开始没怀疑到它，总觉得是自己引导盘做的有问题，还换了 Etcher，用 AI 搜来的过时信息对 bios 一通修改。结果最后换了个 U 盘就好了，并不用做任何多余的操作。</p>
+<span id="more"></span>
+<p>安装 PVE 时注意考虑好主机名和分配给服务器的 ip 再设置，之后虽然也可以修改，不过一开始能固定下来后面就省点心。</p>
+<h3 id="PVE-服务器改名"><a href="#PVE-服务器改名" class="headerlink" title="PVE 服务器改名"></a>PVE 服务器改名</h3><p>hostnamectl set-hostname &lt;新名字&gt; 修改 &#x2F;etc&#x2F;hosts 替换老名字 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> /root/tmp <span class="built_in">cp</span> -r /etc/pve/nodes/&lt;老名字&gt;/\* /root/tmp/ <span class="comment"># 复制现有配置 rm -rf /etc/pve/nodes/&lt;老名字&gt; mkdir /etc/pve/nodes/&lt;新名字&gt; cp -r /root/tmp/\* /etc/pve/nodes/&lt;新名字&gt; # 复制现有配置 reboot</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="修改镜像源"><a href="#修改镜像源" class="headerlink" title="修改镜像源"></a>修改镜像源</h2><p>安装完后要更新软件，首先就是改镜像源了。按<a target="_blank" rel="noopener" href="https://mirror.tuna.tsinghua.edu.cn/help/proxmox/">清华大学镜像站</a>的指引更换 Debian 和 Proxmox 软件源。</p>
+<p>企业版源列表文件内的内容 <em>&#x2F;etc&#x2F;apt&#x2F;sources.list.d&#x2F;pve-enterprise.list</em> 可以全部注释掉。</p>
+<p>ceph 源，将 <em>ceph.source</em> 复制备份后新建 _&#x2F;etc&#x2F;apt&#x2F;sources.list.d&#x2F;ceph.list_，内容为 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">deb https://mirrors.ustc.edu.cn/proxmox/debian/ceph-squid bookworm no-subscription</span><br></pre></td></tr></table></figure></p>
+<p>最后执行 <em>apt update &amp;&amp; apt dist-upgrade -y</em> 更新并重启即可。</p>
+<h2 id="删除-local-lvm"><a href="#删除-local-lvm" class="headerlink" title="删除 local-lvm"></a>删除 local-lvm</h2><p>local-lvm 和 local 本意是一个放 iso 方便安装虚拟机，一个放虚拟机磁盘，相当于默认分了个区，没法有效利用磁盘空间，所以直接删了合并成一个。local-lvm 删除后，空间合并给 local 存储空间。 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lvremove /dev/pve/data lvextend -l +100%FREE -r /dev/pve/root</span><br></pre></td></tr></table></figure> 命令操作完后在 Web 界面删除 local-lvm 存储：点击左侧列表的数据中心节点 - 存储 - 选中 local-lvm 删除。 最后还要配置下 local 存储，在上一步的存储界面选中 local，点击 编辑 - 内容，确保选中了 所有选项（包括磁盘映像、容器等），这样 local 分区就可以存放各类文件了。</p>
+<h2 id="电源配置"><a href="#电源配置" class="headerlink" title="电源配置"></a>电源配置</h2><h3 id="CPU-电源管理"><a href="#CPU-电源管理" class="headerlink" title="CPU 电源管理"></a>CPU 电源管理</h3><p>首先 BIOS 的 C-State 要打开，目的是能让 CPU 空闲时进入更深的睡眠，这个设置通常都是开着的。</p>
+<p>查看当前的 pve 电源策略 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> /sys/devices/system/cpu/cpu\*/cpufreq/scaling\_governor <span class="comment"># 默认情况会输出 performance 性能模式</span></span><br></pre></td></tr></table></figure> 查看可用的电源策略 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> /sys/devices/system/cpu/cpu\*/cpufreq/scaling\_available\_governors <span class="comment"># 输出 performance powersave</span></span><br></pre></td></tr></table></figure> 修改电源策略 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">&quot;powersave&quot;</span> <span class="built_in">tee</span> /sys/devices/system/cpu/cpu\*/cpufreq/scaling\_governor</span><br></pre></td></tr></table></figure> 因为每次重启后会重置，所以每次开机需要执行一次。</p>
+<p>另外可以用 powertop 查看 cpu 频率和好点信息。<em>apt install powertop</em> 安装即可。</p>
+<h3 id="硬盘空闲时休眠"><a href="#硬盘空闲时休眠" class="headerlink" title="硬盘空闲时休眠"></a>硬盘空闲时休眠</h3><p>如果你的硬盘经常会有读写，反复启停反而影响寿命。但如果是不常访问的数据盘，休眠后可以降低功耗和延长寿命。休眠一块 hdd 差不多可以省下 10w 功耗。</p>
+<p>查看当前的硬盘电源配置 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">grep . /sys/class/block/sda/device/power/\* <span class="comment"># 上面的 sda 替换成相应的硬盘 # 在我机器上会输出如下结果 # /sys/class/block/sda/device/power/async:enabled # /sys/class/block/sda/device/power/autosuspend\_delay\_ms:15000 # /sys/class/block/sda/device/power/control:auto # /sys/class/block/sda/device/power/runtime\_active\_kids:0 # /sys/class/block/sda/device/power/runtime\_active\_time:179939 # /sys/class/block/sda/device/power/runtime\_enabled:enabled # /sys/class/block/sda/device/power/runtime\_status:suspended # /sys/class/block/sda/device/power/runtime\_suspended\_time:4379610 # /sys/class/block/sda/device/power/runtime\_usage:0</span></span><br></pre></td></tr></table></figure> 主要关注其中的 control 和 autosuspend_delay_ms，比如这里表示 15 秒空闲后就休眠，太夸张了，可以设置成 15 分钟，即 900000。 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> 900000 <span class="built_in">tee</span> /sys/class/block/sdb/device/power/autosuspend\_delay\_ms <span class="built_in">echo</span> auto <span class="built_in">tee</span> /sys/class/block/sdb/device/power/control</span><br></pre></td></tr></table></figure> 这样把每个硬盘都设一遍。可以写到开机脚本里。</p>
+<p>pve 会运行 smartd 服务，它也会唤醒硬盘，其实也不用天天盯着 smartd 看，可以考虑停掉 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl stop smartd systemctl <span class="built_in">disable</span> smartd</span><br></pre></td></tr></table></figure></p>
+<p>（不确定）可以把想休眠的硬盘排除在 vgscan 的扫描列表之外，这样它不会在这些硬盘上查找卷组，不过结果没法使用这些硬盘上的卷组和逻辑卷。 在 <em>&#x2F;etc&#x2F;lvm&#x2F;lvm.conf</em> 的底部有 global_filter 部分，在里面加入想排除的硬盘 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">global\_filter = \[ <span class="string">&quot;r/dev/sda&quot;</span>, <span class="string">&quot;r/dev/sdb&quot;</span> \] <span class="comment"># r... 表示拒绝匹配的设备</span></span><br></pre></td></tr></table></figure></p>
+<p>（不确定）pve 的统计服务，就是 web 面板上的资源使用统计，如果硬盘总是停不下来的可以关掉试试 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pvestatd stop</span><br></pre></td></tr></table></figure></p>
+<p>另外查看哪些程序访问了磁盘可以用 fatrace，比如硬盘 A mount 在 &#x2F;mnt&#x2F;disk-A 目录，那么可以 cd 到这个目录，并运行 fatrace -ct，它会实时监视并输出访问了磁盘的程序。</p>
+<p>hdparm 可以查看或者设置硬盘的休眠状态。hdparm -C &#x2F;dev&#x2F;sda，输出 active&#x2F;idle 表示活跃，standby 表示休眠。不过当我用 autosuspend_delay_ms 超时让硬盘休眠后，执行 hdparm -C 会激活硬盘，可以听到磁盘开始转动的声音。如果用 hdparm -Y 让硬盘休眠后再用 -C 检查，它就会显示 standby 了，这时硬盘也没有动静。</p>
+<h2 id="使用-LXC-容器作为文件虚拟器"><a href="#使用-LXC-容器作为文件虚拟器" class="headerlink" title="使用 LXC 容器作为文件虚拟器"></a>使用 LXC 容器作为文件虚拟器</h2><p>我一开始的做法是起一堆虚拟机，每个 vm 运行一个服务，但这样开销太大了，应该有效利用 lxc。其实如果不是考虑到以后起 vm 折腾（假想需求中……）的需要，其实直接 linux 单机运行服务就行，不用搞什么 pve。总之，现在的一些 smb、jellyfin、syncthing 之类的服务都可以转成 lxc 完成。原来单独一个 vm 起 samba 后各个 vm 还要挂载，用 lxc 的话宿主直接挂载就能访问。稍微麻烦点的就是权限控制了。建议用<a target="_blank" rel="noopener" href="https://pve.proxmox.com/wiki/Unprivileged_LXC_containers">无特权 lxc</a>。</p>
+<p>硬盘的全盘加密仍然可以考虑做，这个不影响。现在把直通给 vm 的硬盘从 vm 配置里移除，这样 pve 就能看到这块加密磁盘了，解密后挂载好，数据是可以正常访问的。</p>
+<h3 id="下载-lxc-模板"><a href="#下载-lxc-模板" class="headerlink" title="下载 lxc 模板"></a>下载 lxc 模板</h3><p>安装 lxc 需要用到模板，下载一个现成的比较方便。点击下载便会在控制台输出直接下载链接。国内因为网络问题下载速度慢，可以参照其他教程配置国内镜像源下载，或者自行去镜像网站下载后上传到 pve 也行。</p>
+<p><img src="/assets/imgs/2025/10/pve-03.png"></p>
+<p><img src="/assets/imgs/2025/10/pve-04.png"></p>
+<p>模板下载后就可以在服务器页面右上角创建 CT 了，“无特权容器”和“嵌套”默认都是勾上的，不用改。设置 root 密码，选择 CT 模板，一路配置硬件参数就行。我一开始用 turnkey 的 fileserver 模板创建时 lxc 磁盘给小了只有 1G，在创建时会报空间不足，多给点就行了。</p>
+<p>启动后从 pve 面板进入 lxc 的控制台，登录 root 用户后开始安装，turnkey 里自带一些服务需要设置密码，比如 fileserver 需要配置 samba 的密码，之后做个在线更新，很快就会安装完。</p>
+<p><img src="/assets/imgs/2025/10/pve-02.png"></p>
+<h3 id="配置-samba"><a href="#配置-samba" class="headerlink" title="配置 samba"></a>配置 samba</h3><p><img src="/assets/imgs/2025/10/pve-01.png"></p>
+<p>安装完用浏览器访问 lxc 的 ip，进入 webmin 界面，到 System - Users and Groups - 右边的 local group - create a new group，创建 smb group，这里给它指定 group id 为 1000，名字随意。</p>
+<p><img src="/assets/imgs/2025/10/pve-05.png"></p>
+<p>再回到 local user tab - create a new user，填入以下信息后创建，用户名密码随意，主要是 uid 和 group 要选好。如有多个用户 uid 可以从 1000 递增。</p>
+<p><img src="/assets/imgs/2025/10/pve-06.png"></p>
+<p>这里先切换到 pve 的 root 控制台，打开 _&#x2F;etc&#x2F;pve&#x2F;lxc&#x2F;[容器ID].conf_，在里面添加一行目录映射规则 _mp0: &#x2F;mnt&#x2F;bindmounts&#x2F;shared,mp&#x3D;&#x2F;shared_，意思是把 pve 主机的 &#x2F;mnt&#x2F;bindmounts&#x2F;shared 映射到 lxc 的 &#x2F;shared。有多个映射时 mp0 数字递增，不重复即可。重启 lxc。</p>
+<p>再回到 lxc 的 webmin，到左侧 Servers - Samba Windows File Sharing - 右边 create a new file share，创建目录的 samba 共享目录。 完成后点开共享目录，下方有个 Security and Access Control。里面有个 Writable? 设为 Yes 就是可写了，里面也有一些 Read only users、Read&#x2F;write users 等更精细的控制。</p>
+<p><img src="/assets/imgs/2025/10/pve-07.png"></p>
+<p><img src="/assets/imgs/2025/10/pve-08.png"></p>
+<p>如果硬盘里已经有数据了，那还有一步关键的是在 pve 主机里设置共享目录的权限。现在 lxc 里我们 smb 用户的 uid 是 1000，gid 也是 1000。在 pve 的 &#x2F;etc&#x2F;subuid 已经自动生成了映射 _root:100000:65536_，这个配置的意思是 pve 的 root 用户可以将 100000 开始的 65536 个 uid 映射给 lxc 容器（lxc 容器是以 pve 中的 root 用户身份启动的）。而默认情况下 lxc 内的 uid 是从 0 开始一一对应，即 pve 的 uid 1000000 对应 lxc 内的 root 用户（0）。那么依次类推，lxc 内的 smb 用户（uid&#x3D;1000）对应 pve 的 uid 101000。所以我们在 pve 上要给共享目录设置 _chown -R 101000:101000_（lxc 的 samba group id 也是 1000，映射规则也是一致的）。</p>
+<h3 id="配置-jellyfin"><a href="#配置-jellyfin" class="headerlink" title="配置 jellyfin"></a>配置 jellyfin</h3><p>jellyfin 需要安装 turnkey 的 mediaserver 模板。前面的步骤都和 fileserver 类似。安装完成后 lxc 的 root 控制台会显示 jellyfin、webmin、smb、ssh 等服务的地址，直接用浏览器访问即可。 随后进入 jellyfin web 后台做初始设置，lxc 同样挂载 pve 的目录后就能访问了。</p>
+<h3 id="硬件转码"><a href="#硬件转码" class="headerlink" title="硬件转码"></a>硬件转码</h3><p>其实可以不用设置独占，直接共享就行了。来到 pve 后台，选中 jellyfin 所在的 lxc，右边选资源 - 添加 - 设备直通，会让你填设备路径。路径在 pve 主机里用 _ls &#x2F;dev&#x2F;dri_查看，像我的只有核显，就是 <em>card0</em> 和 _renderD128_。这俩一起表示了一张显卡。</p>
+<p><img src="/assets/imgs/2025/10/pve-10.png"></p>
+<p>card0 代表的是 DRM（Direct Render Manager，直接渲染管理器）。它负责直接与 GPU 硬件交互。用来处理多路图形渲染请求、内存管理、显示模式设置等底层任务。所以它表示的是整个物理或虚拟的图形卡。对这个设备的操作通常与显示输出和整体 GPU 管理相关。 renderD128 代表 DRI（Direct Render Infrastructure，直接渲染基础设施）。这是一套允许用户空间的应用程序（如 X11&#x2F;Wayland 合成器、游戏、3D 软件）直接与 GPU 通信的框架，而无需通过 X Server 进行不必要的上下文切换。&#x2F;dev&#x2F;dri 目录就是 DRI 框架暴露给用户空间的设备接口。它提供了一个仅用于计算和渲染的接口，并不关心画面最终要显示在哪里，唯一目的就是高效地处理 3D 渲染、视频编解码、计算着色器等任务。所以很明白了，我们需要的正是 renderD128 的编解码能力。</p>
+<p>在 lxc 里，jellyfin 的 uid 是 107，render 的 group id 是 104，所以上面就这样填。重启 lxc。然后去 jellyfin 控制台 - 播放 - 转码，硬件加速的下拉框里选 Video Acceleration API (VAAPI)，VA-API 设备的输入框里应该已经自动填上了 _&#x2F;dev&#x2F;dri&#x2F;renderD128_。往下的“启用硬件解码”部分所有都可以勾上，“硬件编码选项”和“编码格式选项”（这两个我勾上就会失败）不要改，其实剩下的全保持默认就可以了，保存。</p>
+<p><img src="/assets/imgs/2025/10/pve-09.png"></p>
+<p>为了测试转码，可以到 jellyfin 右上角用户设置 - 播放里，把“允许的最高视频转码分辨率”设一个较低的值如 720P，强制视频进行转码。然后播放一个视频，看看播放信息即可确认是否转码。然后再 ssh 登录 lxc，用 top 看下 cpu 的占用即可。我的机器上开启前后 cpu 占用从 330+ 降到了 60+，这样可以确认 gpu 在工作了。</p>
+<p>PS：不确定 AMD 是否和 intel 一样。</p>
+<p><img src="/assets/imgs/2025/10/pve-11.png"></p>
+<p><img src="/assets/imgs/2025/10/pve-12.png">开启前</p>
+<p><img src="/assets/imgs/2025/10/pve-13.png">开启后</p>
+<h3 id="透明代理"><a href="#透明代理" class="headerlink" title="透明代理"></a>透明代理</h3><p>首先配置系统，开启内核转发： <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">&quot;net.ipv4.ip\_forward = 1&quot;</span> &gt;&gt; /etc/sysctl.conf sysctl -p</span><br></pre></td></tr></table></figure> 解决 53 端口占用（如果有的话，Debian 默认服务会抢占 DNS 端口）： <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl stop systemd-resolved systemctl <span class="built_in">disable</span> systemd-resolved <span class="comment"># 移除软链接并创建真实的 resolv.conf rm /etc/resolv.conf echo &quot;nameserver 223.5.5.5&quot; &gt; /etc/resolv.conf</span></span><br></pre></td></tr></table></figure> 第二步安装 Mihomo 内核，选择适合机器的安装包： <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget https://github.com/MetaCubeX/mihomo/releases/download/v1.19.20/mihomo-linux-amd64-v3-v1.19.20.gz gunzip mihomo-linux-amd64-v3-v1.19.20.gz <span class="built_in">mv</span> mihomo-linux-amd64-v3-v1.19.20 /usr/local/bin/mihomo <span class="built_in">chmod</span> +x /usr/local/bin/mihomo <span class="built_in">mkdir</span> -p /etc/mihomo <span class="comment"># 创建配置目录 # 如果 mihomo 运行报错可以下载带 compatible 版的</span></span><br></pre></td></tr></table></figure> 下一步编写配置文件 (&#x2F;etc&#x2F;mihomo&#x2F;config.yaml)</p>
+<p>使用 nano &#x2F;etc&#x2F;mihomo&#x2F;config.yaml 创建文件，粘贴以下模板： <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"># 基础配置 mixed-port: 7890 allow-lan: true mode: rule log-level: info ipv6: false bind-address: &quot;\*&quot; external-controller: 0.0.0.0:9090 secret: &quot;999999&quot; # 外部控制面板密码</span><br><span class="line"></span><br><span class="line">\# 旁路由核心：TUN 模式 tun: enable: true stack: system mtu: 1400 auto-route: true auto-detect-interface: true dns-hijack: - any:53 strict-route: true</span><br><span class="line"></span><br><span class="line">\# DNS 增强配置（透明代理关键） dns: enable: true listen: 0.0.0.0:53 enhanced-mode: fake-ip fake-ip-range: 198.18.0.1/16 nameserver: - 223.5.5.5 - 8.8.8.8 fallback: - https://dns.google/dns-query</span><br><span class="line"></span><br><span class="line">\# 代理节点列表，reality，如果是其他类型的配置，参数写法不同不能直接套用 proxies: - name: &quot;我的服务器&quot; type: vless server: &lt;替换实际内容&gt; port: &lt;替换实际内容&gt; uuid: &lt;替换实际内容&gt; udp: true tls: true network: tcp # Reality 通常运行在 TCP 之上 servername: &lt;替换实际内容&gt; flow: &lt;替换实际内容&gt; reality-opts: public-key: &lt;替换实际内容&gt; short-id: &quot;&quot; # 如果有的话，没有就留空 &quot;&quot; client-fingerprint: &lt;替换实际内容&gt; # 通常是 chrome 或 safari</span><br><span class="line"></span><br><span class="line">proxy-groups: - name: &quot;节点选择&quot; type: select proxies: - &quot;我的服务器&quot; - &quot;DIRECT&quot;</span><br><span class="line"></span><br><span class="line">rules: - GEOIP,CN,DIRECT # 国内 IP 直连 - MATCH,节点选择 # 其余流量走代理</span><br></pre></td></tr></table></figure> 运行 <em>mihomo -t -d &#x2F;etc&#x2F;mihomo</em> 可以检查配置文件语法。</p>
+<p>第四步是配置防火墙转发（Masquerade）。为了确保内网设备流量能顺利通过 Debian 转发，需要设置 iptables。 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">apt install iptables -y <span class="comment"># 清空所有规则并设置默认接受 iptables -P INPUT ACCEPT iptables -P FORWARD ACCEPT iptables -P OUTPUT ACCEPT iptables -t nat -F iptables -t mangle -F iptables -F iptables -X # 应用 NAT 伪装 iptables -t nat -A POSTROUTING -j MASQUERADE</span></span><br><span class="line"></span><br><span class="line">apt install iptables-persistent -y <span class="comment"># 持久化规则 # 安装时弹窗询问是否保存当前规则，选择“Yes”</span></span><br></pre></td></tr></table></figure> 最后设置开机自启。 创建服务文件 nano &#x2F;etc&#x2F;systemd&#x2F;system&#x2F;mihomo.service： <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">\[Unit\] Description=Mihomo Daemon After=network.target</span><br><span class="line"></span><br><span class="line">\[Service\] Type=simple ExecStart=/usr/local/bin/mihomo -d /etc/mihomo Restart=on-failure</span><br><span class="line"></span><br><span class="line">\[Install\] WantedBy=multi-user.target</span><br></pre></td></tr></table></figure> 启动并检查： <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># mihomo 运行需要 geoip 和 geosite 库，启动后会自动下载。速度慢的话可以提前下好放到 /etc/mihomo 目录中 # 下载 GeoIP 数据库 curl -L -o /etc/mihomo/Country.mmdb https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip.metadb # 下载 GeoSite 数据库（很多配置也会用到这个） curl -L -o /etc/mihomo/geosite.dat https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geosite.dat</span></span><br><span class="line"></span><br><span class="line">systemctl daemon-reload systemctl <span class="built_in">enable</span> --now mihomo systemctl status mihomo</span><br></pre></td></tr></table></figure></p>
+<p>以上就是服务器的配置了，完成后可以在服务器上运行 <em>curl -x <a target="_blank" rel="noopener" href="http://127.0.0.1:7890/">http://127.0.0.1:7890</a> -I <a target="_blank" rel="noopener" href="https://www.google.com/">https://www.google.com</a></em> 测试代理是否生效。</p>
+<p>接下来客户端的设置就比较简单，以手机为例，在手机、电脑或其他设备上，手动修改网络设置： IP ：手动（或静态），ip 地址和子网掩码就按已经分配好的填（例如 192.168.1.50 和 255.255.255.0）。 网关和 DNS 都填这台本地代理机器的 IP 地址。 然后用浏览器访问 google.com，应该能正常访问了。</p>
+<h2 id="修改-pve-服务器-ip"><a href="#修改-pve-服务器-ip" class="headerlink" title="修改 pve 服务器 ip"></a>修改 pve 服务器 ip</h2><p>家里调整网络结构后 ip 难免有变化，想要修改 pve 的 ip 只要修改以下几处即可。</p>
+<ul>
+<li>&#x2F;etc&#x2F;network&#x2F;interfaces: address 行的 ip 换成新的 ip；gateway 换成新的网关</li>
+<li>&#x2F;etc&#x2F;issue: 修改成 https:&#x2F;&#x2F;&lt;新的ip&gt;:8006&#x2F;</li>
+<li>&#x2F;etc&#x2F;hosts: 第二行的旧 ip 替换成新 ip</li>
+</ul>
+<p>然后重启 pve 即可。我是把内部的虚拟机都设置成了 dhcp 动态获取 ip，这样不用逐个设置虚拟机，在路由器里重新绑定就可以了。</p>
+<p>以下配置目前用不上了，但照着配置也是没问题可以正常使用的，暂且留着吧</p>
+<h2 id="安装文件虚拟机"><a href="#安装文件虚拟机" class="headerlink" title="安装文件虚拟机"></a>安装文件虚拟机</h2><p>新建一个虚拟机用来管理所有数据磁盘，并通过 smb 分享给其他服务，省得虚拟机各搞各的了。随便装个 Fedora 或者 Debian，配一下 smb.conf。 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">/usr/sbin/groupadd smbgroup <span class="comment"># 设置 smb 用户组 /usr/sbin/useradd smb\_user1 # 新建 smb 用户 /usr/sbin/usermod -aG smbgroup smb\_user1 # 添加到组 smbpasswd -a smb\_user1 # 设置密码</span></span><br><span class="line"></span><br><span class="line">ufw allow samba <span class="comment"># 防火墙放行，如果有的话</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">chgrp</span> -R smbgroup /srv/samba/shared <span class="comment"># 每个共享目录都要操作 sudo chmod 2770 /srv/samba/shared # 设置 SGID，保证新建文件继承组身份</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="配置-smb-conf"><a href="#配置-smb-conf" class="headerlink" title="配置 smb.conf"></a>配置 smb.conf</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">\[global\] security = user smb passwd file = /etc/samba/smbpasswd access based share enum = Yes server min protocol = SMB3 # 避免用不安全的过时协议 ntlm auth = ntlmv2-only # 禁用不安全的 NTLMv1 认证 server smb encrypt = required # 明确要求客户端使用加密 \[tmp-space\] # 设置共享目录 comment = 临时目录 create mask = 0664 directory mask = 0775 inherit permissions = Yes path = /srv/samba/tmp-folder read only = No # 目录默认可写 valid users = smb\_user1 smb\_user2 # 允许哪些用户访问 read list = smb\_user1 # 重载读写配置，user1 设为只读 write list = smb\_user2 @wgroup # 仅 user2 和 wgroup 里的用户可写，再配合全局的 read only 设置就比较完善了</span><br></pre></td></tr></table></figure>
+
+<p>最后重启 smb：<em>systemctl restart smbd nmbd</em></p>
+<h3 id="连接-smb"><a href="#连接-smb" class="headerlink" title="连接 smb"></a>连接 smb</h3><p>Windows 系统只需要在我的电脑 - 工具栏中的“计算机” - 映射网络驱动器即可。</p>
+<p>Linux 系统可以添加到 systemd 中以便开启自动挂载，_&#x2F;etc&#x2F;systemd&#x2F;system&#x2F;mnt-smb.mount_创建配置文件，请注意，这里 mnt-smb.mount 文件名跟你的实际挂载路径相关，比如挂载到 &#x2F;mnt&#x2F;ABC 你就取名为 mnt-ABC.mount。 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">\[Unit\] Description=Mount My SMB Share Requires=network-online.target # 需要网络就绪 After=network-online.target # 在网络就绪后才执行 Wants=network-online.target # 期望网络就绪</span><br><span class="line"></span><br><span class="line">\[Mount\] What=//192.168.A.B/smb-dir Where=/mnt/smb Type=cifs Options=credentials=/etc/samba/credentials,iocharset=utf8,nofail</span><br><span class="line"></span><br><span class="line">\[Install\] WantedBy=multi-user.target</span><br></pre></td></tr></table></figure> 其中 <em>&#x2F;etc&#x2F;samba&#x2F;credentials</em> 保存了 smb 的用户名和密码用于连接。内容为 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">username=smb\_user password=123456</span><br></pre></td></tr></table></figure> 另外，如果你的 linux 用户跟 smb 用户不是同一个，那么在 .mount 文件的 Options 里再加上 <em>uid&#x3D;1000,gid&#x3D;1000_，1000 换成 linux 用户的实际 id，这样 linux 用户才有权限写入 smb 目录。 设置完毕后 reload 下配置 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl daemon-reload systemctl <span class="built_in">enable</span> mnt-sync.mount systemctl start mnt-sync.mount</span><br></pre></td></tr></table></figure> PS: 使用 mount 命令时经常遇到奇奇怪怪的问题，比如设置了 credentials 密码文件，但是死活 mount 不上。各种报错，什么 <em>w&#x2F;return code &#x3D; -13</em> 啊，_STATUS_ACCESS_DENIED</em> 啊，改用密码就一切正常。这时可以用 <em>apt upgrade cifs-utils</em> 升级一下软件就解决了……真想骂人，什么智障东西，浪费了我几个小时折腾环境。</p>
+<h2 id="直通硬盘给文件服务器"><a href="#直通硬盘给文件服务器" class="headerlink" title="直通硬盘给文件服务器"></a>直通硬盘给文件服务器</h2><p>上面设置文件服务器的目的就是将所有数据硬盘都交由一个虚拟机管理，然后通过 smb 共享给其他机器使用，这样方便集中化管理与隔离，而且相比直接部署在 pve 上，用单独的虚拟机也不会污染主机。</p>
+<h3 id="识别硬盘"><a href="#识别硬盘" class="headerlink" title="识别硬盘"></a>识别硬盘</h3><p>使用 <em>ls -l &#x2F;dev&#x2F;disk&#x2F;by-id&#x2F;</em> 找到新硬盘的持久化 ID。因为还会有其他包括系统盘的输出，不好辨认的话可以 <em>apt install lshw</em> 安装 lshw 查看硬盘的具体信息。安装后执行 <em>lshw -class disk -class storage</em> 即可，输出类似 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">\*-disk description: ATA Disk product: ST3000DM001-1CH1 vendor: Seagate physical id: 0.0.0 bus info: scsi@3:0.0.0 logical name: /dev/sda version: CC27 serial: Z1F41BLC size: 2794GiB (3TB) configuration: ansiversion=5 sectorsize=4096</span><br></pre></td></tr></table></figure> 找到这里 _serial: Z1F41BLC_，然后再执行对比 <em>ls -l &#x2F;dev&#x2F;disk&#x2F;by-id grep Z1F41BLC</em> 的输出，找到磁盘的 id，不要直接用 &#x2F;dev&#x2F;sda，因为它每次重启后是可能发生变化的。</p>
+<h3 id="直通硬盘"><a href="#直通硬盘" class="headerlink" title="直通硬盘"></a>直通硬盘</h3><p>使用 <em>qm set <VMID> -scsiX &#x2F;dev&#x2F;disk&#x2F;by-id&#x2F;&lt;硬盘ID&gt;,backup&#x3D;0,discard&#x3D;on</em> 命令（推荐VirtIO-SCSI）。</p>
+<ul>
+<li>_backup&#x3D;0_：防止 PVE 备份工具尝试备份这个直通磁盘，因为这些磁盘通常很大且可能包含不支持快照的文件系统。</li>
+<li>_discard&#x3D;on_：如果直通的是 SSD，启用此选项以支持 TRIM&#x2F;Discard 指令，有助于 SSD 维护性能和寿命。</li>
+<li>_-scsiX_：控制器类型选择，推荐 VirtIO SCSI 控制器，性能最好，支持更多高级特性（如 TRIM），不过需要虚拟机安装驱动（现代 Linux 系统通常自带，Windows 需额外安装）。参数中的 X 可以是 0<del>5 数字，查看虚拟机的硬件，像图中并没有 scsi0，所以可以填 0</del>5 均可<img src="/assets/imgs/2025/09/pve-1.png" alt="虚拟机硬件配置信息">。</li>
+</ul>
+<h3 id="重启虚拟机，配置硬盘"><a href="#重启虚拟机，配置硬盘" class="headerlink" title="重启虚拟机，配置硬盘"></a>重启虚拟机，配置硬盘</h3><ul>
+<li>Linux：系统内分区、格式化、挂载。</li>
+<li>Windows：如用 VirtIO-SCSI，需要安装 VirtIO 驱动；如果用 SATA，则可直接在磁盘管理中初始化使用。</li>
+</ul>
+<h3 id="全盘加密"><a href="#全盘加密" class="headerlink" title="全盘加密"></a>全盘加密</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">apt install cryptsetup ... <span class="comment"># 先用 lsblk 找到对应的磁盘 cryptsetup -y -v luksFormat /dev/sdX # 把 X 替换成目标磁盘，会清空硬盘所有数据 ... # 根据提示输入一个密码用于加解密磁盘</span></span><br><span class="line"></span><br><span class="line">cryptsetup luksOpen /dev/sdX encrypted-disk <span class="comment"># 打开加密磁盘，会要求输入刚才的密码 mkfs.ext4 /dev/mapper/encrypted-disk # 创建 ext4 文件系统 mkdir /mnt/enc-disk # 挂载加密磁盘 mount /dev/mapper/encrypted-disk /mnt/enc-disk # 之后可以正常使用了</span></span><br><span class="line"></span><br><span class="line">\# 卸载和关闭 umount /mnt/enc-disk cryptsetup luksClose encrypted-disk</span><br><span class="line"></span><br><span class="line">\# 添加恢复密钥 cryptsetup luksAddKey /dev/&lt;你的设备&gt; openssl rand -hex -out /root/encryption-key.bin 2048 <span class="comment"># 生成密钥文件 cryptsetup luksAddKey /dev/sdX /path/to/keyfile</span></span><br></pre></td></tr></table></figure>
+
+<p>每次开机执行 luksOpen + mount 后即可使用。关机时系统会自动卸载磁盘,一般不用手动处理。但是手动卸载可以确保没有正在使用的连接，以免被强制卸载导致数据损坏。文件服务器一般是常开的，所以挂载卸载都是手动操作一下。</p>
+<h2 id="Syncthing"><a href="#Syncthing" class="headerlink" title="Syncthing"></a>Syncthing</h2><p>Syncthing 用来做设备间数据同步。下面设置以当前用户的身份启动 syncthing。 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> -p ~/.config/systemd/user/ vi ~/.config/systemd/user/syncthing.service <span class="comment"># 文件内容在下方 systemctl --user daemon-reload systemctl --user enable syncthing.service systemctl --user start syncthing.service loginctl enable-linger &lt;用户名&gt; # 用户不登陆也自动运行 systemd 服务</span></span><br></pre></td></tr></table></figure> <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">\[Unit\] Description=Syncthing - Open Source Continuous File Synchronization for %i Documentation=man:syncthing(1) After=network.target</span><br><span class="line"></span><br><span class="line">\[Service\] ExecStart=/usr/bin/syncthing serve --no-browser --no-restart --logflags=0 Restart=on-failure SuccessExitStatus=3 4 RestartForceExitStatus=3 4</span><br><span class="line"></span><br><span class="line">\# Hardening ProtectSystem=full PrivateTmp=true SystemCallArchitectures=native MemoryDenyWriteExecute=true NoNewPrivileges=true</span><br><span class="line"></span><br><span class="line">\[Install\] WantedBy=default.target</span><br></pre></td></tr></table></figure></p>
+<p>PS：因为是在 smb 目录里做同步，同步时就会看到本机会自动修改同步数据中各个目录的权限，搞得很麻烦，到所有目录设置里勾选上“忽略权限”就可以了。</p>
+<h2 id="电源管理"><a href="#电源管理" class="headerlink" title="电源管理"></a>电源管理</h2><p><em>echo “powersave” tee &#x2F;sys&#x2F;devices&#x2F;system&#x2F;cpu&#x2F;cpu*&#x2F;cpufreq&#x2F;scaling_governor</em> 设置节能模式，不过我接了功率插座看修改前后并没有什么变化，空闲时功耗仍然保持在 30w，勉强还能接受。目前的配置是 i5-12400 + 单 hdd + ssd。如果 hdd 空闲时能停转可能会好一些。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://kcore.org/2022/02/05/lxc-subuid-subgid/">https://kcore.org/2022/02/05/lxc-subuid-subgid/</a> <a target="_blank" rel="noopener" href="https://linuxcontainers.cn/lxc/getting-started/">https://linuxcontainers.cn/lxc/getting-started/</a> <a target="_blank" rel="noopener" href="https://wayjam.me/posts/allinone-install-file-media-server/">https://wayjam.me/posts/allinone-install-file-media-server/</a> <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/29306228339">https://zhuanlan.zhihu.com/p/29306228339</a> 最后贴一下<a target="_blank" rel="noopener" href="https://pve.proxmox.com/pve-docs/index.html">官方文档</a>，有各种问题都可以去里面找找</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>flandre
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://kerisa.github.io/2341/" title="配置 PVE 服务器">https://kerisa.github.io/2341/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/LUKS/" rel="tag"># LUKS</a>
+              <a href="/tags/lxc/" rel="tag"># lxc</a>
+              <a href="/tags/Passthrough/" rel="tag"># Passthrough</a>
+              <a href="/tags/proxmox/" rel="tag"># proxmox</a>
+              <a href="/tags/PVE/" rel="tag"># PVE</a>
+              <a href="/tags/Samba/" rel="tag"># Samba</a>
+              <a href="/tags/Syncthing/" rel="tag"># Syncthing</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2338/" rel="prev" title="工作中的一些总结">
+      <i class="fa fa-chevron-left"></i> 工作中的一些总结
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2366/" rel="next" title="新疆阿勒泰 1">
+      新疆阿勒泰 1 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85-PVE"><span class="nav-number">1.</span> <span class="nav-text">安装 PVE</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#PVE-%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%94%B9%E5%90%8D"><span class="nav-number">1.1.</span> <span class="nav-text">PVE 服务器改名</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E9%95%9C%E5%83%8F%E6%BA%90"><span class="nav-number">2.</span> <span class="nav-text">修改镜像源</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%A0%E9%99%A4-local-lvm"><span class="nav-number">3.</span> <span class="nav-text">删除 local-lvm</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%B5%E6%BA%90%E9%85%8D%E7%BD%AE"><span class="nav-number">4.</span> <span class="nav-text">电源配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CPU-%E7%94%B5%E6%BA%90%E7%AE%A1%E7%90%86"><span class="nav-number">4.1.</span> <span class="nav-text">CPU 电源管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A1%AC%E7%9B%98%E7%A9%BA%E9%97%B2%E6%97%B6%E4%BC%91%E7%9C%A0"><span class="nav-number">4.2.</span> <span class="nav-text">硬盘空闲时休眠</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-LXC-%E5%AE%B9%E5%99%A8%E4%BD%9C%E4%B8%BA%E6%96%87%E4%BB%B6%E8%99%9A%E6%8B%9F%E5%99%A8"><span class="nav-number">5.</span> <span class="nav-text">使用 LXC 容器作为文件虚拟器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8B%E8%BD%BD-lxc-%E6%A8%A1%E6%9D%BF"><span class="nav-number">5.1.</span> <span class="nav-text">下载 lxc 模板</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE-samba"><span class="nav-number">5.2.</span> <span class="nav-text">配置 samba</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE-jellyfin"><span class="nav-number">5.3.</span> <span class="nav-text">配置 jellyfin</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A1%AC%E4%BB%B6%E8%BD%AC%E7%A0%81"><span class="nav-number">5.4.</span> <span class="nav-text">硬件转码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%8F%E6%98%8E%E4%BB%A3%E7%90%86"><span class="nav-number">5.5.</span> <span class="nav-text">透明代理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9-pve-%E6%9C%8D%E5%8A%A1%E5%99%A8-ip"><span class="nav-number">6.</span> <span class="nav-text">修改 pve 服务器 ip</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E6%96%87%E4%BB%B6%E8%99%9A%E6%8B%9F%E6%9C%BA"><span class="nav-number">7.</span> <span class="nav-text">安装文件虚拟机</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE-smb-conf"><span class="nav-number">7.1.</span> <span class="nav-text">配置 smb.conf</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9E%E6%8E%A5-smb"><span class="nav-number">7.2.</span> <span class="nav-text">连接 smb</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9B%B4%E9%80%9A%E7%A1%AC%E7%9B%98%E7%BB%99%E6%96%87%E4%BB%B6%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="nav-number">8.</span> <span class="nav-text">直通硬盘给文件服务器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%86%E5%88%AB%E7%A1%AC%E7%9B%98"><span class="nav-number">8.1.</span> <span class="nav-text">识别硬盘</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%B4%E9%80%9A%E7%A1%AC%E7%9B%98"><span class="nav-number">8.2.</span> <span class="nav-text">直通硬盘</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8D%E5%90%AF%E8%99%9A%E6%8B%9F%E6%9C%BA%EF%BC%8C%E9%85%8D%E7%BD%AE%E7%A1%AC%E7%9B%98"><span class="nav-number">8.3.</span> <span class="nav-text">重启虚拟机，配置硬盘</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%A8%E7%9B%98%E5%8A%A0%E5%AF%86"><span class="nav-number">8.4.</span> <span class="nav-text">全盘加密</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Syncthing"><span class="nav-number">9.</span> <span class="nav-text">Syncthing</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%B5%E6%BA%90%E7%AE%A1%E7%90%86"><span class="nav-number">10.</span> <span class="nav-text">电源管理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">11.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt=""
+      src="/assets/imgs/fr.png">
+  <p class="site-author-name" itemprop="name"></p>
+  <div class="site-description" itemprop="description">This is a mirror/backup site of <a target="_blank" rel="noopener" href="https://flandre-scarlet.moe/blog">flandre-scarlet.moe</a>. It serves as a fallback when the original site is inaccessible.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">112</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">281</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">flandre</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">389k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">5:54</span>
+</div>
+  <div class="powered-by">Powered by love
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

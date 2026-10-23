@@ -10,7 +10,6 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
   <link rel="mask-icon" href="/images/logo.svg" color="#222">
-  <meta name="google-site-verification" content="n4HzIaQ2ebAeP_VrwiqS7s6qfe8RKXwGfnHiPjz3Z20">
 
 <link rel="stylesheet" href="/css/main.css">
 
@@ -25,7 +24,7 @@
   <meta name="description" content="这两天搞了一下 yu-ris 的 ypf 封包，这里做个简单的记录。 ypf 主要用了 zlib 进行压缩处理。包头里有文件数量和数据区起始地址等信息。文件索引表里包含了文件的偏移、压缩后长度和原始长度等基本信息，文件名则是经过取反后存储的。文件索引表非定长。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="YU-RIS 封包分析">
-<meta property="og:url" content="https://kerisa.github.io/629/index.html">
+<meta property="og:url" content="https://flandre-scarlet.moe/blog/629/">
 <meta property="og:site_name" content="Re: Memory (mirror)">
 <meta property="og:description" content="这两天搞了一下 yu-ris 的 ypf 封包，这里做个简单的记录。 ypf 主要用了 zlib 进行压缩处理。包头里有文件数量和数据区起始地址等信息。文件索引表里包含了文件的偏移、压缩后长度和原始长度等基本信息，文件名则是经过取反后存储的。文件索引表非定长。">
 <meta property="og:locale" content="zh_CN">
@@ -207,15 +206,15 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Programs/" itemprop="url" rel="index"><span itemprop="name">Programs</span></a>
+                  <a href="/categories/programs/" itemprop="url" rel="index"><span itemprop="name">程序</span></a>
                 </span>
                   ，
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Programs/Reverse-engineering/" itemprop="url" rel="index"><span itemprop="name">Reverse-engineering</span></a>
+                  <a href="/categories/programs/reverse-engineering/" itemprop="url" rel="index"><span itemprop="name">逆向</span></a>
                 </span>
                   ，
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Programs/Reverse-engineering/Unpacking/" itemprop="url" rel="index"><span itemprop="name">Unpacking</span></a>
+                  <a href="/categories/programs/reverse-engineering/unpacking/" itemprop="url" rel="index"><span itemprop="name">解包</span></a>
                 </span>
             </span>
 
@@ -225,7 +224,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>1.3k</span>
+              <span>1.4k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -247,11 +246,18 @@
         <p>这两天搞了一下 yu-ris 的 ypf 封包，这里做个简单的记录。</p>
 <p>ypf 主要用了 zlib 进行压缩处理。包头里有文件数量和数据区起始地址等信息。文件索引表里包含了文件的偏移、压缩后长度和原始长度等基本信息，文件名则是经过取反后存储的。文件索引表非定长。</p>
 <span id="more"></span>
-<h3 id="ypf-封包"><a href="#ypf-封包" class="headerlink" title="ypf 封包"></a>ypf 封包</h3><p>封包的结构如下： <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">YpfHeader</span> &#123; uint32\<span class="type">_t</span> mMagic; uint32\<span class="type">_t</span> mVersionTmp; <span class="comment">// 应该是版本号之类的 uint32\_t mFileCount; uint32\_t mDataStart; uint8\_t mZero\[16\]; &#125;; struct YpfEntry &#123; uint32\_t unknown; uint8\_t name\_length; // 要解码 uint8\_t name\[1\]; // 要解码 uint8\_t filetype; uint8\_t zlib\_compress\_flag; uint32\_t original\_length; uint32\_t compressd\_length; uint32\_t offset; uint32\_t unknwon; // 估计是 crc 之类的 &#125;;</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="ypf-封包"><a href="#ypf-封包" class="headerlink" title="ypf 封包"></a>ypf 封包</h3><p>封包的结构如下： </p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">YpfHeader</span> &#123;</span><br><span class="line">    <span class="type">uint32_t</span> mMagic;</span><br><span class="line">    <span class="type">uint32_t</span> mVersionTmp;    <span class="comment">// 应该是版本号之类的</span></span><br><span class="line">    <span class="type">uint32_t</span> mFileCount;</span><br><span class="line">    <span class="type">uint32_t</span> mDataStart;</span><br><span class="line">    <span class="type">uint8_t</span>  mZero[<span class="number">16</span>];</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">YpfEntry</span> &#123;</span><br><span class="line">    <span class="type">uint32_t</span> unknown;</span><br><span class="line">    <span class="type">uint8_t</span> name_length;     <span class="comment">// 要解码</span></span><br><span class="line">    <span class="type">uint8_t</span> name[<span class="number">1</span>];         <span class="comment">// 要解码</span></span><br><span class="line">    <span class="type">uint8_t</span> filetype;</span><br><span class="line">    <span class="type">uint8_t</span> zlib_compress_flag;</span><br><span class="line">    <span class="type">uint32_t</span> original_length;</span><br><span class="line">    <span class="type">uint32_t</span> compressd_length;</span><br><span class="line">    <span class="type">uint32_t</span> offset;</span><br><span class="line">    <span class="type">uint32_t</span> unknwon;      <span class="comment">// 估计是 crc 之类的</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+
+
 <p>目前手头上两款游戏的 YpfHeader::mVersionTmp 字段不同，并且 YpfEntry 中也有（微小的）差异，版号大的 YpfEntry 结构中多了一个全零的 uint32_t。</p>
 <p>文件名前面有一个指示长度的字节，但是需要经过运算才能得到真实的文件名长度。为简便起见，可以在解码过程中识别文件扩展名之前的 ‘.’，然后加上最后 3 个字符的扩展名就得到完整文件名了。</p>
 <p>根据索引表中的偏移长度提速数据并解压即可解出原始文件。</p>
-<h3 id="ycg-文件"><a href="#ycg-文件" class="headerlink" title="ycg 文件"></a>ycg 文件</h3><p>ycg 是经 zlib 压缩后的图像。其中头 0x38 个字节记录了文件信息，结构如下： <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">YcgHeader</span> &#123; uint32\<span class="type">_t</span> mMagic; uint32\<span class="type">_t</span> mWidth; uint32\<span class="type">_t</span> mHeight; uint32\<span class="type">_t</span> mBpp; uint32\<span class="type">_t</span> mUnkonwn\[<span class="number">4</span>\]; uint32\<span class="type">_t</span> mPart1PlainLength; uint32\<span class="type">_t</span> mPart1PackedLength; uint32\<span class="type">_t</span> mMaybeImgPosition\[<span class="number">2</span>\]; uint32\<span class="type">_t</span> mPart2PlainLength; uint32\<span class="type">_t</span> mPart2PackedLength; &#125;;</span><br></pre></td></tr></table></figure><br>这两部分就对应着上下半张图像，对两部分分别解压后直接拼接，最后再补上 bmp 文件头即可。</p>
+<h3 id="ycg-文件"><a href="#ycg-文件" class="headerlink" title="ycg 文件"></a>ycg 文件</h3><p>ycg 是经 zlib 压缩后的图像。其中头 0x38 个字节记录了文件信息，结构如下： </p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">YcgHeader</span> &#123;</span><br><span class="line">    <span class="type">uint32_t</span> mMagic;</span><br><span class="line">    <span class="type">uint32_t</span> mWidth;</span><br><span class="line">    <span class="type">uint32_t</span> mHeight;</span><br><span class="line">    <span class="type">uint32_t</span> mBpp;</span><br><span class="line">    <span class="type">uint32_t</span> mUnkonwn[<span class="number">4</span>];</span><br><span class="line">    <span class="type">uint32_t</span> mPart1PlainLength;</span><br><span class="line">    <span class="type">uint32_t</span> mPart1PackedLength;</span><br><span class="line">    <span class="type">uint32_t</span> mMaybeImgPosition[<span class="number">2</span>];</span><br><span class="line">    <span class="type">uint32_t</span> mPart2PlainLength;</span><br><span class="line">    <span class="type">uint32_t</span> mPart2PackedLength;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>这两部分就对应着上下半张图像，对两部分分别解压后直接拼接，最后再补上 bmp 文件头即可。</p>
 <h3 id="ybn-文件"><a href="#ybn-文件" class="headerlink" title="ybn 文件"></a>ybn 文件</h3><p>经过编译后的脚本文件，带有 YSTB 标志。使用异或解码，key 要在 exe 文件中找，搜索字符串 “ysbin\yst%05d.ybn” 即可快速空降到目标附近。每个游戏的 key 应该都不相同，毕竟可以自定义。</p>
 <p><a target="_blank" rel="noopener" href="https://i.imgur.com/lKydatO.png"><img src="/assets/imgs/2018/11/ypf%E5%B0%81%E5%8C%85.png" alt="脚本截图"></a></p>
 
@@ -260,6 +266,131 @@
     
     
     
+<div class="wp-comments" id="comments">
+  <style>
+    .wp-comments { margin-top: 2em; padding-top: 1em; border-top: 1px solid #ddd; }
+    .wp-comments-title { font-size: 1.15em; margin: 0 0 .4em; }
+    .wp-comments-note { font-size: .875em; color: #888; margin: 0 0 1em; }
+    .wp-comment-list { list-style: none; margin: 0; padding: 0; }
+    .wp-comment { margin: 0 0 1em; padding: .6em .8em; background: rgba(127,127,127,.06); border-radius: 4px; }
+    .wp-comment-reply { margin-left: 2em; }
+    .wp-comment-meta { font-size: .8125em; color: #888; margin-bottom: .3em; }
+    .wp-comment-author { font-weight: 600; color: inherit; }
+    .wp-comment-meta time { margin-left: .6em; }
+    .wp-comment-link { margin-left: .6em; }
+    .wp-comment-content > :first-child { margin-top: 0; }
+    .wp-comment-content > :last-child { margin-bottom: 0; }
+  </style>
+  <h2 class="wp-comments-title">评论（11）</h2>
+  <p class="wp-comments-note">
+    以下评论来自 WordPress 备份，本站仅提供浏览。
+    <a href="https://flandre-scarlet.moe/blog/629/#comments" rel="noopener" target="_blank">前往主站参与讨论</a>
+  </p>
+  <ol class="wp-comment-list">
+    <li class="wp-comment" id="comment-212">
+      <div class="wp-comment-meta">
+        <span class="wp-comment-author">Sora</span>
+        <time>2019-07-29 20:56:16</time>
+        <a class="wp-comment-link" href="https://flandre-scarlet.moe/blog/629/#comment-212" rel="noopener" target="_blank">原站</a>
+      </div>
+      <div class="wp-comment-content">关于YBN文件的异或解码和KEY的查找还是不太清楚，如果方便的话请发给我一份详细的教程！不胜感激。</div>
+    </li>
+    <li class="wp-comment wp-comment-reply" id="comment-213">
+      <div class="wp-comment-meta">
+        <span class="wp-comment-author">flandre</span>
+        <time>2019-07-29 22:33:28</time>
+        <a class="wp-comment-link" href="https://flandre-scarlet.moe/blog/629/#comment-213" rel="noopener" target="_blank">原站</a>
+      </div>
+      <div class="wp-comment-content">在 OD 里搜这个字符串的引用，没记错的话在引用位置之后应该有个小循环用来对读取出的 ybn 文件内容进行逐双字异或，key 则是在循环里直接引用的一个静态区 4 字节整数，把它取出来就可以了。</div>
+    </li>
+    <li class="wp-comment" id="comment-562">
+      <div class="wp-comment-meta">
+        <span class="wp-comment-author">好奇虎</span>
+        <time>2020-02-20 01:07:59</time>
+        <a class="wp-comment-link" href="https://flandre-scarlet.moe/blog/629/#comment-562" rel="noopener" target="_blank">原站</a>
+      </div>
+      <div class="wp-comment-content">大佬厉害，我最近再搞黑兽2（YU-RIS Ver.479），文本在bin.ypf中，其中还包含了一些音频和图片，请问：
+1要查找调用zlib函数的位置应该下什么断点。能不能把zlib函数直接弄掉，然后让程序直接读取未经过zlib压缩的文本，因为我想要省去回封过程。（目前我用tachie FF抑或后能提取，但是放在bin文件夹中打开游戏提示错误中提到zlib，所以我怀疑问题出在这里）。
+2我的封包里还有音频（ogg）以及图片（png），格式和上面好像对不上，大佬要不一起做了，要参考文件我这边可以提供。</div>
+    </li>
+    <li class="wp-comment wp-comment-reply" id="comment-570">
+      <div class="wp-comment-meta">
+        <span class="wp-comment-author">flandre</span>
+        <time>2020-02-22 01:11:13</time>
+        <a class="wp-comment-link" href="https://flandre-scarlet.moe/blog/629/#comment-570" rel="noopener" target="_blank">原站</a>
+      </div>
+      <div class="wp-comment-content">其实知道用了 zlib 后也不用特地去移除它，因为索引表已经有足够的信息来处理了，直接调就行。是不是回封后封包索引表没更新导致解码失败？
+至于音频的话大多数都是未经压缩的，直接解压就可以播放；png 同理，一般资源会选择直接压缩位图，png 很可能也没做多少处理的
+细节记不太清，只能仅供参考了，哈哈</div>
+    </li>
+    <li class="wp-comment wp-comment-reply" id="comment-633">
+      <div class="wp-comment-meta">
+        <span class="wp-comment-author">好奇虎</span>
+        <time>2020-03-12 15:27:38</time>
+        <a class="wp-comment-link" href="https://flandre-scarlet.moe/blog/629/#comment-633" rel="noopener" target="_blank">原站</a>
+      </div>
+      <div class="wp-comment-content">多谢大佬解答，再问一下回封的时候文件前后顺序修改掉有关系吗，比如先写2.ybn再写1.ybn</div>
+    </li>
+    <li class="wp-comment wp-comment-reply" id="comment-634">
+      <div class="wp-comment-meta">
+        <span class="wp-comment-author">好奇虎</span>
+        <time>2020-03-12 17:06:24</time>
+        <a class="wp-comment-link" href="https://flandre-scarlet.moe/blog/629/#comment-634" rel="noopener" target="_blank">原站</a>
+      </div>
+      <div class="wp-comment-content">还有offset是相对于文件开始位置还是数据开始位置？</div>
+    </li>
+    <li class="wp-comment wp-comment-reply" id="comment-635">
+      <div class="wp-comment-meta">
+        <span class="wp-comment-author">好奇虎</span>
+        <time>2020-03-12 17:13:57</time>
+        <a class="wp-comment-link" href="https://flandre-scarlet.moe/blog/629/#comment-635" rel="noopener" target="_blank">原站</a>
+      </div>
+      <div class="wp-comment-content">好吧是相对于开头的，那我现在问题就只有上面那个了</div>
+    </li>
+    <li class="wp-comment wp-comment-reply" id="comment-636">
+      <div class="wp-comment-meta">
+        <span class="wp-comment-author">flandre</span>
+        <time>2020-03-13 23:24:55</time>
+        <a class="wp-comment-link" href="https://flandre-scarlet.moe/blog/629/#comment-636" rel="noopener" target="_blank">原站</a>
+      </div>
+      <div class="wp-comment-content">一般没有哪个二货特地把文件的先后顺序给设定死，基本就是索引表里放个校验值，所以只要文件本身没啥问题不影响处理就好了</div>
+    </li>
+    <li class="wp-comment" id="comment-1658">
+      <div class="wp-comment-meta">
+        <span class="wp-comment-author">Luckykeeper</span>
+        <time>2021-08-30 00:09:49</time>
+        <a class="wp-comment-link" href="https://flandre-scarlet.moe/blog/629/#comment-1658" rel="noopener" target="_blank">原站</a>
+      </div>
+      <div class="wp-comment-content">大佬，想问一下您有没有见过这个引擎里面的动画，我解了个包，发现里面的动画全是.jpg格式的图片组成的，但是按理说jpg格式的图片是不带alpha通道的，但是在游戏里底却是透明的，我发现每个动画的目录下都包含了
+00000000.jpg
+00000001.jpg
+00000002.jpg
+00000003.jpg
+这样四个ps和系统图片查看器都打不开的文件，想请大佬帮忙分析一下这样的jpg图片能不能转成带alpha通道的图片（或者是动画）
+参考动画解包文件链接：
+链接：https://pan.baidu.com/s/1lOxy0fX3wEf6dyQNHydhDQ 
+提取码：qxqm
+希望大佬能抽空看一下，指点一下怎么做才能把这样的jpg图片能不能转成带alpha通道的图片（或者是动画），非常感谢！</div>
+    </li>
+    <li class="wp-comment wp-comment-reply" id="comment-1661">
+      <div class="wp-comment-meta">
+        <span class="wp-comment-author">flandre</span>
+        <time>2021-08-30 19:47:37</time>
+        <a class="wp-comment-link" href="https://flandre-scarlet.moe/blog/629/#comment-1661" rel="noopener" target="_blank">原站</a>
+      </div>
+      <div class="wp-comment-content">我看了下，这几个文件里包含了不少完整的 jpg 文件，里面的数据直接保存出来就是文件夹里的帧动画。提取出的文件虽然少但它带有 8 位的掩码文件，这样渲染的时候就能做出透明效果了。想保存的话可以试试写点代码直接把文件夹里那些现成的 jpg 黑色像素当成透明，再存成 png。</div>
+    </li>
+    <li class="wp-comment wp-comment-reply" id="comment-1662">
+      <div class="wp-comment-meta">
+        <span class="wp-comment-author">Luckykeeper</span>
+        <time>2021-08-30 19:56:57</time>
+        <a class="wp-comment-link" href="https://flandre-scarlet.moe/blog/629/#comment-1662" rel="noopener" target="_blank">原站</a>
+      </div>
+      <div class="wp-comment-content">好的，多谢大佬指点</div>
+    </li>
+  </ol>
+</div>
+
         
 
 <div>
@@ -374,20 +505,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">112</span>
+          <span class="site-state-item-count">117</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-count">13</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">281</span>
+        <span class="site-state-item-count">298</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -418,19 +549,19 @@
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">flandre</span>
+  <span class="author" itemprop="copyrightHolder">flandre · <a href="https://flandre-scarlet.moe/blog/" rel="noopener" target="_blank">主站</a></span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">389k</span>
+    <span title="站点总字数">414k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">5:54</span>
+    <span title="站点阅读时长">6:16</span>
 </div>
   <div class="powered-by">Powered by love
   </div>
@@ -481,6 +612,8 @@
 
 
 
+
+  
 
   
 

@@ -10,7 +10,6 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
   <link rel="mask-icon" href="/images/logo.svg" color="#222">
-  <meta name="google-site-verification" content="n4HzIaQ2ebAeP_VrwiqS7s6qfe8RKXwGfnHiPjz3Z20">
 
 <link rel="stylesheet" href="/css/main.css">
 
@@ -25,7 +24,7 @@
   <meta name="description" content="以前在学校里用的是移动网，每人都有公网ip（真是美滋滋）。现在换了电信网后反而只能得到一个内网ip了，比如我现在的网络中除了我自己的路由器，外面还夹着两个路由，过了这两个路由才是电信的路由，然后才到外网∠( ᐛ 」∠)＿ 。这种状况想要正常地获得 eMule 的 HighID 实在困难。另外 easyMule 貌似是有 lowID 互相通讯的打洞功能，但是 easyMule 名声不好不想用。。正好">
 <meta property="og:type" content="article">
 <meta property="og:title" content="使用 OpenVPN 将内网 eMule LowID 转换为 HighID">
-<meta property="og:url" content="https://kerisa.github.io/304/index.html">
+<meta property="og:url" content="https://flandre-scarlet.moe/blog/304/">
 <meta property="og:site_name" content="Re: Memory (mirror)">
 <meta property="og:description" content="以前在学校里用的是移动网，每人都有公网ip（真是美滋滋）。现在换了电信网后反而只能得到一个内网ip了，比如我现在的网络中除了我自己的路由器，外面还夹着两个路由，过了这两个路由才是电信的路由，然后才到外网∠( ᐛ 」∠)＿ 。这种状况想要正常地获得 eMule 的 HighID 实在困难。另外 easyMule 貌似是有 lowID 互相通讯的打洞功能，但是 easyMule 名声不好不想用。。正好">
 <meta property="og:locale" content="zh_CN">
@@ -206,7 +205,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Programs/" itemprop="url" rel="index"><span itemprop="name">Programs</span></a>
+                  <a href="/categories/programs/" itemprop="url" rel="index"><span itemprop="name">程序</span></a>
                 </span>
             </span>
 
@@ -216,7 +215,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>3.3k</span>
+              <span>3.5k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -239,20 +238,79 @@
 <span id="more"></span>
 <p>这里介绍使用 vpn 来中继的方案。其实一开始我是准备用 frp 的，然而配置完后发觉并没有卵用，因为别人获取到你的 ip 仍然是电信的公网 ip，而不是你的 vps 的 ip，所以就换成 vpn 来。</p>
 <p>vps 系统为 Centos 6 x86, 目前的 OpenVPN 版本为 2.4.4。</p>
-<h1 id="配置服务器"><a href="#配置服务器" class="headerlink" title="配置服务器"></a>配置服务器</h1><h2 id="1、安装-openvpn-easy-rsa"><a href="#1、安装-openvpn-easy-rsa" class="headerlink" title="1、安装 openvpn easy-rsa"></a>1、安装 openvpn easy-rsa</h2><p>使用命令<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install openvpn easy-rsa -y</span><br></pre></td></tr></table></figure>安装 OpenVPN 和 easy-rsa。</p>
-<h2 id="2、配置-server-conf"><a href="#2、配置-server-conf" class="headerlink" title="2、配置 server.conf"></a>2、配置 server.conf</h2><p>复制模板配置<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cp</span> /usr/share/doc/openvpn-\*/sample/sample-config-files/server.conf /etc/openvpn</span><br></pre></td></tr></table></figure>启用数据包转发（去掉注释）<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">push <span class="string">&quot;redirect-gateway def1 bypass-dhcp&quot;</span></span><br></pre></td></tr></table></figure>修改 dns（查找DNS并修改）<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">push <span class="string">&quot;dhcp-option DNS 8.8.8.8&quot;</span> push <span class="string">&quot;dhcp-option DNS 8.8.4.4&quot;</span></span><br></pre></td></tr></table></figure>修改权限（去掉注释）<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">user nobody group nobody</span><br></pre></td></tr></table></figure></p>
-<h2 id="3、生成证书"><a href="#3、生成证书" class="headerlink" title="3、生成证书"></a>3、生成证书</h2><p>创建目录用于存放生成的证书<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> -p /etc/openvpn/easy-rsa/keys</span><br></pre></td></tr></table></figure>复制 easy-rsa&#x2F;2.0 目录下所有文件到 openvpn 目录<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cp</span> -rf /usr/share/easy-rsa/2.0/\* /etc/openvpn/easy-rsa</span><br></pre></td></tr></table></figure>打开 &#x2F;etc&#x2F;openvpn&#x2F;easy-rsa&#x2F;vars 文件并按需要修改其中的默认配置<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">export KEY\_COUNTRY=&quot;US&quot; export KEY\_PROVINCE=&quot;NY&quot; export KEY\_CITY=&quot;New York&quot; export KEY\_ORG=&quot;DigitalOcean&quot; export KEY\_EMAIL=&quot;sammy@example.com&quot; export KEY\_OU=&quot;Community&quot; export KEY\_NAME=&quot;server&quot; // 这个名称在生成证书时会用到 export KEY\_CN=openvpn.example.com</span><br></pre></td></tr></table></figure>生成证书，按顺序逐个执行命令<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /etc/openvpn/easy-rsa <span class="built_in">source</span> ./vars // 初始化环境变量 ./clean-all // 清除原有证书 ./build-ca // 生成根证书ca.crt和根密钥ca.key ./build-key-server server // 注意：中间会提示设置密码，输入即可 ./build-key client1 // 为客户端生成证书和密钥（这里有两个） ./build-key client2 ./build-dh // 创建迪菲·赫尔曼密钥，会生成dh2048.pem文件 openvpn --genkey --secret keys/ta.key // 生成ta.key文件（防DDos攻击、UDP淹没等恶意攻击）</span><br></pre></td></tr></table></figure>复制证书<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cp</span> dh2048.pem ca.crt server.crt server.key ta.key /etc/openvpn</span><br></pre></td></tr></table></figure></p>
-<h2 id="4、路由表"><a href="#4、路由表" class="headerlink" title="4、路由表"></a>4、路由表</h2><p>安装 iptables（一般都已安装）<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install iptables-services -y service iptable start iptables --flush</span><br></pre></td></tr></table></figure>设置并保存 iptables (注意备份)，假设连接 vpn 后的 ip 为 10.8.0.x<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -j MASQUERADE // 增加 -o &lt;网卡&gt; 参数会导致无法上网 iptables-save &gt; /etc/sysconfig/iptables // 保存设置</span><br></pre></td></tr></table></figure>打开并配置 &#x2F;etc&#x2F;sysctl.conf，将<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">net.ipv4.ip\_forward = 0 // 修改为 net.ipv4.ip\_forward = 1</span><br></pre></td></tr></table></figure>保存后重启网络服务<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">service network restart</span><br></pre></td></tr></table></figure></p>
-<h2 id="5、设置端口转发"><a href="#5、设置端口转发" class="headerlink" title="5、设置端口转发"></a>5、设置端口转发</h2><p>假定 eMule 的 TCP 和 UDP 端口分别为 5555 和 6666，vps 公网 ip 为 1.1.1.1，客户端连接 vpn 后得到的 ip 为 10.8.0.3， 分别执行<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -t nat -A PREROUTING -p tcp -d 1.1.1.1 --dport 5555 -j DNAT --to 10.8.0.6:5555 iptables -t nat -A PREROUTING -p udp -d 1.1.1.1 --dport 6666 -j DNAT --to 10.8.0.6:6666 iptables-save &gt; /etc/sysconfig/iptables</span><br></pre></td></tr></table></figure>完成两个端口转发规则的添加，这里只需要设置入站的转发即可，一开始我把出站的也加上了，通讯一直有问题，浪费了不少时间∠( ᐛ 」∠)＿。查看 iptables 设置状态使用命令<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -nL -t nat --line-numbers // 或 service iptables status</span><br></pre></td></tr></table></figure>iptables 的默认策略是 ACCEPT , 所以不用特意添加端口的入站规则。</p>
+<h1 id="配置服务器"><a href="#配置服务器" class="headerlink" title="配置服务器"></a>配置服务器</h1><h2 id="1、安装-openvpn-easy-rsa"><a href="#1、安装-openvpn-easy-rsa" class="headerlink" title="1、安装 openvpn easy-rsa"></a>1、安装 openvpn easy-rsa</h2><p>使用命令</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install openvpn easy-rsa -y</span><br></pre></td></tr></table></figure>
+
+<p>安装 OpenVPN 和 easy-rsa。</p>
+<h2 id="2、配置-server-conf"><a href="#2、配置-server-conf" class="headerlink" title="2、配置 server.conf"></a>2、配置 server.conf</h2><p>复制模板配置</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cp</span> /usr/share/doc/openvpn-*/sample/sample-config-files/server.conf /etc/openvpn</span><br></pre></td></tr></table></figure>
+
+<p>启用数据包转发（去掉注释）</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">push <span class="string">&quot;redirect-gateway def1 bypass-dhcp&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>修改 dns（查找DNS并修改）</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">push <span class="string">&quot;dhcp-option DNS 8.8.8.8&quot;</span></span><br><span class="line">push <span class="string">&quot;dhcp-option DNS 8.8.4.4&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>修改权限（去掉注释）</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">user nobody</span><br><span class="line">group nobody</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="3、生成证书"><a href="#3、生成证书" class="headerlink" title="3、生成证书"></a>3、生成证书</h2><p>创建目录用于存放生成的证书</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> -p /etc/openvpn/easy-rsa/keys</span><br></pre></td></tr></table></figure>
+
+<p>复制 easy-rsa&#x2F;2.0 目录下所有文件到 openvpn 目录</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cp</span> -rf /usr/share/easy-rsa/2.0/* /etc/openvpn/easy-rsa</span><br></pre></td></tr></table></figure>
+
+<p>打开 &#x2F;etc&#x2F;openvpn&#x2F;easy-rsa&#x2F;vars 文件并按需要修改其中的默认配置</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">export KEY_COUNTRY=&quot;US&quot;</span><br><span class="line">export KEY_PROVINCE=&quot;NY&quot;</span><br><span class="line">export KEY_CITY=&quot;New York&quot;</span><br><span class="line">export KEY_ORG=&quot;DigitalOcean&quot;</span><br><span class="line">export KEY_EMAIL=&quot;sammy@example.com&quot;</span><br><span class="line">export KEY_OU=&quot;Community&quot;</span><br><span class="line">export KEY_NAME=&quot;server&quot;            // 这个名称在生成证书时会用到</span><br><span class="line">export KEY_CN=openvpn.example.com</span><br></pre></td></tr></table></figure>
+
+<p>生成证书，按顺序逐个执行命令</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /etc/openvpn/easy-rsa</span><br><span class="line"><span class="built_in">source</span> ./vars                           // 初始化环境变量</span><br><span class="line">./clean-all                             // 清除原有证书</span><br><span class="line">./build-ca                              // 生成根证书ca.crt和根密钥ca.key</span><br><span class="line">./build-key-server server               // 注意：中间会提示设置密码，输入即可</span><br><span class="line">./build-key client1                     // 为客户端生成证书和密钥（这里有两个）</span><br><span class="line">./build-key client2</span><br><span class="line">./build-dh                              // 创建迪菲·赫尔曼密钥，会生成dh2048.pem文件</span><br><span class="line">openvpn --genkey --secret keys/ta.key   // 生成ta.key文件（防DDos攻击、UDP淹没等恶意攻击）</span><br></pre></td></tr></table></figure>
+
+<p>复制证书</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cp</span> dh2048.pem ca.crt server.crt server.key ta.key /etc/openvpn</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="4、路由表"><a href="#4、路由表" class="headerlink" title="4、路由表"></a>4、路由表</h2><p>安装 iptables（一般都已安装）</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">yum install iptables-services -y</span><br><span class="line">service iptable start</span><br><span class="line">iptables --flush</span><br></pre></td></tr></table></figure>
+
+<p>设置并保存 iptables (注意备份)，假设连接 vpn 后的 ip 为 10.8.0.x</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -j MASQUERADE    // 增加 -o &lt;网卡&gt; 参数会导致无法上网</span><br><span class="line">iptables-save &gt; /etc/sysconfig/iptables    // 保存设置</span><br></pre></td></tr></table></figure>
+
+<p>打开并配置 &#x2F;etc&#x2F;sysctl.conf，将</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">net.ipv4.ip_forward = 0</span><br><span class="line">// 修改为</span><br><span class="line">net.ipv4.ip_forward = 1</span><br></pre></td></tr></table></figure>
+
+<p>保存后重启网络服务</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">service network restart</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="5、设置端口转发"><a href="#5、设置端口转发" class="headerlink" title="5、设置端口转发"></a>5、设置端口转发</h2><p>假定 eMule 的 TCP 和 UDP 端口分别为 5555 和 6666，vps 公网 ip 为 1.1.1.1，客户端连接 vpn 后得到的 ip 为 10.8.0.3， 分别执行</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">iptables -t nat -A PREROUTING -p tcp -d 1.1.1.1 --dport 5555 -j DNAT --to 10.8.0.6:5555</span><br><span class="line">iptables -t nat -A PREROUTING -p udp -d 1.1.1.1 --dport 6666 -j DNAT --to 10.8.0.6:6666</span><br><span class="line">iptables-save &gt; /etc/sysconfig/iptables</span><br></pre></td></tr></table></figure>
+
+<p>完成两个端口转发规则的添加，这里只需要设置入站的转发即可，一开始我把出站的也加上了，通讯一直有问题，浪费了不少时间∠( ᐛ 」∠)＿。查看 iptables 设置状态使用命令</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">iptables -nL -t nat --line-numbers</span><br><span class="line">// 或</span><br><span class="line">service iptables status</span><br></pre></td></tr></table></figure>
+
+<p>iptables 的默认策略是 ACCEPT , 所以不用特意添加端口的入站规则。</p>
 <h2 id="6、分配固定-ip"><a href="#6、分配固定-ip" class="headerlink" title="6、分配固定 ip"></a>6、分配固定 ip</h2><p>因为模板规则里默认是启用客户端地址关联的(ifconfig-pool-persist ipp.txt), 所以服务器会按照记录为客户端分配上一次的 ip。</p>
 <h2 id="7、启动-openvpn"><a href="#7、启动-openvpn" class="headerlink" title="7、启动 openvpn"></a>7、启动 openvpn</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">service openvpn start</span><br></pre></td></tr></table></figure>
 
+
+
 <h2 id="8、设置开机自启动"><a href="#8、设置开机自启动" class="headerlink" title="8、设置开机自启动"></a>8、设置开机自启动</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chkconfig openvpn on</span><br></pre></td></tr></table></figure>
+
+
 
 <p>至此服务器的设置完成，接下去设置客户端。</p>
 <h1 id="配置客户端"><a href="#配置客户端" class="headerlink" title="配置客户端"></a>配置客户端</h1><h2 id="1、在-windows-上安装客户端"><a href="#1、在-windows-上安装客户端" class="headerlink" title="1、在 windows 上安装客户端"></a>1、在 windows 上安装客户端</h2><p><a target="_blank" rel="noopener" href="https://openvpn.net/index.php/open-source/downloads.html">下载</a></p>
 <h2 id="2、复制客户端证书"><a href="#2、复制客户端证书" class="headerlink" title="2、复制客户端证书"></a>2、复制客户端证书</h2><p>安装完成后将服务器上生成的客户端证书复制一份到安装目录的 config 子目录中。客户端证书（在 &#x2F;etc&#x2F;openvpn&#x2F;easy-rsa&#x2F;keys 目录中）包含 ca.crt、ta.key、client.crt 和 client.key 四个文件。</p>
-<h2 id="3、修改客户端配置"><a href="#3、修改客户端配置" class="headerlink" title="3、修改客户端配置"></a>3、修改客户端配置</h2><p>首先从客户端安装目录下的 sample-config 中复制 client.ovpn 到 config 目录中。修改配置文件<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">client dev tun proto udp remote 1.1.1.1 1194 // 改为实际的 ip 和端口 resolv-retry infinite nobind persist-key persist-tun ca ca.crt cert client1.crt // 文件名一致 key client1.key remote-cert-tls server tls-auth ta.key 1 cipher AES-256-CBC verb 3</span><br></pre></td></tr></table></figure></p>
+<h2 id="3、修改客户端配置"><a href="#3、修改客户端配置" class="headerlink" title="3、修改客户端配置"></a>3、修改客户端配置</h2><p>首先从客户端安装目录下的 sample-config 中复制 client.ovpn 到 config 目录中。修改配置文件</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">client</span><br><span class="line"></span><br><span class="line">dev tun</span><br><span class="line">proto udp</span><br><span class="line">remote 1.1.1.1 1194     // 改为实际的 ip 和端口</span><br><span class="line">resolv-retry infinite</span><br><span class="line">nobind</span><br><span class="line">persist-key</span><br><span class="line">persist-tun</span><br><span class="line">ca ca.crt</span><br><span class="line">cert client1.crt        // 文件名一致</span><br><span class="line">key client1.key</span><br><span class="line">remote-cert-tls server</span><br><span class="line">tls-auth ta.key 1</span><br><span class="line">cipher AES-256-CBC</span><br><span class="line">verb 3</span><br></pre></td></tr></table></figure>
+
+
+
 <h2 id="4、启动客户端"><a href="#4、启动客户端" class="headerlink" title="4、启动客户端"></a>4、启动客户端</h2><p>运行后右键单击客户端任务栏图标，选择连接即可。如果一切顺利，客户端会提示连接成功。</p>
 <p>附： <a target="_blank" rel="noopener" href="https://fedoraproject.org/wiki/OpenVPN">OpenVPN 配置</a> <a target="_blank" rel="noopener" href="https://wiki.archlinux.org/index.php/Iptables_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)#.E9.93.BE_.EF.BC.88Chains.EF.BC.89">iptables 介绍</a></p>
 
@@ -261,6 +319,46 @@
     
     
     
+<div class="wp-comments" id="comments">
+  <style>
+    .wp-comments { margin-top: 2em; padding-top: 1em; border-top: 1px solid #ddd; }
+    .wp-comments-title { font-size: 1.15em; margin: 0 0 .4em; }
+    .wp-comments-note { font-size: .875em; color: #888; margin: 0 0 1em; }
+    .wp-comment-list { list-style: none; margin: 0; padding: 0; }
+    .wp-comment { margin: 0 0 1em; padding: .6em .8em; background: rgba(127,127,127,.06); border-radius: 4px; }
+    .wp-comment-reply { margin-left: 2em; }
+    .wp-comment-meta { font-size: .8125em; color: #888; margin-bottom: .3em; }
+    .wp-comment-author { font-weight: 600; color: inherit; }
+    .wp-comment-meta time { margin-left: .6em; }
+    .wp-comment-link { margin-left: .6em; }
+    .wp-comment-content > :first-child { margin-top: 0; }
+    .wp-comment-content > :last-child { margin-bottom: 0; }
+  </style>
+  <h2 class="wp-comments-title">评论（2）</h2>
+  <p class="wp-comments-note">
+    以下评论来自 WordPress 备份，本站仅提供浏览。
+    <a href="https://flandre-scarlet.moe/blog/304/#comments" rel="noopener" target="_blank">前往主站参与讨论</a>
+  </p>
+  <ol class="wp-comment-list">
+    <li class="wp-comment" id="comment-685">
+      <div class="wp-comment-meta">
+        <span class="wp-comment-author">NFairy</span>
+        <time>2020-04-06 23:29:04</time>
+        <a class="wp-comment-link" href="https://flandre-scarlet.moe/blog/304/#comment-685" rel="noopener" target="_blank">原站</a>
+      </div>
+      <div class="wp-comment-content">Easy-RSA部分有些命令过时了，Easy-RSA现在都3.0版本了，可以看这个替代一下：https://www.howtoforge.com/tutorial/how-to-install-openvpn-server-and-client-with-easy-rsa-3-on-centos-8/#step-install-openvpn-and-easyrsa</div>
+    </li>
+    <li class="wp-comment wp-comment-reply" id="comment-686">
+      <div class="wp-comment-meta">
+        <span class="wp-comment-author">flandre</span>
+        <time>2020-04-06 23:52:37</time>
+        <a class="wp-comment-link" href="https://flandre-scarlet.moe/blog/304/#comment-686" rel="noopener" target="_blank">原站</a>
+      </div>
+      <div class="wp-comment-content">easy-rsa2 确实是挺老的了，这文章写得很详细 d(>_< )</div>
+    </li>
+  </ol>
+</div>
+
         
 
 <div>
@@ -376,20 +474,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">112</span>
+          <span class="site-state-item-count">117</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-count">13</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">281</span>
+        <span class="site-state-item-count">298</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -420,19 +518,19 @@
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">flandre</span>
+  <span class="author" itemprop="copyrightHolder">flandre · <a href="https://flandre-scarlet.moe/blog/" rel="noopener" target="_blank">主站</a></span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">389k</span>
+    <span title="站点总字数">414k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">5:54</span>
+    <span title="站点阅读时长">6:16</span>
 </div>
   <div class="powered-by">Powered by love
   </div>
@@ -483,6 +581,8 @@
 
 
 
+
+  
 
   
 

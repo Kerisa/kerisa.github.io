@@ -10,7 +10,6 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
   <link rel="mask-icon" href="/images/logo.svg" color="#222">
-  <meta name="google-site-verification" content="n4HzIaQ2ebAeP_VrwiqS7s6qfe8RKXwGfnHiPjz3Z20">
 
 <link rel="stylesheet" href="/css/main.css">
 
@@ -25,7 +24,7 @@
   <meta name="description" content="最近给几台机器设置 ssh 公钥登陆的时候发现老是失败，putty 和 ssh 命令都显示认证被拒绝。今天想搞一个 git server，又碰到这个问题了，想着还是得解决一下才行。 一开始想换个环境于是在虚拟机里先做个测试，果然也出现了无法登录的情况。。。查看 &#x2F;var&#x2F;log&#x2F;secure 日志，可以发现有下面这样的信息： Authentication refuse">
 <meta property="og:type" content="article">
 <meta property="og:title" content="ssh使用公钥登陆设置时返回 Authentication Refused">
-<meta property="og:url" content="https://kerisa.github.io/637/index.html">
+<meta property="og:url" content="https://flandre-scarlet.moe/blog/637/">
 <meta property="og:site_name" content="Re: Memory (mirror)">
 <meta property="og:description" content="最近给几台机器设置 ssh 公钥登陆的时候发现老是失败，putty 和 ssh 命令都显示认证被拒绝。今天想搞一个 git server，又碰到这个问题了，想着还是得解决一下才行。 一开始想换个环境于是在虚拟机里先做个测试，果然也出现了无法登录的情况。。。查看 &#x2F;var&#x2F;log&#x2F;secure 日志，可以发现有下面这样的信息： Authentication refuse">
 <meta property="og:locale" content="zh_CN">
@@ -205,7 +204,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Programs/" itemprop="url" rel="index"><span itemprop="name">Programs</span></a>
+                  <a href="/categories/programs/" itemprop="url" rel="index"><span itemprop="name">程序</span></a>
                 </span>
             </span>
 
@@ -237,7 +236,10 @@
         <p>最近给几台机器设置 ssh 公钥登陆的时候发现老是失败，putty 和 ssh 命令都显示认证被拒绝。今天想搞一个 git server，又碰到这个问题了，想着还是得解决一下才行。</p>
 <p>一开始想换个环境于是在虚拟机里先做个测试，果然也出现了无法登录的情况。。。查看 &#x2F;var&#x2F;log&#x2F;secure 日志，可以发现有下面这样的信息： <em>Authentication refused: bad ownership or modes for file &#x2F;home&#x2F;testuser&#x2F;.ssh&#x2F;authorized_keys</em> 上网查了一下，发现是 ssh 对文件以及目录的权限有要求，随意设置会导致 ssh 不认这个文件。同时又想起使用 ssh 命令登录时有时会提示你私钥权限过大而忽略这个私钥</p>
 <span id="more"></span>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ @ WARNING: UNPROTECTED PRIVATE KEY FILE! @ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ Permissions 0555 for &#x27;id\_rsa&#x27; are too open. It is required that your private key files are NOT accessible by others. This private key will be ignored. bad permissions: ignore key: id\_rsa</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</span><br><span class="line">@         WARNING: UNPROTECTED PRIVATE KEY FILE!          @</span><br><span class="line">@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</span><br><span class="line">Permissions 0555 for &#x27;id_rsa&#x27; are too open.</span><br><span class="line">It is required that your private key files are NOT accessible by others.</span><br><span class="line">This private key will be ignored.</span><br><span class="line">bad permissions: ignore key: id_rsa</span><br></pre></td></tr></table></figure>
+
+
 
 <p>因此问题的原因应该就是这个了。</p>
 <p>接下来调整目录权限。<br>用户目录权限为 755 或者 700，不能是777之类的。<br>.ssh目录权限可以是 700 或 755。<br>rsa_id.pub 和 authorized_keys 设置为 644。<br>rsa_id 权限设为 600。</p>
@@ -250,6 +252,7 @@
     
     
     
+
         
 
 <div>
@@ -364,20 +367,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">112</span>
+          <span class="site-state-item-count">117</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-count">13</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">281</span>
+        <span class="site-state-item-count">298</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -408,19 +411,19 @@
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">flandre</span>
+  <span class="author" itemprop="copyrightHolder">flandre · <a href="https://flandre-scarlet.moe/blog/" rel="noopener" target="_blank">主站</a></span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">389k</span>
+    <span title="站点总字数">414k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">5:54</span>
+    <span title="站点阅读时长">6:16</span>
 </div>
   <div class="powered-by">Powered by love
   </div>
@@ -471,6 +474,8 @@
 
 
 
+
+  
 
   
 

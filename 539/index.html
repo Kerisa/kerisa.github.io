@@ -10,7 +10,6 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
   <link rel="mask-icon" href="/images/logo.svg" color="#222">
-  <meta name="google-site-verification" content="n4HzIaQ2ebAeP_VrwiqS7s6qfe8RKXwGfnHiPjz3Z20">
 
 <link rel="stylesheet" href="/css/main.css">
 
@@ -25,7 +24,7 @@
   <meta name="description" content="游戏：仏蘭西少女 厂家：PIL 这个封包没有经过压缩、加密处理，而且主程序也没作任何反调试的处理，逆起来相当轻松。。。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="DDSystem 游戏封包分析">
-<meta property="og:url" content="https://kerisa.github.io/539/index.html">
+<meta property="og:url" content="https://flandre-scarlet.moe/blog/539/">
 <meta property="og:site_name" content="Re: Memory (mirror)">
 <meta property="og:description" content="游戏：仏蘭西少女 厂家：PIL 这个封包没有经过压缩、加密处理，而且主程序也没作任何反调试的处理，逆起来相当轻松。。。">
 <meta property="og:locale" content="zh_CN">
@@ -207,15 +206,15 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Programs/" itemprop="url" rel="index"><span itemprop="name">Programs</span></a>
+                  <a href="/categories/programs/" itemprop="url" rel="index"><span itemprop="name">程序</span></a>
                 </span>
                   ，
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Programs/Reverse-engineering/" itemprop="url" rel="index"><span itemprop="name">Reverse-engineering</span></a>
+                  <a href="/categories/programs/reverse-engineering/" itemprop="url" rel="index"><span itemprop="name">逆向</span></a>
                 </span>
                   ，
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Programs/Reverse-engineering/Unpacking/" itemprop="url" rel="index"><span itemprop="name">Unpacking</span></a>
+                  <a href="/categories/programs/reverse-engineering/unpacking/" itemprop="url" rel="index"><span itemprop="name">解包</span></a>
                 </span>
             </span>
 
@@ -225,7 +224,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>1.1k</span>
+              <span>1.2k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -247,7 +246,11 @@
         <p>游戏：仏蘭西少女 厂家：PIL</p>
 <p>这个封包没有经过压缩、加密处理，而且主程序也没作任何反调试的处理，逆起来相当轻松。。。</p>
 <span id="more"></span>
-<p>封包的相关结构如下，2 和 3 的 entry 即对应 DDP2 和 DDP3 的封包，DDP3 中的索引使用了二级结构。 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">Header</span> &#123; <span class="keyword">enum</span> &#123; MAGIC\_2 = <span class="number">0x32504444</span>,<span class="comment">// DDP2 MAGIC\_3 = 0x33504444,// DDP3 &#125;; uint32\_t Magic; uint32\_t EntryCount; // DDP3 中指 Entry3\_L1 的数量 uint32\_t DataOffset; // 起始数据的偏移 uint8\_t Revsered\[20\]; &#125;;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> Entry2 &#123; uint32\<span class="type">_t</span> Offset; uint32\<span class="type">_t</span> PlainSize; <span class="comment">// 实际大小 uint32\_t PackedSize; // 压缩后大小 uint32\_t Revsered; &#125;;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Entry3</span>\_L1 &#123; uint32\<span class="type">_t</span> BlockSize; <span class="comment">// 块大小 uint32\_t BlockOffset; // 块偏移 &#125;;</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">pragma</span> pack(push, 1) struct Entry3\_L2\_Header &#123; uint8\_t Size; <span class="comment">// 索引大小 uint32\_t Offset; uint32\_t PlainSize; uint32\_t PackedSize; uint8\_t Revsered\[4\]; // followed by char\* NameWithoutSuffix; &#125;; #pragma pack(pop)</span></span></span><br></pre></td></tr></table></figure></p>
+<p>封包的相关结构如下，2 和 3 的 entry 即对应 DDP2 和 DDP3 的封包，DDP3 中的索引使用了二级结构。 </p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">Header</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">enum</span> &#123;</span><br><span class="line">        MAGIC_2 = <span class="number">0x32504444</span>,	<span class="comment">// DDP2</span></span><br><span class="line">        MAGIC_3 = <span class="number">0x33504444</span>,	<span class="comment">// DDP3</span></span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="type">uint32_t</span> Magic;</span><br><span class="line">    <span class="type">uint32_t</span> EntryCount;   <span class="comment">// DDP3 中指 Entry3_L1 的数量</span></span><br><span class="line">    <span class="type">uint32_t</span> DataOffset;   <span class="comment">// 起始数据的偏移</span></span><br><span class="line">    <span class="type">uint8_t</span>  Revsered[<span class="number">20</span>];</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Entry2</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">uint32_t</span> Offset;</span><br><span class="line">    <span class="type">uint32_t</span> PlainSize;    <span class="comment">// 实际大小</span></span><br><span class="line">    <span class="type">uint32_t</span> PackedSize;   <span class="comment">// 压缩后大小</span></span><br><span class="line">    <span class="type">uint32_t</span> Revsered;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Entry3_L1</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">uint32_t</span> BlockSize;    <span class="comment">// 块大小</span></span><br><span class="line">    <span class="type">uint32_t</span> BlockOffset;  <span class="comment">// 块偏移</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">pragma</span> pack(push, 1)</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Entry3_L2_Header</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">uint8_t</span>  Size;         <span class="comment">// 索引大小</span></span><br><span class="line">    <span class="type">uint32_t</span> Offset;</span><br><span class="line">    <span class="type">uint32_t</span> PlainSize;</span><br><span class="line">    <span class="type">uint32_t</span> PackedSize;</span><br><span class="line">    <span class="type">uint8_t</span>  Revsered[<span class="number">4</span>];</span><br><span class="line">    <span class="comment">// followed by char* NameWithoutSuffix;</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="meta">#<span class="keyword">pragma</span> pack(pop)</span></span><br></pre></td></tr></table></figure>
+
+
+
 <p>就这个游戏来看，DDP2 封包的内容都是经过压缩的，两个字段的大小不一致；而 DDP3 中不是所有文件都经过压缩，未压缩文件的 PackedSize 字段为 0。另外 DDP3 的索引中带有 C 风格字符串的文件名，DDP2 中则没有。<img src="/assets/imgs/2018/08/ddsystem-1.png" alt="封包">橙色部分即为索引部分，按照大小是 16 字节一个索引。</p>
 <p>压缩似乎是采用了自有的压缩算法（弱渣，认不出来什么算法_(:з」∠)_），总之用 ida 整个抽出来了，把没有的代码删掉，重建一下入口就能用了www</p>
 <p>脚本文件还多了一步加密的操作，就是生成一个 key 简单异或一下。还原后的脚本：<img src="/assets/imgs/2018/08/ddsystem-2.png" alt="脚本"></p>
@@ -259,6 +262,47 @@
     
     
     
+<div class="wp-comments" id="comments">
+  <style>
+    .wp-comments { margin-top: 2em; padding-top: 1em; border-top: 1px solid #ddd; }
+    .wp-comments-title { font-size: 1.15em; margin: 0 0 .4em; }
+    .wp-comments-note { font-size: .875em; color: #888; margin: 0 0 1em; }
+    .wp-comment-list { list-style: none; margin: 0; padding: 0; }
+    .wp-comment { margin: 0 0 1em; padding: .6em .8em; background: rgba(127,127,127,.06); border-radius: 4px; }
+    .wp-comment-reply { margin-left: 2em; }
+    .wp-comment-meta { font-size: .8125em; color: #888; margin-bottom: .3em; }
+    .wp-comment-author { font-weight: 600; color: inherit; }
+    .wp-comment-meta time { margin-left: .6em; }
+    .wp-comment-link { margin-left: .6em; }
+    .wp-comment-content > :first-child { margin-top: 0; }
+    .wp-comment-content > :last-child { margin-bottom: 0; }
+  </style>
+  <h2 class="wp-comments-title">评论（2）</h2>
+  <p class="wp-comments-note">
+    以下评论来自 WordPress 备份，本站仅提供浏览。
+    <a href="https://flandre-scarlet.moe/blog/539/#comments" rel="noopener" target="_blank">前往主站参与讨论</a>
+  </p>
+  <ol class="wp-comment-list">
+    <li class="wp-comment" id="comment-779">
+      <div class="wp-comment-meta">
+        <span class="wp-comment-author">XIANYU</span>
+        <time>2020-06-10 20:22:17</time>
+        <a class="wp-comment-link" href="https://flandre-scarlet.moe/blog/539/#comment-779" rel="noopener" target="_blank">原站</a>
+      </div>
+      <div class="wp-comment-content">大佬你好，我想请问一下，后面的封包解析代码可以直接用于解包同引擎的游戏吗？还是说需要下载VS进软件去运行，或者单纯的就是大佬您的一般记录呢？
+我这边有一个应该是同引擎的游戏文本，wxm打开看开头是DDP3，现在不知道该怎么去把文本文件还原出来，用arc暴拆的结果是分文件scn用wxm打开仅能得到部分文本，部分还是乱码状态……</div>
+    </li>
+    <li class="wp-comment wp-comment-reply" id="comment-780">
+      <div class="wp-comment-meta">
+        <span class="wp-comment-author">flandre</span>
+        <time>2020-06-10 21:57:51</time>
+        <a class="wp-comment-link" href="https://flandre-scarlet.moe/blog/539/#comment-780" rel="noopener" target="_blank">原站</a>
+      </div>
+      <div class="wp-comment-content">同引擎如果封包没有更新是可以解包的。DDP3 可以尝试用它拆下，单个文本文件是以 DDSxHXB 开头，你可以自己用 vs 编译一份运行试试。如果解码文本的 key 更新了的话就要自己捣鼓下把 key 找出来了</div>
+    </li>
+  </ol>
+</div>
+
         
 
 <div>
@@ -371,20 +415,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">112</span>
+          <span class="site-state-item-count">117</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-count">13</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">281</span>
+        <span class="site-state-item-count">298</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -415,19 +459,19 @@
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">flandre</span>
+  <span class="author" itemprop="copyrightHolder">flandre · <a href="https://flandre-scarlet.moe/blog/" rel="noopener" target="_blank">主站</a></span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">389k</span>
+    <span title="站点总字数">414k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">5:54</span>
+    <span title="站点阅读时长">6:16</span>
 </div>
   <div class="powered-by">Powered by love
   </div>
@@ -478,6 +522,8 @@
 
 
 
+
+  
 
   
 

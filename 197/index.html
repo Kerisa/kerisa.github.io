@@ -10,7 +10,6 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
   <link rel="mask-icon" href="/images/logo.svg" color="#222">
-  <meta name="google-site-verification" content="n4HzIaQ2ebAeP_VrwiqS7s6qfe8RKXwGfnHiPjz3Z20">
 
 <link rel="stylesheet" href="/css/main.css">
 
@@ -25,7 +24,7 @@
   <meta name="description" content="调试一个 Duilib 界面程序时遇到一个问题：当在主函数里使用 ShowModal() 显示第一个对话框并关闭对话框后，再一次使用 ShowModal() 显示第二个对话框时第二个对话框便直接关闭退出了。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Duilib无法连续创建两个模态对话框">
-<meta property="og:url" content="https://kerisa.github.io/197/index.html">
+<meta property="og:url" content="https://flandre-scarlet.moe/blog/197/">
 <meta property="og:site_name" content="Re: Memory (mirror)">
 <meta property="og:description" content="调试一个 Duilib 界面程序时遇到一个问题：当在主函数里使用 ShowModal() 显示第一个对话框并关闭对话框后，再一次使用 ShowModal() 显示第二个对话框时第二个对话框便直接关闭退出了。">
 <meta property="og:locale" content="zh_CN">
@@ -202,11 +201,11 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Programs/" itemprop="url" rel="index"><span itemprop="name">Programs</span></a>
+                  <a href="/categories/programs/" itemprop="url" rel="index"><span itemprop="name">程序</span></a>
                 </span>
                   ，
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Programs/Debug/" itemprop="url" rel="index"><span itemprop="name">Debug</span></a>
+                  <a href="/categories/programs/debug/" itemprop="url" rel="index"><span itemprop="name">Debug</span></a>
                 </span>
             </span>
 
@@ -216,14 +215,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>2.6k</span>
+              <span>2.9k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>2 分钟</span>
+              <span>3 分钟</span>
             </span>
 
         </div>
@@ -237,18 +236,29 @@
       
         <p>调试一个 Duilib 界面程序时遇到一个问题：当在主函数里使用 ShowModal() 显示第一个对话框并关闭对话框后，再一次使用 ShowModal() 显示第二个对话框时第二个对话框便直接关闭退出了。</p>
 <span id="more"></span>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">CDemoWindow\* pFrame1 = <span class="keyword">new</span> <span class="built_in">CDemoWindow</span>(); pFrame1-&gt;<span class="built_in">Create</span>(<span class="literal">NULL</span>, \_T(<span class="string">&quot;&quot;</span>), UI\_WNDSTYLE\_FRAME, WS\_EX\_WINDOWEDGE); pFrame1-&gt;<span class="built_in">CenterWindow</span>(); pFrame1-&gt;<span class="built_in">ShowModal</span>();</span><br><span class="line"></span><br><span class="line">CDemoWindow\* pFrame2 = <span class="keyword">new</span> <span class="built_in">CDemoWindow</span>(); pFrame2-&gt;<span class="built_in">Create</span>(<span class="literal">NULL</span>, \_T(<span class="string">&quot;&quot;</span>), UI\_WNDSTYLE\_FRAME, WS\_EX\_WINDOWEDGE); pFrame2-&gt;<span class="built_in">CenterWindow</span>(); pFrame2-&gt;<span class="built_in">ShowModal</span>();</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">CDemoWindow* pFrame1 = <span class="keyword">new</span> <span class="built_in">CDemoWindow</span>();</span><br><span class="line">pFrame1-&gt;<span class="built_in">Create</span>(<span class="literal">NULL</span>, _T(<span class="string">&quot;&quot;</span>), UI_WNDSTYLE_FRAME, WS_EX_WINDOWEDGE);</span><br><span class="line">pFrame1-&gt;<span class="built_in">CenterWindow</span>();</span><br><span class="line">pFrame1-&gt;<span class="built_in">ShowModal</span>();</span><br><span class="line"></span><br><span class="line">CDemoWindow* pFrame2 = <span class="keyword">new</span> <span class="built_in">CDemoWindow</span>();</span><br><span class="line">pFrame2-&gt;<span class="built_in">Create</span>(<span class="literal">NULL</span>, _T(<span class="string">&quot;&quot;</span>), UI_WNDSTYLE_FRAME, WS_EX_WINDOWEDGE);</span><br><span class="line">pFrame2-&gt;<span class="built_in">CenterWindow</span>();</span><br><span class="line">pFrame2-&gt;<span class="built_in">ShowModal</span>();</span><br></pre></td></tr></table></figure>
+
+
 
 <p>调试了一下发现第二个对话框的消息循环很快收到一个 WM_QUIT 消息导致了它的退出。继续跟踪发现原来是第一个对话框的 OnDestory() 里调用了 PostQuitMesage() 往消息队列里发送了 WM_QUIT 消息，而 ShowModal() 里的消息循环的循环条件写的是</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span>(::<span class="built_in">IsWindow</span>(m\_hWnd) &amp;&amp; ::<span class="built_in">GetMessage</span>(&amp;msg, <span class="literal">NULL</span>, <span class="number">0</span>, <span class="number">0</span>))</span><br></pre></td></tr></table></figure>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span>(::<span class="built_in">IsWindow</span>(m_hWnd) &amp;&amp; ::<span class="built_in">GetMessage</span>(&amp;msg, <span class="literal">NULL</span>, <span class="number">0</span>, <span class="number">0</span>))</span><br></pre></td></tr></table></figure>
+
+
 
 <p>它最终是因为 ::IsWindow(m_hWnd) 为 false 而退出消息循环的， MW_QUIT 消息依然被留在了消息队列中，随后被下一个对话框收到了。</p>
 <p>修改方法就是去掉 OnDestroy() 中的 PostQuitMessage() 调用。因为窗口已经销毁，所以不用 MW_QUIT 也能正常退出消息循环。</p>
 <p>另外对比了一下 MFC，当在 MFC 的应用程序向导中选择“基于对话框”作为应用程序类型后，并在代码中将 App::InitInstance() 作如下补充：</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">BOOL <span class="title">CMFCApplication2App::InitInstance</span><span class="params">()</span> </span>&#123; INITCOMMONCONTROLSEX InitCtrls; InitCtrls.dwSize = <span class="built_in">sizeof</span>(InitCtrls); InitCtrls.dwICC = ICC\_WIN95\_CLASSES; <span class="built_in">InitCommonControlsEx</span>(&amp;InitCtrls);</span><br><span class="line"></span><br><span class="line">CWinApp::<span class="built_in">InitInstance</span>(); <span class="built_in">AfxEnableControlContainer</span>(); CShellManager \*pShellManager = <span class="keyword">new</span> CShellManager; CMFCVisualManager::<span class="built_in">SetDefaultManager</span>(RUNTIME\_CLASS(CMFCVisualManagerWindows));</span><br><span class="line"></span><br><span class="line"><span class="built_in">SetRegistryKey</span>(\_T(<span class="string">&quot;应用程序向导生成的本地应用程序&quot;</span>)); &#123; CMFCApplication2Dlg dlg; m\_pMainWnd = &amp;dlg; INT\_PTR nResponse = dlg.<span class="built_in">DoModal</span>(); &#125; &#123; CMFCApplication2Dlg dlg; m\_pMainWnd = &amp;dlg; INT\_PTR nResponse = dlg.<span class="built_in">DoModal</span>(); &#125; <span class="keyword">if</span> (pShellManager != <span class="literal">NULL</span>) &#123; <span class="keyword">delete</span> pShellManager; &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 由于对话框已关闭，所以将返回 FALSE 以便退出应用程序， // 而不是启动应用程序的消息泵。 return FALSE; &#125;</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">BOOL <span class="title">CMFCApplication2App::InitInstance</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    INITCOMMONCONTROLSEX InitCtrls;</span><br><span class="line">    InitCtrls.dwSize = <span class="built_in">sizeof</span>(InitCtrls);</span><br><span class="line">    InitCtrls.dwICC = ICC_WIN95_CLASSES;</span><br><span class="line">    <span class="built_in">InitCommonControlsEx</span>(&amp;InitCtrls);</span><br><span class="line"></span><br><span class="line">    CWinApp::<span class="built_in">InitInstance</span>();</span><br><span class="line">    <span class="built_in">AfxEnableControlContainer</span>();</span><br><span class="line">    CShellManager *pShellManager = <span class="keyword">new</span> CShellManager;</span><br><span class="line">    CMFCVisualManager::<span class="built_in">SetDefaultManager</span>(<span class="built_in">RUNTIME_CLASS</span>(CMFCVisualManagerWindows));</span><br><span class="line"></span><br><span class="line">    <span class="built_in">SetRegistryKey</span>(_T(<span class="string">&quot;应用程序向导生成的本地应用程序&quot;</span>));</span><br><span class="line">    &#123;</span><br><span class="line">        CMFCApplication2Dlg dlg;</span><br><span class="line">        m_pMainWnd = &amp;dlg;</span><br><span class="line">        INT_PTR nResponse = dlg.<span class="built_in">DoModal</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    &#123;</span><br><span class="line">        CMFCApplication2Dlg dlg;</span><br><span class="line">        m_pMainWnd = &amp;dlg;</span><br><span class="line">        INT_PTR nResponse = dlg.<span class="built_in">DoModal</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (pShellManager != <span class="literal">NULL</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">delete</span> pShellManager;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 由于对话框已关闭，所以将返回 FALSE 以便退出应用程序，</span></span><br><span class="line">    <span class="comment">//  而不是启动应用程序的消息泵。</span></span><br><span class="line">    <span class="keyword">return</span> FALSE;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
 
 <p>即在第一个对话框后立即调用生成第二个对话框。结果发现第二个对话框的 DoModal() 也是立刻退出了。跟踪了一下代码发现在 RunModalLoop() 的消息循环里同样收到了 WM_QUIT。继续跟踪了一下，发现第一个对话框在收到最后一个消息 WM_NCDESTORY 后调用了 AfxPostQuitMessage(0)，塞了个 MW_QUIT 到消息队列里。</p>
-<p>但是如果在向导中不选择“基于对话框”类型的话，在产生主窗口前先产生一个或多个模态对话框则不会导致随后的主窗口退出。这个原因出在窗口对 WM_NCDESTORY 的处理上。 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">CWnd::OnNcDestroy</span><span class="params">()</span> </span>&#123; <span class="comment">// cleanup main and active windows CWinThread\* pThread = AfxGetThread(); if (pThread != NULL) &#123; if (pThread-&gt;m\_pMainWnd == this) // 关键在这里 &#123; if (!afxContextIsDLL) &#123; // shut down current thread if possible if (pThread != AfxGetApp() AfxOleCanExitApp()) AfxPostQuitMessage(0); &#125; pThread-&gt;m\_pMainWnd = NULL; &#125; if (pThread-&gt;m\_pActiveWnd == this) pThread-&gt;m\_pActiveWnd = NULL; &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 后面省略 // ... &#125;</span></span><br></pre></td></tr></table></figure></p>
+<p>但是如果在向导中不选择“基于对话框”类型的话，在产生主窗口前先产生一个或多个模态对话框则不会导致随后的主窗口退出。这个原因出在窗口对 WM_NCDESTORY 的处理上。 </p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">CWnd::OnNcDestroy</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// cleanup main and active windows</span></span><br><span class="line">    CWinThread* pThread = <span class="built_in">AfxGetThread</span>();</span><br><span class="line">    <span class="keyword">if</span> (pThread != <span class="literal">NULL</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> (pThread-&gt;m_pMainWnd == <span class="keyword">this</span>)    <span class="comment">// 关键在这里</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span> (!afxContextIsDLL)</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="comment">// shut down current thread if possible</span></span><br><span class="line">                <span class="keyword">if</span> (pThread != <span class="built_in">AfxGetApp</span>() || <span class="built_in">AfxOleCanExitApp</span>())</span><br><span class="line">                    <span class="built_in">AfxPostQuitMessage</span>(<span class="number">0</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            pThread-&gt;m_pMainWnd = <span class="literal">NULL</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (pThread-&gt;m_pActiveWnd == <span class="keyword">this</span>)</span><br><span class="line">            pThread-&gt;m_pActiveWnd = <span class="literal">NULL</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 后面省略</span></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
 <p>其中有一个当前窗口是否是作为当前线程的主窗口的判断，如果是的话才发送 WM_QUIT 消息。而基于对话框类型的程序的话则在对话框声明之后便将其作为线程主窗口记录下来了(对话框部分代码的 16 和 21 行)，所以窗口销毁时会有额外的 WM_QUIT。</p>
 
     </div>
@@ -256,6 +266,7 @@
     
     
     
+
         
 
 <div>
@@ -366,20 +377,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">112</span>
+          <span class="site-state-item-count">117</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-count">13</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">281</span>
+        <span class="site-state-item-count">298</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -410,19 +421,19 @@
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">flandre</span>
+  <span class="author" itemprop="copyrightHolder">flandre · <a href="https://flandre-scarlet.moe/blog/" rel="noopener" target="_blank">主站</a></span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">389k</span>
+    <span title="站点总字数">414k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">5:54</span>
+    <span title="站点阅读时长">6:16</span>
 </div>
   <div class="powered-by">Powered by love
   </div>
@@ -473,6 +484,8 @@
 
 
 
+
+  
 
   
 

@@ -10,7 +10,6 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
   <link rel="mask-icon" href="/images/logo.svg" color="#222">
-  <meta name="google-site-verification" content="n4HzIaQ2ebAeP_VrwiqS7s6qfe8RKXwGfnHiPjz3Z20">
 
 <link rel="stylesheet" href="/css/main.css">
 
@@ -25,12 +24,12 @@
   <meta name="description" content="之前公司项目中一直没有方便好用的异步编程框架，在开发过程中会遇到一些问题。比如多线程编码时开发需要自己管理线程，并在两侧同步数据。一些操作也会被直接放在主线程中，就算单个操作的耗时并不明显，长此以往也会积少成多，最终拖慢了 UI 的速度。 但好在公司的代码库已经支持 C++11，我们基于 C++11 开发了一个仅使用标准库的框架。这样既能简化业务开发时的代码工作量，也可以提高代码的可读性，而且使用">
 <meta property="og:type" content="article">
 <meta property="og:title" content="C++ 异步编程框架">
-<meta property="og:url" content="https://kerisa.github.io/2074/index.html">
+<meta property="og:url" content="https://flandre-scarlet.moe/blog/2074/">
 <meta property="og:site_name" content="Re: Memory (mirror)">
 <meta property="og:description" content="之前公司项目中一直没有方便好用的异步编程框架，在开发过程中会遇到一些问题。比如多线程编码时开发需要自己管理线程，并在两侧同步数据。一些操作也会被直接放在主线程中，就算单个操作的耗时并不明显，长此以往也会积少成多，最终拖慢了 UI 的速度。 但好在公司的代码库已经支持 C++11，我们基于 C++11 开发了一个仅使用标准库的框架。这样既能简化业务开发时的代码工作量，也可以提高代码的可读性，而且使用">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2024-04-07T13:21:40.000Z">
-<meta property="article:modified_time" content="2026-03-01T12:20:03.708Z">
+<meta property="article:modified_time" content="2024-04-07T15:05:19.000Z">
 <meta property="article:author" content="flandre">
 <meta property="article:tag" content="c++">
 <meta property="article:tag" content="task">
@@ -187,23 +186,17 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
+              
 
-              <time title="创建时间：2024-04-07 21:21:40" itemprop="dateCreated datePublished" datetime="2024-04-07T21:21:40+08:00">2024-04-07</time>
+              <time title="创建时间：2024-04-07 21:21:40 / 修改时间：23:05:19" itemprop="dateCreated datePublished" datetime="2024-04-07T21:21:40+08:00">2024-04-07</time>
             </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-03-01 20:20:03" itemprop="dateModified" datetime="2026-03-01T20:20:03+08:00">2026-03-01</time>
-              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Programs/" itemprop="url" rel="index"><span itemprop="name">Programs</span></a>
+                  <a href="/categories/programs/" itemprop="url" rel="index"><span itemprop="name">程序</span></a>
                 </span>
             </span>
 
@@ -243,7 +236,9 @@
 <p>通常客户端程序除了 UI 处理外，大多的业务逻辑也会放在主线程一起执行。所以比较常见的模式是在主线程提交一个耗时操作到工作线程，当任务完成后再回到主线程做下一步的处理。除非项目里其他组件都是线程安全的，否则在工作线程里直接做后续操作（比如同步数据状态等）都可能会引发竞态条件，所以这里默认都让主线程去完成这些逻辑操作。</p>
 <p>而且也不可能让 UI 线程&#x2F;主线程去做同步等待，所以会在 UI 线程做 OnIdle 处理时会加入一个对完成队列的检查，当任务完成后结果被 post 到完成队列里时，主线程再去取出来执行后续步骤。</p>
 <p>PS：在 windows 平台上可以利用 UI 线程的消息循环，自定义一个消息并将结果用 PostMessage 传过去，这样就可以优化掉 OnIdle 时的队列检查，处理会更加高效，但这样的话其他平台需要做类似的适配，用自身平台的机制实现同样效果。</p>
-<p>基于这个线程池，我们可以快速搞出一个提交任务处理的基本结构： <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// // 定义一个线程池，全局或者是在特定范围的类里均可，同时设置好最大线程数 // ThreadPool th\_pool\_(5); // 指定池里的最大线程数，这里随便写了个 5 ThreadSafeQueue&lt;std::packaged\_task&lt;void()&gt;&gt; completed\_queue\_; // 完成队列，用来存放需要主线程做后续处理的 task</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// // 在任何需要的地方将 task 提交到线程池中运行 // void Panel::OnButtonClick() &#123;   // ... 其他代码   std::string full\_path = ...;   th\_pool\_.enqueue(\[this, full\_path\]() &#123;     // 以下代码都在工作线程中执行</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 做一些耗时操作，比如读写文件等     auto result = LoadData(full\_path);</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 工作线程部分的操作结束后在主线程进行后续操作，比如通知其他组件操作结果，     // 刷新 UI 等，需要新建一个 task 并 post 给主线程     auto ptask = std::make\_shared&lt;std::packaged\_task&lt;void()&gt;&gt;(\[this, result\]() &#123;       // 这个 lambda 内的代码会在主线程中执行       log::info(&quot;save data result: &quot; &lt;&lt; result);       if (this-&gt;sink\_)         this-&gt;sink\_-&gt;OnDataLoaded(result);       UpdateLabel();     &#125;);     // 将下一步的 task 放到完成队列中等待主线程执行     completed\_queue\_.push(ptask);   &#125;); &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// // 主线程的 OnIdle 函数 // void OnIdle() &#123;   // ... 其他操作   std::shared\_ptr&lt;std::packaged\_task&lt;void()&gt;&gt; tmp;   while (finished\_task\_queue\_.try\_pop(tmp) &amp;&amp; tmp) &#123;     (\*tmp)();   &#125; &#125;</span></span><br></pre></td></tr></table></figure></p>
+<p>基于这个线程池，我们可以快速搞出一个提交任务处理的基本结构： </p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// 定义一个线程池，全局或者是在特定范围的类里均可，同时设置好最大线程数</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="function">ThreadPool <span class="title">th_pool_</span><span class="params">(<span class="number">5</span>)</span></span>;  <span class="comment">// 指定池里的最大线程数，这里随便写了个 5</span></span><br><span class="line">ThreadSafeQueue&lt;std::packaged_task&lt;<span class="built_in">void</span>()&gt;&gt; completed_queue_;  <span class="comment">// 完成队列，用来存放需要主线程做后续处理的 task</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// 在任何需要的地方将 task 提交到线程池中运行</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Panel::OnButtonClick</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="comment">// ... 其他代码</span></span><br><span class="line">  std::string full_path = ...;</span><br><span class="line">  th_pool_.<span class="built_in">enqueue</span>([<span class="keyword">this</span>, full_path]() &#123;</span><br><span class="line">    <span class="comment">// 以下代码都在工作线程中执行</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 做一些耗时操作，比如读写文件等</span></span><br><span class="line">    <span class="keyword">auto</span> result = <span class="built_in">LoadData</span>(full_path);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 工作线程部分的操作结束后在主线程进行后续操作，比如通知其他组件操作结果，</span></span><br><span class="line">    <span class="comment">// 刷新 UI 等，需要新建一个 task 并 post 给主线程</span></span><br><span class="line">    <span class="keyword">auto</span> ptask = std::make_shared&lt;std::packaged_task&lt;<span class="built_in">void</span>()&gt;&gt;([<span class="keyword">this</span>, result]() &#123;</span><br><span class="line">      <span class="comment">// 这个 lambda 内的代码会在主线程中执行</span></span><br><span class="line">      log::<span class="built_in">info</span>(<span class="string">&quot;save data result: &quot;</span> &lt;&lt; result);</span><br><span class="line">      <span class="keyword">if</span> (<span class="keyword">this</span>-&gt;sink_)</span><br><span class="line">        <span class="keyword">this</span>-&gt;sink_-&gt;<span class="built_in">OnDataLoaded</span>(result);</span><br><span class="line">      <span class="built_in">UpdateLabel</span>();</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="comment">// 将下一步的 task 放到完成队列中等待主线程执行</span></span><br><span class="line">    completed_queue_.<span class="built_in">push</span>(ptask);</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// 主线程的 OnIdle 函数</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">OnIdle</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="comment">// ... 其他操作</span></span><br><span class="line">  std::shared_ptr&lt;std::packaged_task&lt;<span class="built_in">void</span>()&gt;&gt; tmp;</span><br><span class="line">  <span class="keyword">while</span> (finished_task_queue_.<span class="built_in">try_pop</span>(tmp) &amp;&amp; tmp) &#123;</span><br><span class="line">    (*tmp)();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <p>这里用了 packaged_task、future、thread 等来实现简单的异步和回调处理，将 callback 写成 lambda 这样后续的逻辑就一目了然，不用再到代码里东翻西找了。</p>
 <h2 id="封装函数对象"><a href="#封装函数对象" class="headerlink" title="封装函数对象"></a>封装函数对象</h2><p>实际实现中我们不会直接将任务提交到线程池，而是增加一个间接层比如 TaskRunner，用来处理任务调度，跟由系统调度器默认安排线程来执行 task 相比有更高的灵活度。比如将一些 task 安排到同一个线程、低负载情况下尽可能地唤醒同一个线程来处理 task 等。</p>
 <p>实现 task 的优先级、延时、重复执行也比较容易，只要定义一个 Task 类，将外部提交的 lambda 等可执行对象和优先级等属性一起打包保存，然后放到 TaskRunner 的优先队列里，再把队列里的任务分配给线程池执行就可以。重复的任务执行完毕后再次入队即可。</p>
@@ -260,6 +255,7 @@
     
     
     
+
         
 
 <div>
@@ -372,20 +368,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">112</span>
+          <span class="site-state-item-count">117</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-count">13</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">281</span>
+        <span class="site-state-item-count">298</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -416,19 +412,19 @@
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">flandre</span>
+  <span class="author" itemprop="copyrightHolder">flandre · <a href="https://flandre-scarlet.moe/blog/" rel="noopener" target="_blank">主站</a></span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">389k</span>
+    <span title="站点总字数">414k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">5:54</span>
+    <span title="站点阅读时长">6:16</span>
 </div>
   <div class="powered-by">Powered by love
   </div>
@@ -479,6 +475,8 @@
 
 
 
+
+  
 
   
 

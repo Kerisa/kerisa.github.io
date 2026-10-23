@@ -10,7 +10,6 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
   <link rel="mask-icon" href="/images/logo.svg" color="#222">
-  <meta name="google-site-verification" content="n4HzIaQ2ebAeP_VrwiqS7s6qfe8RKXwGfnHiPjz3Z20">
 
 <link rel="stylesheet" href="/css/main.css">
 
@@ -25,7 +24,7 @@
   <meta name="description" content="主要功能根据定义的 ID 列表下载每个画师的所有插画   下载链接PixivSpider 如何使用">
 <meta property="og:type" content="article">
 <meta property="og:title" content="pixivspider – P 站爬虫工具">
-<meta property="og:url" content="https://kerisa.github.io/673/index.html">
+<meta property="og:url" content="https://flandre-scarlet.moe/blog/673/">
 <meta property="og:site_name" content="Re: Memory (mirror)">
 <meta property="og:description" content="主要功能根据定义的 ID 列表下载每个画师的所有插画   下载链接PixivSpider 如何使用">
 <meta property="og:locale" content="zh_CN">
@@ -33,7 +32,7 @@
 <meta property="og:image" content="https://kerisa.github.io/assets/imgs/2019/05/pixivspider-1.png">
 <meta property="og:image" content="https://kerisa.github.io/assets/imgs/2019/05/pixivspider-4.png">
 <meta property="article:published_time" content="2019-04-04T16:59:56.000Z">
-<meta property="article:modified_time" content="2026-03-01T12:20:03.722Z">
+<meta property="article:modified_time" content="2020-08-15T11:40:23.000Z">
 <meta property="article:author" content="flandre">
 <meta property="article:tag" content="pixiv">
 <meta property="article:tag" content="python">
@@ -200,7 +199,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-03-01 20:20:03" itemprop="dateModified" datetime="2026-03-01T20:20:03+08:00">2026-03-01</time>
+                <time title="修改时间：2020-08-15 19:40:23" itemprop="dateModified" datetime="2020-08-15T19:40:23+08:00">2020-08-15</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -208,7 +207,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Programs/" itemprop="url" rel="index"><span itemprop="name">Programs</span></a>
+                  <a href="/categories/programs/" itemprop="url" rel="index"><span itemprop="name">程序</span></a>
                 </span>
             </span>
 
@@ -245,7 +244,7 @@
 <li>需要安装 python 3.7 环境，并安装 demjson 依赖库。</li>
 <li>解压文件包，在 pixivspider-data 目录下的 config.ini 文件中填入有效的 P 站账号以及对应密码用于正常访问 P 站。账号中的浏览限制选项不打开会影响部分插画的下载，需要下载则在网页中打开。</li>
 <li>添加准备下载的画师 ID，以下方式选一种即可<ul>
-<li><p>数据库文件不存在（首次使用）：使用导入方式自动生成，参看<a href="/blog/?p=673#import">导入</a>部分，比较推荐此种方式，方便快捷。</p>
+<li><p>数据库文件不存在（首次使用）：使用导入方式自动生成，参看<a href="/673/#import">导入</a>部分，比较推荐此种方式，方便快捷。</p>
 </li>
 <li><p>数据库文件不存在（首次使用）：直接运行</p>
 <p>python pixivspider</p>
@@ -271,13 +270,73 @@
 <li>程序使用数据库中的记录判断插画是否已经下载，因此可以随意处理 downloads 目录中已下载的插画。下次下载时仍会跳过这些文件。</li>
 <li>向不知道是否存在的读者们求 star (๑•́ ₃ •̀๑)</li>
 </ol>
-<p>※2019-07-07：今天脚本拿来一跑发现登录不了，原来 P 站上了股沟 reCAPTCHA…成天搞事情。试了试发现（用浏览器插件）把 cookie 提取出来，把 P 站中 PHPSESSID 字段的 value 和 expire 提取出来覆盖到 PixivCookie.txt 中就可以以已登录的身份继续下载乛◡乛。顺便提供一份 PixivCookie.txt 的模板 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># Netscape HTTP Cookie File # http://curl.haxx.se/rfc/cookie\_spec.html # This is a generated file! Do not edit.</span><br><span class="line"></span><br><span class="line">.pixiv.netTRUE/TRUE(expire值覆盖)PHPSESSID(value值覆盖) .pixiv.netTRUE/TRUE1719677052p\_ab\_d\_id1000246005 .pixiv.netTRUE/TRUE1719677052p\_ab\_id7 .pixiv.netTRUE/TRUE1719677052p\_ab\_id\_21</span><br></pre></td></tr></table></figure></p>
-
+<p>※2019-07-07：今天脚本拿来一跑发现登录不了，原来 P 站上了股沟 reCAPTCHA…成天搞事情。试了试发现（用浏览器插件）把 cookie 提取出来，把 P 站中 PHPSESSID 字段的 value 和 expire 提取出来覆盖到 PixivCookie.txt 中就可以以已登录的身份继续下载乛◡乛。顺便提供一份 PixivCookie.txt 的模板 </p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># Netscape HTTP Cookie File</span><br><span class="line"># http://curl.haxx.se/rfc/cookie_spec.html</span><br><span class="line"># This is a generated file!  Do not edit.</span><br><span class="line"></span><br><span class="line">.pixiv.net	TRUE	/	TRUE	(expire值覆盖)	PHPSESSID	(value值覆盖)</span><br><span class="line">.pixiv.net	TRUE	/	TRUE	1719677052	p_ab_d_id	1000246005</span><br><span class="line">.pixiv.net	TRUE	/	TRUE	1719677052	p_ab_id	7</span><br><span class="line">.pixiv.net	TRUE	/	TRUE	1719677052	p_ab_id_2	1</span><br></pre></td></tr></table></figure>
     </div>
 
     
     
     
+<div class="wp-comments" id="comments">
+  <style>
+    .wp-comments { margin-top: 2em; padding-top: 1em; border-top: 1px solid #ddd; }
+    .wp-comments-title { font-size: 1.15em; margin: 0 0 .4em; }
+    .wp-comments-note { font-size: .875em; color: #888; margin: 0 0 1em; }
+    .wp-comment-list { list-style: none; margin: 0; padding: 0; }
+    .wp-comment { margin: 0 0 1em; padding: .6em .8em; background: rgba(127,127,127,.06); border-radius: 4px; }
+    .wp-comment-reply { margin-left: 2em; }
+    .wp-comment-meta { font-size: .8125em; color: #888; margin-bottom: .3em; }
+    .wp-comment-author { font-weight: 600; color: inherit; }
+    .wp-comment-meta time { margin-left: .6em; }
+    .wp-comment-link { margin-left: .6em; }
+    .wp-comment-content > :first-child { margin-top: 0; }
+    .wp-comment-content > :last-child { margin-bottom: 0; }
+  </style>
+  <h2 class="wp-comments-title">评论（4）</h2>
+  <p class="wp-comments-note">
+    以下评论来自 WordPress 备份，本站仅提供浏览。
+    <a href="https://flandre-scarlet.moe/blog/673/#comments" rel="noopener" target="_blank">前往主站参与讨论</a>
+  </p>
+  <ol class="wp-comment-list">
+    <li class="wp-comment" id="comment-207">
+      <div class="wp-comment-meta">
+        <span class="wp-comment-author">MoeWang</span>
+        <time>2019-06-18 21:54:19</time>
+        <a class="wp-comment-link" href="https://flandre-scarlet.moe/blog/673/#comment-207" rel="noopener" target="_blank">原站</a>
+      </div>
+      <div class="wp-comment-content">不错的工具,感谢分享~话说博主招不招友链啊~</div>
+    </li>
+    <li class="wp-comment wp-comment-reply" id="comment-208">
+      <div class="wp-comment-meta">
+        <span class="wp-comment-author">flandre</span>
+        <time>2019-06-19 01:08:54</time>
+        <a class="wp-comment-link" href="https://flandre-scarlet.moe/blog/673/#comment-208" rel="noopener" target="_blank">原站</a>
+      </div>
+      <div class="wp-comment-content">吼啊</div>
+    </li>
+    <li class="wp-comment wp-comment-reply" id="comment-210">
+      <div class="wp-comment-meta">
+        <span class="wp-comment-author">MoeWang</span>
+        <time>2019-06-19 11:44:41</time>
+        <a class="wp-comment-link" href="https://flandre-scarlet.moe/blog/673/#comment-210" rel="noopener" target="_blank">原站</a>
+      </div>
+      <div class="wp-comment-content">ok.已添加。
+友链页面:https://moeblog.top/Blog/friend-links.html
+名称:MoeBlog
+地址https://moeblog.top
+一句话签名:不要忘记,当初为何出发。</div>
+    </li>
+    <li class="wp-comment wp-comment-reply" id="comment-211">
+      <div class="wp-comment-meta">
+        <span class="wp-comment-author">flandre</span>
+        <time>2019-06-19 19:35:41</time>
+        <a class="wp-comment-link" href="https://flandre-scarlet.moe/blog/673/#comment-211" rel="noopener" target="_blank">原站</a>
+      </div>
+      <div class="wp-comment-content">已经添加😀</div>
+    </li>
+  </ol>
+</div>
+
         
 
 <div>
@@ -391,20 +450,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">112</span>
+          <span class="site-state-item-count">117</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-count">13</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">281</span>
+        <span class="site-state-item-count">298</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -435,19 +494,19 @@
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">flandre</span>
+  <span class="author" itemprop="copyrightHolder">flandre · <a href="https://flandre-scarlet.moe/blog/" rel="noopener" target="_blank">主站</a></span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">389k</span>
+    <span title="站点总字数">414k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">5:54</span>
+    <span title="站点阅读时长">6:16</span>
 </div>
   <div class="powered-by">Powered by love
   </div>
@@ -498,6 +557,8 @@
 
 
 
+
+  
 
   
 

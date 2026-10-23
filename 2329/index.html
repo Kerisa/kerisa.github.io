@@ -10,7 +10,6 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
   <link rel="mask-icon" href="/images/logo.svg" color="#222">
-  <meta name="google-site-verification" content="n4HzIaQ2ebAeP_VrwiqS7s6qfe8RKXwGfnHiPjz3Z20">
 
 <link rel="stylesheet" href="/css/main.css">
 
@@ -25,7 +24,7 @@
   <meta name="description" content="VPS 需要定期续费，域名也是，万一我哪天嘎了，域名过期主机欠费，我的博客也就销声匿迹了。我希望它能活得久一点，毕竟是自己一手带大的。眼下最好的选择应该就是托管 github pages 了吧，比起被随意关停的产品，作为世界上最大的代码托管网站和开源社区，github 可以被转手，但绝不会轻易消失。除非哪天说要 archive 长期不活跃的仓库和账号，哈哈。不管怎么说，目前来看都是相当好的选择了。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="为本站添加 github pages 备份">
-<meta property="og:url" content="https://kerisa.github.io/2329/index.html">
+<meta property="og:url" content="https://flandre-scarlet.moe/blog/2329/">
 <meta property="og:site_name" content="Re: Memory (mirror)">
 <meta property="og:description" content="VPS 需要定期续费，域名也是，万一我哪天嘎了，域名过期主机欠费，我的博客也就销声匿迹了。我希望它能活得久一点，毕竟是自己一手带大的。眼下最好的选择应该就是托管 github pages 了吧，比起被随意关停的产品，作为世界上最大的代码托管网站和开源社区，github 可以被转手，但绝不会轻易消失。除非哪天说要 archive 长期不活跃的仓库和账号，哈哈。不管怎么说，目前来看都是相当好的选择了。">
 <meta property="og:locale" content="zh_CN">
@@ -198,7 +197,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Programs/" itemprop="url" rel="index"><span itemprop="name">Programs</span></a>
+                  <a href="/categories/programs/" itemprop="url" rel="index"><span itemprop="name">程序</span></a>
                 </span>
             </span>
 
@@ -208,14 +207,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>1.6k</span>
+              <span>1.7k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
+              <span>2 分钟</span>
             </span>
 
         </div>
@@ -231,8 +230,11 @@
 <span id="more"></span>
 <p>于是开始着手备份。之前听到过 Hugo 和 Hexo 这些静态网站框架，没多想，选了 Hexo，先上手搞起来再说。</p>
 <h3 id="迁移文章"><a href="#迁移文章" class="headerlink" title="迁移文章"></a>迁移文章</h3><p>首先到 wordpress 后台自带工具里导出所有数据，得到一个 xml 文件。</p>
-<p>然后安装 hexo 还有导入工具 hexo-migrator-wordpress。并将 wordpress 的 xml 导入成 hexo 的文章。 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install hexo-migrator-wordpress --save hexo migrate wordpress WordPress.xml --paragraph-fix --import-image --skipduplicate</span><br></pre></td></tr></table></figure> 导入完后其实还是要检查下。比如有些文章的图片链接没有识别出来，变成 markdown 后还是指向原站，就要查找替换成新站的图片目录。导入后的图片是散落在 source 目录下的，把图片归类之后又要批量替换掉 .md 里的所有链接。</p>
-<p>代码块也要修复，还好是<a target="_blank" rel="noopener" href="https://hexo.io/docs/syntax-highlight#Configuration">原生支持</a>的，把标签替换成 <figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">... </span><br></pre></td></tr></table></figure> 就好了。</p>
+<p>然后安装 hexo 还有导入工具 hexo-migrator-wordpress。并将 wordpress 的 xml 导入成 hexo 的文章。 </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">npm install hexo-migrator-wordpress --save</span><br><span class="line">hexo migrate wordpress WordPress.xml --paragraph-fix --import-image --skipduplicate</span><br></pre></td></tr></table></figure>
+
+<p> 导入完后其实还是要检查下。比如有些文章的图片链接没有识别出来，变成 markdown 后还是指向原站，就要查找替换成新站的图片目录。导入后的图片是散落在 source 目录下的，把图片归类之后又要批量替换掉 .md 里的所有链接。</p>
+<p>代码块也要修复，还好是<a target="_blank" rel="noopener" href="https://hexo.io/docs/syntax-highlight#Configuration">原生支持</a>的，把标签替换成 &#123;% code lang:php %} … &#123;% endcode %} 就好了。</p>
 <p>用 migrator 导入进来有个问题，wp 里代码块的换行全消失不生效了，应该是没处理换行符。所以副站现在的代码块还是一片狼藉。不知道是不是我导入时有什么参数没指定好，有机会再搞吧。</p>
 <p>还有 post 的固定链接，导入后是以文章名为永久链接的，地址栏里一堆 %XX 看得我头疼。观察到导入的 .md 文件中含有 wp 的 id，比如文件开头就有文章元数据id: ‘2329’，于是到 hexo 的配置文件 _config.yml 里找到 permalink 改掉就好 permalink: :id&#x2F;。</p>
 <p>总之就是这样，一点点修改文章的数据和分类，让它尽量跟原来一样。</p>
@@ -240,7 +242,11 @@
 <p>至于评论，现在博客里的评论其实挺少。而且只是建一个备份站，并不是完全迁移，所以评论就先不处理了。等到哪一天主站也不用 wp 时再一块转移吧。</p>
 <p>有一两篇文章里用了数学公式，这个暂时也没搞，似乎可以用 hexo-renderer-pandoc 这个插件。</p>
 <p>最后再处理一下 SEO，因为现在原站和副站同时运行了，搜索引擎检查到重复内容可能会降权之类乱七八槽的，所以打算把副站禁用爬虫。 一开始我是添加了 canonical 规范，把副站的页面尽可能对应到原站页面，文章自不必说，还有分类目录、tags 和分页页面，都加上了原站地址。这里还要吐槽下，hexo 添加的 canonical 地址域名似乎只能是副站的地址（即 _config.yml 里的 url: ），导致我不得不再搞个脚本替换域名和一些 url path 上的差异。</p>
-<p>然后又担心只设置 canonical 会不会有意外状况导致副站仍然被索引，万一搜索引擎不讲武德呢。要是两个页面同时出现那也挺头疼。所以最后又打算加上 noindex 和 robots.txt 限制。 robots.txt 里设置 Disallow。然后所有 html 页面的 head 里都加上 <figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">&quot;robots&quot;</span> <span class="attr">content</span>=<span class="string">&quot;noindex, nofollow, noarchive, nosnippet, noimageindex&quot;</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>然后又担心只设置 canonical 会不会有意外状况导致副站仍然被索引，万一搜索引擎不讲武德呢。要是两个页面同时出现那也挺头疼。所以最后又打算加上 noindex 和 robots.txt 限制。 robots.txt 里设置 Disallow。然后所有 html 页面的 head 里都加上 </p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">&quot;robots&quot;</span> <span class="attr">content</span>=<span class="string">&quot;noindex, nofollow, noarchive, nosnippet, noimageindex&quot;</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+
 <p>到这里就算差不多搭完了，push 到 github 上<a href="https://kerisa.github.io/">看看效果</a>。</p>
 <p>副站的网址也已经添加到网站底部了👇</p>
 
@@ -249,6 +255,7 @@
     
     
     
+
         
 
 <div>
@@ -363,20 +370,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">112</span>
+          <span class="site-state-item-count">117</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-count">13</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">281</span>
+        <span class="site-state-item-count">298</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -407,19 +414,19 @@
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">flandre</span>
+  <span class="author" itemprop="copyrightHolder">flandre · <a href="https://flandre-scarlet.moe/blog/" rel="noopener" target="_blank">主站</a></span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">389k</span>
+    <span title="站点总字数">414k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">5:54</span>
+    <span title="站点阅读时长">6:16</span>
 </div>
   <div class="powered-by">Powered by love
   </div>
@@ -470,6 +477,8 @@
 
 
 
+
+  
 
   
 

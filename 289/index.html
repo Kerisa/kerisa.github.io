@@ -10,7 +10,6 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
   <link rel="mask-icon" href="/images/logo.svg" color="#222">
-  <meta name="google-site-verification" content="n4HzIaQ2ebAeP_VrwiqS7s6qfe8RKXwGfnHiPjz3Z20">
 
 <link rel="stylesheet" href="/css/main.css">
 
@@ -25,7 +24,7 @@
   <meta name="description" content="直接用 rendertarget 的 DrawText 方法显示文字的话无法为文字增加描边，用路径对象配合字体字形进行显示，并在内部用画刷填充的话可以达到描边的效果。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="DirectWrite 文字描边">
-<meta property="og:url" content="https://kerisa.github.io/289/index.html">
+<meta property="og:url" content="https://flandre-scarlet.moe/blog/289/">
 <meta property="og:site_name" content="Re: Memory (mirror)">
 <meta property="og:description" content="直接用 rendertarget 的 DrawText 方法显示文字的话无法为文字增加描边，用路径对象配合字体字形进行显示，并在内部用画刷填充的话可以达到描边的效果。">
 <meta property="og:locale" content="zh_CN">
@@ -204,11 +203,11 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Programs/" itemprop="url" rel="index"><span itemprop="name">Programs</span></a>
+                  <a href="/categories/programs/" itemprop="url" rel="index"><span itemprop="name">程序</span></a>
                 </span>
                   ，
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Programs/DirectX/" itemprop="url" rel="index"><span itemprop="name">DirectX</span></a>
+                  <a href="/categories/programs/directx/" itemprop="url" rel="index"><span itemprop="name">DirectX</span></a>
                 </span>
             </span>
 
@@ -218,7 +217,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>2.8k</span>
+              <span>3.1k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -241,12 +240,13 @@
 <span id="more"></span>
 <p>首先初始化的时候创建字体，要显示中文的话需要选择支持中文的字体，否则会因为找不到字模而显示为”囗”，这里选择了黑体作为样例。<br>渲染的时候根据要显示的内容获取对应字模，并以此创建路径对象，创建完成后将其绘制到合适的位置，同时用指定颜色填充内部即可。</p>
 <p>附上代码：</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">Init</span><span class="params">()</span> </span>&#123; ... hr = <span class="built_in">DWriteCreateFactory</span>( DWRITE\_FACTORY\_TYPE\_SHARED, \_\_uuidof(m\_pDWriteFactory), reinterpret\_cast&lt;IUnknown \*\*&gt;(&amp;m\_pDWriteFactory) ); IDWriteFontFile \*pFontFiles&#123; <span class="literal">nullptr</span> &#125;; hr = m\_pDWriteFactory-&gt;<span class="built_in">CreateFontFileReference</span>( <span class="string">L&quot;simhei.ttf&quot;</span>, <span class="literal">NULL</span>, &amp;pFontFiles ); <span class="built_in">assert</span>(<span class="built_in">SUCCEEDED</span>(hr)); IDWriteFontFile \*fontFileArray\[\] = &#123; pFontFiles &#125;; hr = m\_pDWriteFactory-&gt;<span class="built_in">CreateFontFace</span>( DWRITE\_FONT\_FACE\_TYPE\_TRUETYPE, <span class="built_in">ARRAYSIZE</span>(fontFileArray), <span class="comment">// file count fontFileArray, 0, DWRITE\_FONT\_SIMULATIONS\_NONE, &amp;m\_pFontFace ); assert(SUCCEEDED(hr)); SafeRelease(&amp;pFontFiles); ... &#125; void DrawText( const wchar\_t \* string, unsigned int stringLength, IDWriteTextFormat \* textFormat, const Rectangle &amp; layoutRect ) &#123; UINT\* pCodePoints = new UINT\[stringLength\]; UINT16\* pGlyphIndices = new UINT16\[stringLength\]; ZeroMemory(pCodePoints, sizeof(UINT) \* stringLength); ZeroMemory(pGlyphIndices, sizeof(UINT16) \* stringLength); for (int i = 0; i &lt; stringLength; ++i) &#123; pCodePoints\[i\] = string\[i\]; &#125; HRESULT hr; // 确认字形是否存在 hr = m\_pFontFace-&gt;GetGlyphIndicesW(pCodePoints, stringLength, pGlyphIndices); // 将文字描边储存至路径几何对象, 18.0f 为字号大小 hr = m\_pDirect2dFactory-&gt;CreatePathGeometry(&amp;m\_pPathGeometry); hr = m\_pPathGeometry-&gt;Open(&amp;m\_pGeometrySink); hr = m\_pFontFace-&gt;GetGlyphRunOutline(18.0f, pGlyphIndices, NULL, NULL, stringLength, FALSE, FALSE, m\_pGeometrySink ); hr = m\_pGeometrySink-&gt;Close(); IDWriteTextLayout\* pTextLayout = NULL; // 获取文本尺寸 hr = m\_pDWriteFactory-&gt;CreateTextLayout(string, stringLength, textFormat, 0.0f, 0.0f, &amp;pTextLayout); DWRITE\_TEXT\_METRICS textMetrics; hr = pTextLayout-&gt;GetMetrics(&amp;textMetrics); SafeRelease(&amp;pTextLayout); D2D1\_MATRIX\_3X2\_F old; D2D1\_RECT\_F bounds; m\_pRenderTarget-&gt;GetTransform(&amp;old); m\_pPathGeometry-&gt;GetBounds(old, &amp;bounds); m\_pRenderTarget-&gt;SetTransform(D2D1::Matrix3x2F::Translation( layoutRect.GetLeft() + (layoutRect.GetWidth() - bounds.right + bounds.left + textMetrics.left) / 2.0f, layoutRect.GetBottom() - (layoutRect.GetHeight() - bounds.bottom + bounds.top) / 2.0f)); m\_pRenderTarget-&gt;DrawGeometry(m\_pPathGeometry, m\_pBlackBrush, 1.0f); m\_pRenderTarget-&gt;FillGeometry(m\_pPathGeometry, m\_pWhiteBrush); m\_pRenderTarget-&gt;SetTransform(old); SafeDeleteArray(&amp;pCodePoints); SafeDeleteArray(&amp;pGlyphIndices); SafeRelease(&amp;m\_pGeometrySink); SafeRelease(&amp;m\_pPathGeometry); &#125;</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">Init</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    hr = <span class="built_in">DWriteCreateFactory</span>(</span><br><span class="line">        DWRITE_FACTORY_TYPE_SHARED,</span><br><span class="line">        __uuidof(m_pDWriteFactory),</span><br><span class="line">        <span class="built_in">reinterpret_cast</span>&lt;IUnknown **&gt;(&amp;m_pDWriteFactory)</span><br><span class="line">    );</span><br><span class="line">    IDWriteFontFile *pFontFiles&#123; <span class="literal">nullptr</span> &#125;;</span><br><span class="line">    hr = m_pDWriteFactory-&gt;<span class="built_in">CreateFontFileReference</span>(</span><br><span class="line">        <span class="string">L&quot;simhei.ttf&quot;</span>, <span class="literal">NULL</span>, &amp;pFontFiles</span><br><span class="line">    );</span><br><span class="line">    <span class="built_in">assert</span>(<span class="built_in">SUCCEEDED</span>(hr));</span><br><span class="line">    IDWriteFontFile *fontFileArray[] = &#123; pFontFiles &#125;;</span><br><span class="line">    hr = m_pDWriteFactory-&gt;<span class="built_in">CreateFontFace</span>(</span><br><span class="line">        DWRITE_FONT_FACE_TYPE_TRUETYPE,</span><br><span class="line">        <span class="built_in">ARRAYSIZE</span>(fontFileArray), <span class="comment">// file count</span></span><br><span class="line">        fontFileArray,</span><br><span class="line">        <span class="number">0</span>,</span><br><span class="line">        DWRITE_FONT_SIMULATIONS_NONE,</span><br><span class="line">        &amp;m_pFontFace</span><br><span class="line">    );</span><br><span class="line">    <span class="built_in">assert</span>(<span class="built_in">SUCCEEDED</span>(hr));</span><br><span class="line">    <span class="built_in">SafeRelease</span>(&amp;pFontFiles);</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">DrawText</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="type">const</span> <span class="type">wchar_t</span> * string,</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="type">unsigned</span> <span class="type">int</span> stringLength,</span></span></span><br><span class="line"><span class="params"><span class="function">    IDWriteTextFormat * textFormat,</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="type">const</span> Rectangle &amp; layoutRect</span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    UINT* pCodePoints = <span class="keyword">new</span> UINT[stringLength];</span><br><span class="line">    UINT16* pGlyphIndices = <span class="keyword">new</span> UINT16[stringLength];</span><br><span class="line">    <span class="built_in">ZeroMemory</span>(pCodePoints, <span class="built_in">sizeof</span>(UINT) * stringLength);</span><br><span class="line">    <span class="built_in">ZeroMemory</span>(pGlyphIndices, <span class="built_in">sizeof</span>(UINT16) * stringLength);</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; stringLength; ++i)</span><br><span class="line">    &#123;</span><br><span class="line">        pCodePoints[i] = string[i];</span><br><span class="line">    &#125;</span><br><span class="line">    HRESULT hr;</span><br><span class="line">    <span class="comment">// 确认字形是否存在</span></span><br><span class="line">    hr = m_pFontFace-&gt;<span class="built_in">GetGlyphIndicesW</span>(pCodePoints, stringLength, pGlyphIndices);</span><br><span class="line">    <span class="comment">// 将文字描边储存至路径几何对象, 18.0f 为字号大小</span></span><br><span class="line">    hr = m_pDirect2dFactory-&gt;<span class="built_in">CreatePathGeometry</span>(&amp;m_pPathGeometry);</span><br><span class="line">    hr = m_pPathGeometry-&gt;<span class="built_in">Open</span>(&amp;m_pGeometrySink);</span><br><span class="line">    hr = m_pFontFace-&gt;<span class="built_in">GetGlyphRunOutline</span>(<span class="number">18.0f</span>, pGlyphIndices,</span><br><span class="line">        <span class="literal">NULL</span>, <span class="literal">NULL</span>, stringLength, FALSE, FALSE, m_pGeometrySink</span><br><span class="line">    );</span><br><span class="line">    hr = m_pGeometrySink-&gt;<span class="built_in">Close</span>();</span><br><span class="line"></span><br><span class="line">    IDWriteTextLayout* pTextLayout = <span class="literal">NULL</span>;</span><br><span class="line">    <span class="comment">// 获取文本尺寸 </span></span><br><span class="line">    hr = m_pDWriteFactory-&gt;<span class="built_in">CreateTextLayout</span>(string, stringLength, textFormat, <span class="number">0.0f</span>, <span class="number">0.0f</span>, &amp;pTextLayout);</span><br><span class="line">    DWRITE_TEXT_METRICS textMetrics;</span><br><span class="line">    hr = pTextLayout-&gt;<span class="built_in">GetMetrics</span>(&amp;textMetrics);</span><br><span class="line">    <span class="built_in">SafeRelease</span>(&amp;pTextLayout);</span><br><span class="line"></span><br><span class="line">    D2D1_MATRIX_3X2_F old;</span><br><span class="line">    D2D1_RECT_F bounds;</span><br><span class="line">    m_pRenderTarget-&gt;<span class="built_in">GetTransform</span>(&amp;old);</span><br><span class="line">    m_pPathGeometry-&gt;<span class="built_in">GetBounds</span>(old, &amp;bounds);</span><br><span class="line">    m_pRenderTarget-&gt;<span class="built_in">SetTransform</span>(D2D1::Matrix3x2F::<span class="built_in">Translation</span>(</span><br><span class="line">        layoutRect.<span class="built_in">GetLeft</span>() + (layoutRect.<span class="built_in">GetWidth</span>() - bounds.right + bounds.left + textMetrics.left) / <span class="number">2.0f</span>,</span><br><span class="line">        layoutRect.<span class="built_in">GetBottom</span>() - (layoutRect.<span class="built_in">GetHeight</span>() - bounds.bottom + bounds.top) / <span class="number">2.0f</span>));</span><br><span class="line">    m_pRenderTarget-&gt;<span class="built_in">DrawGeometry</span>(m_pPathGeometry, m_pBlackBrush, <span class="number">1.0f</span>);</span><br><span class="line">    m_pRenderTarget-&gt;<span class="built_in">FillGeometry</span>(m_pPathGeometry, m_pWhiteBrush);</span><br><span class="line">    m_pRenderTarget-&gt;<span class="built_in">SetTransform</span>(old);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">SafeDeleteArray</span>(&amp;pCodePoints);</span><br><span class="line">    <span class="built_in">SafeDeleteArray</span>(&amp;pGlyphIndices);</span><br><span class="line">    <span class="built_in">SafeRelease</span>(&amp;m_pGeometrySink);</span><br><span class="line">    <span class="built_in">SafeRelease</span>(&amp;m_pPathGeometry);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
     </div>
 
     
     
     
+
         
 
 <div>
@@ -359,20 +359,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">112</span>
+          <span class="site-state-item-count">117</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-count">13</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">281</span>
+        <span class="site-state-item-count">298</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -403,19 +403,19 @@
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">flandre</span>
+  <span class="author" itemprop="copyrightHolder">flandre · <a href="https://flandre-scarlet.moe/blog/" rel="noopener" target="_blank">主站</a></span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">389k</span>
+    <span title="站点总字数">414k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">5:54</span>
+    <span title="站点阅读时长">6:16</span>
 </div>
   <div class="powered-by">Powered by love
   </div>
@@ -466,6 +466,8 @@
 
 
 
+
+  
 
   
 

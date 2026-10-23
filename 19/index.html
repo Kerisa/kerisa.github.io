@@ -10,7 +10,6 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
   <link rel="mask-icon" href="/images/logo.svg" color="#222">
-  <meta name="google-site-verification" content="n4HzIaQ2ebAeP_VrwiqS7s6qfe8RKXwGfnHiPjz3Z20">
 
 <link rel="stylesheet" href="/css/main.css">
 
@@ -25,7 +24,7 @@
   <meta name="description" content="ListView控件在添加大量数据时速度很慢而且会频繁刷新以至于窗口不断闪烁，总之是没法用啦，这种情况把控件改成虚拟列表的形式就能解决这个问题。 虚拟列表不在控件中存储数据，而是向外部“索要”数据，即数据是由我们自己维护的，它唯一保存的数据是控件中项目的数量。虚拟列表通过 LVN_GETDISPINFO、LVN_ODFINDITEM和LVN_ODCACHEHINT这三个消息与外界交互。 创建虚拟列">
 <meta property="og:type" content="article">
 <meta property="og:title" content="虚拟列表的使用">
-<meta property="og:url" content="https://kerisa.github.io/19/index.html">
+<meta property="og:url" content="https://flandre-scarlet.moe/blog/19/">
 <meta property="og:site_name" content="Re: Memory (mirror)">
 <meta property="og:description" content="ListView控件在添加大量数据时速度很慢而且会频繁刷新以至于窗口不断闪烁，总之是没法用啦，这种情况把控件改成虚拟列表的形式就能解决这个问题。 虚拟列表不在控件中存储数据，而是向外部“索要”数据，即数据是由我们自己维护的，它唯一保存的数据是控件中项目的数量。虚拟列表通过 LVN_GETDISPINFO、LVN_ODFINDITEM和LVN_ODCACHEHINT这三个消息与外界交互。 创建虚拟列">
 <meta property="og:locale" content="zh_CN">
@@ -200,7 +199,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Programs/" itemprop="url" rel="index"><span itemprop="name">Programs</span></a>
+                  <a href="/categories/programs/" itemprop="url" rel="index"><span itemprop="name">程序</span></a>
                 </span>
             </span>
 
@@ -210,14 +209,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>3.4k</span>
+              <span>4.2k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>3 分钟</span>
+              <span>4 分钟</span>
             </span>
 
         </div>
@@ -233,15 +232,33 @@
 <p>虚拟列表不在控件中存储数据，而是向外部“索要”数据，即数据是由我们自己维护的，它唯一保存的数据是控件中项目的数量。虚拟列表通过 LVN_GETDISPINFO、LVN_ODFINDITEM和LVN_ODCACHEHINT这三个消息与外界交互。</p>
 <h1 id="创建虚拟列表控件"><a href="#创建虚拟列表控件" class="headerlink" title="创建虚拟列表控件"></a>创建虚拟列表控件</h1><p>使用CreateWindows(Ex)创建控件时加上 LVS_OWNERDATA 样式，这样创建的就是一个虚拟列表了。注意，虚拟列表样式只能在创建时指定而无法在创建后添加或移除。</p>
 <span id="more"></span>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hList = <span class="built_in">CreateWindowEx</span>(<span class="number">0</span>, WC\_LISTVIEW, <span class="literal">NULL</span>, LVS\_REPORT WS\_CHILD WS\_VISIBLE WS\_BORDER LVS\_ALIGNTOP LVS\_OWNERDATA, <span class="number">0</span>, <span class="number">0</span>, CW\_USEDEFAULT, CW\_USEDEFAULT, hDlg, (HMENU)ID\_LISTVIEW, (HINSTANCE)<span class="built_in">GetWindowLong</span>(hDlg, GWL\_HINSTANCE), <span class="literal">NULL</span>);</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">hList = <span class="built_in">CreateWindowEx</span>(<span class="number">0</span>, WC_LISTVIEW, <span class="literal">NULL</span>,</span><br><span class="line">    LVS_REPORT | WS_CHILD | WS_VISIBLE | WS_BORDER | LVS_ALIGNTOP | LVS_OWNERDATA,</span><br><span class="line">    <span class="number">0</span>, <span class="number">0</span>, CW_USEDEFAULT, CW_USEDEFAULT,</span><br><span class="line">    hDlg, (HMENU)ID_LISTVIEW, (HINSTANCE)<span class="built_in">GetWindowLong</span>(hDlg, GWL_HINSTANCE), <span class="literal">NULL</span>);</span><br></pre></td></tr></table></figure>
+
+
 
 <h1 id="向虚拟列表添加数据"><a href="#向虚拟列表添加数据" class="headerlink" title="向虚拟列表添加数据"></a>向虚拟列表添加数据</h1><p>使用的时候先准备好表中的数据，同时设置好表项的数量（ 使用<a target="_blank" rel="noopener" href="https://msdn.microsoft.com/en-us/library/windows/desktop/bb775095(v=vs.85).aspx">ListView_SetItemCountEx</a>或直接发<a target="_blank" rel="noopener" href="https://msdn.microsoft.com/en-us/library/windows/desktop/bb761188(v=vs.85).aspx">LVM_SETITEMCOUNT</a>消息给控件），这样就完成数据的添加了。</p>
-<h1 id="处理控件的通知消息"><a href="#处理控件的通知消息" class="headerlink" title="处理控件的通知消息"></a>处理控件的通知消息</h1><h1 id="·LVN-GETDISPINFO"><a href="#·LVN-GETDISPINFO" class="headerlink" title="·LVN_GETDISPINFO"></a>·LVN_GETDISPINFO</h1><p>ListView控件显示信息时向父窗口发送<a target="_blank" rel="noopener" href="https://msdn.microsoft.com/en-us/library/windows/desktop/bb774818(v=vs.85).aspx">LVN_GETDISPINFO</a>消息来获取数据。因此父窗口要处理 WM_NOTIFY 消息。而大多数情况下我们只要处理了这个消息就可以享受到虚拟列表的高速显示了，剩下两个不用管(‘∀`) LVN_GETDISPINFO消息的处理差不多是这个样子： <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM\_NOTIFY: <span class="keyword">if</span> (((NMHDR\*)lParam)-&gt;idFrom == ID\_LISTVIEW) &#123; <span class="keyword">switch</span> (((NMHDR\*)lParam)-&gt;code) &#123; <span class="keyword">case</span> LVN\_GETDISPINFO: &#123; NMLVDISPINFO \*pdi = reinterpret\_cast&lt;NMLVDISPINFO\*&gt;(lParam); LVITEMW \*pItem = &amp;pdi-&gt;item; <span class="comment">// 要获取第几行的数据 int itemid = pItem-&gt;iItem; // 从外部传递数据 Information \*pi = g\_Data\[itemid\]; if (pItem-&gt;mask &amp; LVIF\_TEXT) &#123; switch (pItem-&gt;iSubItem) &#123; case 0: // 获取第一列的数据 wcscpy\_s(pItem-&gt;pszText, pItem-&gt;cchTextMax, pi-&gt;firstcolumn ); break;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">case</span> <span class="number">1</span>: wcscpy\_s(pItem-&gt;pszText, pItem-&gt;cchTextMax, pi-&gt;secondcolumn ); <span class="keyword">break</span>; <span class="comment">// ... &#125; &#125; break; &#125; // ... &#125; &#125;</span></span><br></pre></td></tr></table></figure></p>
+<h1 id="处理控件的通知消息"><a href="#处理控件的通知消息" class="headerlink" title="处理控件的通知消息"></a>处理控件的通知消息</h1><h1 id="·LVN-GETDISPINFO"><a href="#·LVN-GETDISPINFO" class="headerlink" title="·LVN_GETDISPINFO"></a>·LVN_GETDISPINFO</h1><p>ListView控件显示信息时向父窗口发送<a target="_blank" rel="noopener" href="https://msdn.microsoft.com/en-us/library/windows/desktop/bb774818(v=vs.85).aspx">LVN_GETDISPINFO</a>消息来获取数据。因此父窗口要处理 WM_NOTIFY 消息。而大多数情况下我们只要处理了这个消息就可以享受到虚拟列表的高速显示了，剩下两个不用管(‘∀`) LVN_GETDISPINFO消息的处理差不多是这个样子： </p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_NOTIFY:</span><br><span class="line">    <span class="keyword">if</span> (((NMHDR*)lParam)-&gt;idFrom == ID_LISTVIEW)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">switch</span> (((NMHDR*)lParam)-&gt;code)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">case</span> LVN_GETDISPINFO:</span><br><span class="line">            &#123;</span><br><span class="line">                NMLVDISPINFO *pdi = <span class="built_in">reinterpret_cast</span>&lt;NMLVDISPINFO*&gt;(lParam);</span><br><span class="line">                LVITEMW *pItem = &amp;pdi-&gt;item;</span><br><span class="line">                </span><br><span class="line">                <span class="comment">// 要获取第几行的数据</span></span><br><span class="line">                <span class="type">int</span> itemid = pItem-&gt;iItem;</span><br><span class="line">                </span><br><span class="line">                <span class="comment">// 从外部传递数据</span></span><br><span class="line">                Information *pi = g_Data[itemid];</span><br><span class="line">                <span class="keyword">if</span> (pItem-&gt;mask &amp; LVIF_TEXT)</span><br><span class="line">                &#123;</span><br><span class="line">                    <span class="keyword">switch</span> (pItem-&gt;iSubItem)</span><br><span class="line">                    &#123;</span><br><span class="line">                    <span class="keyword">case</span> <span class="number">0</span>: <span class="comment">// 获取第一列的数据</span></span><br><span class="line">                        <span class="built_in">wcscpy_s</span>(pItem-&gt;pszText,</span><br><span class="line">                            pItem-&gt;cchTextMax,</span><br><span class="line">                            pi-&gt;firstcolumn</span><br><span class="line">                            );</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">                    <span class="keyword">case</span> <span class="number">1</span>:</span><br><span class="line">                        <span class="built_in">wcscpy_s</span>(pItem-&gt;pszText,</span><br><span class="line">                            pItem-&gt;cchTextMax,</span><br><span class="line">                            pi-&gt;secondcolumn</span><br><span class="line">                            );</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                    <span class="comment">// ...</span></span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// ...</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+
+
 <h1 id="·LVN-ODFINDITEM"><a href="#·LVN-ODFINDITEM" class="headerlink" title="·LVN_ODFINDITEM"></a>·LVN_ODFINDITEM</h1><p>LVN_ODFINDITEM消息用于处理查找特定的项，就像我们在资源管理器中输入exp来搜索exp开头的文件（夹）一样，这个消息就是用于支持这项功能的。当控件接受到键盘按键消息或LVM_FINDITEM消息时会向父控件发送此消息。此时的 lParam 指向一个<a target="_blank" rel="noopener" href="https://msdn.microsoft.com/en-us/library/windows/desktop/bb774784(v=vs.85).aspx">NMLVFINDITEM</a>结构。NMLVFINDITEM包含一个<a target="_blank" rel="noopener" href="https://msdn.microsoft.com/en-us/library/windows/desktop/bb774745(v=vs.85).aspx">LVFINDINFO</a>结构的成员变量。 NMLVFINDITEM中的iStart指示搜索的开始位置（从0开始），LVFINDINFO中的psz则储存了要搜索的字符串（同时flags成员中应包含LVFI_STRING），有了这些消息就可以自己搜索匹配的项了，然后找到了则返回项的偏移，找不到返回-1。</p>
 <h1 id="·LVN-ODCACHEHINT"><a href="#·LVN-ODCACHEHINT" class="headerlink" title="·LVN_ODCACHEHINT"></a>·LVN_ODCACHEHINT</h1><p>最后一个处理缓存的消息。将经常会被显示的项缓存起来以提高显示效率。此时lParam指向<a target="_blank" rel="noopener" href="https://msdn.microsoft.com/en-us/library/windows/desktop/bb774775(v=vs.85).aspx">NMLVCACHEHINT</a>结构。这个结构中的iFrom和iTo指示了显示范围。 当ListView的显示改变（比如滚动鼠标滚轮）时将会发送此消息，此时应用程序便可以决定是否缓存目标范围内的数据，然后等待LVN_GETDISPINFO消息的到来。 比如把大量数据存在硬盘，然后缓存一部分到内存里，收到消息时便可异步读取数据到内存，然后在LVN_GETDISPINFO中提交给控件显示(‘∀`)。 这个消息必须返回0。</p>
 <h1 id="复选框-checkbox-的处理"><a href="#复选框-checkbox-的处理" class="headerlink" title="复选框(checkbox)的处理"></a>复选框(checkbox)的处理</h1><p>Checkbox还是个挺有用的东西。</p>
-<p>首先创建控件时设置扩展风格LVS_EX_CHECKBOXES，这个不管是不是虚拟列表都要处理的。 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ListView\_SetExtendedListViewStyleEx( hList, <span class="number">0</span>, LVS\_EX\_GRIDLINES LVS\_EX\_CHECKBOXES LVS\_EX\_FULLROWSELECT);</span><br></pre></td></tr></table></figure></p>
-<p>非虚拟列表的话就不用处理其他的直接能看到效果了。因为虚拟列表不存储条目数量以外的数据，所以我们还得继续做点处理。一个是要维护一个列表中项目的选中状态，然后就是当有选中状态变换时及时刷新到界面上。比如使用空格键切换checkbox的选中状态： <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM\_NOTIFY: <span class="keyword">if</span> (((NMHDR\*)lParam)-&gt;idFrom == ID\_LISTVIEW) &#123; <span class="keyword">switch</span> (((NMHDR\*)lParam)-&gt;code) &#123; <span class="keyword">case</span> VK\_SPACE: iClickItem = ListView\_GetSelectionMark(hList); g\_Data\[iClickItem\].checkstate ^= <span class="number">0x3</span>; <span class="built_in">SendMessage</span>(hList, LVM\_REDRAWITEMS, iClickItem, iClickItem); <span class="keyword">break</span>; &#125; &#125;</span><br></pre></td></tr></table></figure> 其中 checkstate&#x3D;&#x3D;1 时代表未选中，2代表选中。更新了选中状态后发送<a target="_blank" rel="noopener" href="https://msdn.microsoft.com/en-us/library/windows/desktop/bb761145(v=vs.85).aspx">LVM_REDRAWITEMS</a>消息刷新显示。因为是虚拟列表，重刷当然还是在LVN_GETDISPINFO里处理。 因此处理checkbox时还要在LVN_GETDISPINFO中设置以下字段的值： <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> LVN\_GETDISPINFO: &#123; NMLVDISPINFO \*pdi = reinterpret\_cast&lt;NMLVDISPINFO\*&gt;(lParam); LVITEMW \*pItem = &amp;pdi-&gt;item; <span class="type">int</span> itemid = pItem-&gt;iItem; pdi-&gt;item.state = <span class="built_in">INDEXTOSTATEIMAGEMASK</span>(g\_Data\[itemid\].checkstate); pdi-&gt;item.stateMask = LVIS\_STATEIMAGEMASK;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 处理item内容 &#125;</span></span><br></pre></td></tr></table></figure></p>
+<p>首先创建控件时设置扩展风格LVS_EX_CHECKBOXES，这个不管是不是虚拟列表都要处理的。 </p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">ListView_SetExtendedListViewStyleEx</span>(</span><br><span class="line">    hList, <span class="number">0</span>, LVS_EX_GRIDLINES | LVS_EX_CHECKBOXES | LVS_EX_FULLROWSELECT);</span><br></pre></td></tr></table></figure>
+
+
+
+<p>非虚拟列表的话就不用处理其他的直接能看到效果了。因为虚拟列表不存储条目数量以外的数据，所以我们还得继续做点处理。一个是要维护一个列表中项目的选中状态，然后就是当有选中状态变换时及时刷新到界面上。比如使用空格键切换checkbox的选中状态： </p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_NOTIFY:</span><br><span class="line">    <span class="keyword">if</span> (((NMHDR*)lParam)-&gt;idFrom == ID_LISTVIEW)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">switch</span> (((NMHDR*)lParam)-&gt;code)</span><br><span class="line">        &#123;</span><br><span class="line">        <span class="keyword">case</span> VK_SPACE:</span><br><span class="line">            iClickItem = <span class="built_in">ListView_GetSelectionMark</span>(hList);</span><br><span class="line">            g_Data[iClickItem].checkstate ^= <span class="number">0x3</span>;</span><br><span class="line">            <span class="built_in">SendMessage</span>(hList, LVM_REDRAWITEMS, iClickItem, iClickItem);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p> 其中 checkstate&#x3D;&#x3D;1 时代表未选中，2代表选中。更新了选中状态后发送<a target="_blank" rel="noopener" href="https://msdn.microsoft.com/en-us/library/windows/desktop/bb761145(v=vs.85).aspx">LVM_REDRAWITEMS</a>消息刷新显示。因为是虚拟列表，重刷当然还是在LVN_GETDISPINFO里处理。 因此处理checkbox时还要在LVN_GETDISPINFO中设置以下字段的值： </p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> LVN_GETDISPINFO:</span><br><span class="line">&#123;</span><br><span class="line">    NMLVDISPINFO *pdi = <span class="built_in">reinterpret_cast</span>&lt;NMLVDISPINFO*&gt;(lParam);</span><br><span class="line">    LVITEMW *pItem = &amp;pdi-&gt;item;                </span><br><span class="line">    <span class="type">int</span> itemid = pItem-&gt;iItem;</span><br><span class="line">    pdi-&gt;item.state = <span class="built_in">INDEXTOSTATEIMAGEMASK</span>(g_Data[itemid].checkstate);</span><br><span class="line">    pdi-&gt;item.stateMask = LVIS_STATEIMAGEMASK;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 处理item内容</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
 <p>state字段的12~15位表示item的状态图片，即checkbox的图片，0代表不显示。可用宏INDEXTOSTATEIMAGEMASK(sta)设置状态，这个宏就是将sta左移12位 同时还要设置stateMask，使state中的设置生效，状态图片对应的是LVIS_STATEIMAGEMASK。这样就能将checkbox的状态刷新上去了。其他的属性参考<a target="_blank" rel="noopener" href="https://msdn.microsoft.com/en-us/library/windows/desktop/bb774760(v=vs.85).aspx">LVITEM</a>。</p>
 <p>更多内容请参考<a target="_blank" rel="noopener" href="https://msdn.microsoft.com/en-us/library/windows/desktop/bb774735(v=vs.85).aspx#Virtual_ListView_Style">Virtual List-View Style</a>。</p>
 
@@ -250,6 +267,7 @@
     
     
     
+
         
 
 <div>
@@ -357,20 +375,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">112</span>
+          <span class="site-state-item-count">117</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-count">13</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">281</span>
+        <span class="site-state-item-count">298</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -401,19 +419,19 @@
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">flandre</span>
+  <span class="author" itemprop="copyrightHolder">flandre · <a href="https://flandre-scarlet.moe/blog/" rel="noopener" target="_blank">主站</a></span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">389k</span>
+    <span title="站点总字数">414k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">5:54</span>
+    <span title="站点阅读时长">6:16</span>
 </div>
   <div class="powered-by">Powered by love
   </div>
@@ -464,6 +482,8 @@
 
 
 
+
+  
 
   
 

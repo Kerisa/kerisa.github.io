@@ -10,7 +10,6 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
   <link rel="mask-icon" href="/images/logo.svg" color="#222">
-  <meta name="google-site-verification" content="n4HzIaQ2ebAeP_VrwiqS7s6qfe8RKXwGfnHiPjz3Z20">
 
 <link rel="stylesheet" href="/css/main.css">
 
@@ -25,7 +24,7 @@
   <meta name="description" content="函数监视器可以监视代码中对外部函数的调用情况，通过这些调用信息可以让我们方便理解程序的意图。类似的实现思路可以用 dll 转发或者微软的 detour 库实现 api hook。最近我自己写了一个函数监视器，可以监视进程内所有模块导出函数的调用情况，并且可以自行选择需要监视和设置断点的函数。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="实现函数监视器">
-<meta property="og:url" content="https://kerisa.github.io/1205/index.html">
+<meta property="og:url" content="https://flandre-scarlet.moe/blog/1205/">
 <meta property="og:site_name" content="Re: Memory (mirror)">
 <meta property="og:description" content="函数监视器可以监视代码中对外部函数的调用情况，通过这些调用信息可以让我们方便理解程序的意图。类似的实现思路可以用 dll 转发或者微软的 detour 库实现 api hook。最近我自己写了一个函数监视器，可以监视进程内所有模块导出函数的调用情况，并且可以自行选择需要监视和设置断点的函数。">
 <meta property="og:locale" content="zh_CN">
@@ -206,7 +205,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Programs/" itemprop="url" rel="index"><span itemprop="name">Programs</span></a>
+                  <a href="/categories/programs/" itemprop="url" rel="index"><span itemprop="name">程序</span></a>
                 </span>
             </span>
 
@@ -216,7 +215,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>5.1k</span>
+              <span>5.2k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -262,7 +261,10 @@
 <p>; 递归加载静态依赖的 dll<br>00 02f9e710 77853631 ntdll!NtMapViewOfSection<br>01 02f9e768 7785340f ntdll!LdrpMinimalMapModule+0x93<br>02 02f9e790 7785549d ntdll!LdrpMapDllWithSectionHandle+0x15<br>03 02f9e7c0 778604eb ntdll!LdrpLoadKnownDll+0xf4<br>04 02f9e7e4 77847925 ntdll!LdrpFindOrPrepareLoadingModule+0x80<br>05 02f9ee00 77846700 ntdll!LdrpLoadDependentModule+0x1175<br>06 02f9ee48 77853565 ntdll!LdrpMapAndSnapDependency+0x190<br>07 02f9ee70 7785549d ntdll!LdrpMapDllWithSectionHandle+0x16b<br>08 02f9eea0 778604eb ntdll!LdrpLoadKnownDll+0xf4<br>09 02f9eec4 77847925 ntdll!LdrpFindOrPrepareLoadingModule+0x80<br>0a 02f9f4e0 77846700 ntdll!LdrpLoadDependentModule+0x1175<br>0b 02f9f528 778b91f2 ntdll!LdrpMapAndSnapDependency+0x190<br>0c 02f9f788 77861dc1 ntdll!LdrpInitializeProcess+0x1b32<br>0d 02f9f7e0 77861cb1 ntdll!_LdrpInitialize+0xba<br>0e 02f9f7ec 00000000 ntdll!LdrInitializeThunk+0x11</p>
 <p>; LdrpLoadDll 的路径，加载 dll 最终也会通过 NtMapViewOfSection 进行映射<br>00 02f9f228 77853631 ntdll!NtMapViewOfSection<br>01 02f9f280 7785340f ntdll!LdrpMinimalMapModule+0x93<br>02 02f9f2a8 7785549d ntdll!LdrpMapDllWithSectionHandle+0x15<br>03 02f9f2d8 778604eb ntdll!LdrpLoadKnownDll+0xf4<br>04 02f9f2fc 77845029 ntdll!LdrpFindOrPrepareLoadingModule+0x80<br>05 02f9f358 77854e8c ntdll!LdrpLoadDllInternal+0xbd<br>06 02f9f498 77854db3 ntdll!LdrpLoadDll+0x7e<br>07 02f9f518 778b8d85 ntdll!LdrLoadDll+0x93</p>
 <p>hook 导出函数则通过 hook 导出表来实现，这样可以避免修改原始函数，稍微隐蔽一些。hook 导出表也有两种，一种是直接替换原始导出表中 AddressOfFunctions 表的 rva 地址。在 32 位程序中，可以利用整数溢出来跳转到任何地址，也就是说我们的中转函数地址可以小于模块的基址；64 位程序就要用其他办法了，比如模块重定位之类的。另一种则是新建一个导出表，然后替换 PE 头里导出表的地址为新表的地址。甚至还可以在 RtlImageDirectoryEntryToData 中替换获取到的导出表地址。因为像 GetProcAddress 会使用这个 api 来定位导出表。接管这个函数我们就可以实现无模块修改的导出表 hook。除非是那些自己实现了 GetProcAddress 的程序，这样可能会遗漏掉。</p>
-<h3 id="通信"><a href="#通信" class="headerlink" title="通信"></a>通信</h3><p>通信采用命名管道。另外，还要定义收发消息的数据结构。这里简单地采用一个枚举作为消息的类型，并自行做消息体的封包和解包。 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">ModuleFilter</span> &#123; Allocator::string name; <span class="type">bool</span> filter; std::vector&lt;<span class="type">char</span>, Allocator::allocator&lt;<span class="type">char</span>&gt;&gt; <span class="built_in">Serial</span>() &#123; std::vector&lt;<span class="type">char</span>, Allocator::allocator&lt;<span class="type">char</span>&gt;&gt; vec; <span class="built_in">SerialInit</span>(vec); <span class="built_in">SerialItem</span>(vec, name); <span class="comment">// 逐个附加字段即可 SerialItem(vec, filter); CalFinalLength(vec); return vec; &#125; void Unserial(std::vector&lt;char, Allocator::allocator&lt;char&gt;&gt;&amp; str) &#123; size\_t idx = GetFirstItemIndex(str); idx = ExtractItem(str, idx, name); // 保持相同顺序，逐个附加字段即可 idx = ExtractItem(str, idx, filter); &#125; &#125;;</span></span><br></pre></td></tr></table></figure> 这里有一点，虽然我在 PayLoad 里启动了读写线程来进行简单的批量收发数据和缓存，但实际上实现的还是服务端被动回复模式，如果要求支持更多的操作，实现全双工模式的话，就需要修改服务端的实现，从而进行主动发送消息。PayLoad 端也需要修改，比如使用完成端口等更加高效的方式，这会增加了不少工作量；另外这在目标进程里的动作也更大了，可能要考虑是否会被保护代码检测到。总之，现在就是 PayLoad 主动发消息，监控端处理并只在此时发送回复消息。</p>
+<h3 id="通信"><a href="#通信" class="headerlink" title="通信"></a>通信</h3><p>通信采用命名管道。另外，还要定义收发消息的数据结构。这里简单地采用一个枚举作为消息的类型，并自行做消息体的封包和解包。 </p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">ModuleFilter</span> &#123;</span><br><span class="line">    Allocator::string name;</span><br><span class="line">    <span class="type">bool</span>              filter;</span><br><span class="line"></span><br><span class="line">    std::vector&lt;<span class="type">char</span>, Allocator::allocator&lt;<span class="type">char</span>&gt;&gt; <span class="built_in">Serial</span>() &#123;</span><br><span class="line">        std::vector&lt;<span class="type">char</span>, Allocator::allocator&lt;<span class="type">char</span>&gt;&gt; vec;</span><br><span class="line">        <span class="built_in">SerialInit</span>(vec);</span><br><span class="line">        <span class="built_in">SerialItem</span>(vec, name);      <span class="comment">// 逐个附加字段即可</span></span><br><span class="line">        <span class="built_in">SerialItem</span>(vec, filter);</span><br><span class="line">        <span class="built_in">CalFinalLength</span>(vec);</span><br><span class="line">        <span class="keyword">return</span> vec;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">Unserial</span><span class="params">(std::vector&lt;<span class="type">char</span>, Allocator::allocator&lt;<span class="type">char</span>&gt;&gt;&amp; str)</span> </span>&#123;</span><br><span class="line">        <span class="type">size_t</span> idx = <span class="built_in">GetFirstItemIndex</span>(str);</span><br><span class="line">        idx = <span class="built_in">ExtractItem</span>(str, idx, name);   <span class="comment">// 保持相同顺序，逐个附加字段即可</span></span><br><span class="line">        idx = <span class="built_in">ExtractItem</span>(str, idx, filter);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p> 这里有一点，虽然我在 PayLoad 里启动了读写线程来进行简单的批量收发数据和缓存，但实际上实现的还是服务端被动回复模式，如果要求支持更多的操作，实现全双工模式的话，就需要修改服务端的实现，从而进行主动发送消息。PayLoad 端也需要修改，比如使用完成端口等更加高效的方式，这会增加了不少工作量；另外这在目标进程里的动作也更大了，可能要考虑是否会被保护代码检测到。总之，现在就是 PayLoad 主动发消息，监控端处理并只在此时发送回复消息。</p>
 <h3 id="消息"><a href="#消息" class="headerlink" title="消息"></a>消息</h3><p>主要设置了以下几个事件：发送模块导出函数消息、回复函数过滤消息、函数调用消息这三个。监控端收到模块导出函数消息后会在 UI 上提供是否 hook 相应函数的选择，同时也可以设置断点，然后一并回复给 PayLoad。目标进程在调用了监控的函数时则发送函数调用消息给监控端，这里也利用了 PayLoad 会等待监控端回复的特点，如果触发了“断点”，监控端可以先不回复，那么目标线程就会一直等待消息，此时可以做附加调试器等操作了。</p>
 <h3 id="要注意的一些点"><a href="#要注意的一些点" class="headerlink" title="要注意的一些点"></a>要注意的一些点</h3><ul>
 <li>因为系统 dll 的 hook 发生在进程早期，crt 的设施都没有初始化，要使用容器的话需要自行创建堆，实现 stl 的内存分配器。</li>
@@ -277,6 +279,87 @@
     
     
     
+<div class="wp-comments" id="comments">
+  <style>
+    .wp-comments { margin-top: 2em; padding-top: 1em; border-top: 1px solid #ddd; }
+    .wp-comments-title { font-size: 1.15em; margin: 0 0 .4em; }
+    .wp-comments-note { font-size: .875em; color: #888; margin: 0 0 1em; }
+    .wp-comment-list { list-style: none; margin: 0; padding: 0; }
+    .wp-comment { margin: 0 0 1em; padding: .6em .8em; background: rgba(127,127,127,.06); border-radius: 4px; }
+    .wp-comment-reply { margin-left: 2em; }
+    .wp-comment-meta { font-size: .8125em; color: #888; margin-bottom: .3em; }
+    .wp-comment-author { font-weight: 600; color: inherit; }
+    .wp-comment-meta time { margin-left: .6em; }
+    .wp-comment-link { margin-left: .6em; }
+    .wp-comment-content > :first-child { margin-top: 0; }
+    .wp-comment-content > :last-child { margin-bottom: 0; }
+  </style>
+  <h2 class="wp-comments-title">评论（7）</h2>
+  <p class="wp-comments-note">
+    以下评论来自 WordPress 备份，本站仅提供浏览。
+    <a href="https://flandre-scarlet.moe/blog/1205/#comments" rel="noopener" target="_blank">前往主站参与讨论</a>
+  </p>
+  <ol class="wp-comment-list">
+    <li class="wp-comment" id="comment-1308">
+      <div class="wp-comment-meta">
+        <span class="wp-comment-author">唐正飞</span>
+        <time>2021-03-17 18:06:24</time>
+        <a class="wp-comment-link" href="https://flandre-scarlet.moe/blog/1205/#comment-1308" rel="noopener" target="_blank">原站</a>
+      </div>
+      <div class="wp-comment-content">代码编译后无法运行</div>
+    </li>
+    <li class="wp-comment wp-comment-reply" id="comment-1310">
+      <div class="wp-comment-meta">
+        <span class="wp-comment-author">flandre</span>
+        <time>2021-03-17 23:52:36</time>
+        <a class="wp-comment-link" href="https://flandre-scarlet.moe/blog/1205/#comment-1310" rel="noopener" target="_blank">原站</a>
+      </div>
+      <div class="wp-comment-content">具体是什么错误呢</div>
+    </li>
+    <li class="wp-comment wp-comment-reply" id="comment-1311">
+      <div class="wp-comment-meta">
+        <span class="wp-comment-author">唐正飞</span>
+        <time>2021-03-18 09:25:57</time>
+        <a class="wp-comment-link" href="https://flandre-scarlet.moe/blog/1205/#comment-1311" rel="noopener" target="_blank">原站</a>
+      </div>
+      <div class="wp-comment-content">config not exit or invaild.然后点击确定后运行MFC界面 启动显示在APIMonitor.cpp的60行也就是CreateThread失败.</div>
+    </li>
+    <li class="wp-comment wp-comment-reply" id="comment-1312">
+      <div class="wp-comment-meta">
+        <span class="wp-comment-author">唐正飞</span>
+        <time>2021-03-18 09:55:52</time>
+        <a class="wp-comment-link" href="https://flandre-scarlet.moe/blog/1205/#comment-1312" rel="noopener" target="_blank">原站</a>
+      </div>
+      <div class="wp-comment-content">TestExe为什么会一闪而过,以及怎么在开始的时候给某个API下断点呢?</div>
+    </li>
+    <li class="wp-comment wp-comment-reply" id="comment-1313">
+      <div class="wp-comment-meta">
+        <span class="wp-comment-author">flandre</span>
+        <time>2021-03-18 10:23:43</time>
+        <a class="wp-comment-link" href="https://flandre-scarlet.moe/blog/1205/#comment-1313" rel="noopener" target="_blank">原站</a>
+      </div>
+      <div class="wp-comment-content">启动 TestExe 后每次它加载 dll 时监视器都会弹窗，可以选择监听哪些导出函数，断点也是这个时候设置。
+选择把 hook 函数配置存到配置文件里下次就会直接用配置里的设置了。</div>
+    </li>
+    <li class="wp-comment" id="comment-3075">
+      <div class="wp-comment-meta">
+        <span class="wp-comment-author">stafiel</span>
+        <time>2023-09-20 14:29:17</time>
+        <a class="wp-comment-link" href="https://flandre-scarlet.moe/blog/1205/#comment-3075" rel="noopener" target="_blank">原站</a>
+      </div>
+      <div class="wp-comment-content">想问下，vlog这个输出日志为何输出的宏被注释掉了？我去掉注释之后一加载就会报访问冲突崩溃。</div>
+    </li>
+    <li class="wp-comment wp-comment-reply" id="comment-3077">
+      <div class="wp-comment-meta">
+        <span class="wp-comment-author">flandre</span>
+        <time>2023-09-21 01:28:24</time>
+        <a class="wp-comment-link" href="https://flandre-scarlet.moe/blog/1205/#comment-3077" rel="noopener" target="_blank">原站</a>
+      </div>
+      <div class="wp-comment-content">这个应该只是单纯关闭了日志输出，可以看下具体挂在哪了</div>
+    </li>
+  </ol>
+</div>
+
         
 
 <div>
@@ -390,20 +473,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">112</span>
+          <span class="site-state-item-count">117</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-count">13</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">281</span>
+        <span class="site-state-item-count">298</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -434,19 +517,19 @@
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">flandre</span>
+  <span class="author" itemprop="copyrightHolder">flandre · <a href="https://flandre-scarlet.moe/blog/" rel="noopener" target="_blank">主站</a></span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">389k</span>
+    <span title="站点总字数">414k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">5:54</span>
+    <span title="站点阅读时长">6:16</span>
 </div>
   <div class="powered-by">Powered by love
   </div>
@@ -497,6 +580,8 @@
 
 
 
+
+  
 
   
 

@@ -10,7 +10,6 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
   <link rel="mask-icon" href="/images/logo.svg" color="#222">
-  <meta name="google-site-verification" content="n4HzIaQ2ebAeP_VrwiqS7s6qfe8RKXwGfnHiPjz3Z20">
 
 <link rel="stylesheet" href="/css/main.css">
 
@@ -25,7 +24,7 @@
   <meta name="description" content="r11 的封包是 afs 格式的，封包没有压缩和加密，在封包头部有文件的偏移和大小，封包尾部有各文件的文件名以及其他一些信息。 所有封包中含有以下类型文件：*   bip: lzss 压缩或未压缩的多 png 组合文件  t2p: lzss 压缩的 tim2 文件，tim2 可转为 bmp 文件 adx: 原始 ogg 或 wav 声音文件">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Remember11 解包">
-<meta property="og:url" content="https://kerisa.github.io/352/index.html">
+<meta property="og:url" content="https://flandre-scarlet.moe/blog/352/">
 <meta property="og:site_name" content="Re: Memory (mirror)">
 <meta property="og:description" content="r11 的封包是 afs 格式的，封包没有压缩和加密，在封包头部有文件的偏移和大小，封包尾部有各文件的文件名以及其他一些信息。 所有封包中含有以下类型文件：*   bip: lzss 压缩或未压缩的多 png 组合文件  t2p: lzss 压缩的 tim2 文件，tim2 可转为 bmp 文件 adx: 原始 ogg 或 wav 声音文件">
 <meta property="og:locale" content="zh_CN">
@@ -204,15 +203,15 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Programs/" itemprop="url" rel="index"><span itemprop="name">Programs</span></a>
+                  <a href="/categories/programs/" itemprop="url" rel="index"><span itemprop="name">程序</span></a>
                 </span>
                   ，
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Programs/Reverse-engineering/" itemprop="url" rel="index"><span itemprop="name">Reverse-engineering</span></a>
+                  <a href="/categories/programs/reverse-engineering/" itemprop="url" rel="index"><span itemprop="name">逆向</span></a>
                 </span>
                   ，
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Programs/Reverse-engineering/Unpacking/" itemprop="url" rel="index"><span itemprop="name">Unpacking</span></a>
+                  <a href="/categories/programs/reverse-engineering/unpacking/" itemprop="url" rel="index"><span itemprop="name">解包</span></a>
                 </span>
             </span>
 
@@ -222,7 +221,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>3k</span>
+              <span>3.5k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -247,14 +246,24 @@
 <li>t2p: lzss 压缩的 tim2 文件，tim2 可转为 bmp 文件</li>
 <li>adx: 原始 ogg 或 wav 声音文件<span id="more"></span></li>
 </ul>
-<h1 id="afs-相关结构"><a href="#afs-相关结构" class="headerlink" title="afs 相关结构"></a>afs 相关结构</h1><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> &#123; <span class="type">char</span> Magic\[<span class="number">4</span>\]; <span class="type">int</span> FileCount; AFS\_ENTRY \*Entries; &#125; AFS\_HEADER; <span class="keyword">typedef</span> <span class="keyword">struct</span> <span class="comment">// 紧跟文件头的索引 &#123; int Offset; int Length; &#125; AFS\_ENTRY; typedef struct // 封包尾部的索引信息 &#123; char FileName\[32\]; char UnknownBytes\[16\]; &#125; AFS\_INDEX;</span></span><br></pre></td></tr></table></figure>
+<h1 id="afs-相关结构"><a href="#afs-相关结构" class="headerlink" title="afs 相关结构"></a>afs 相关结构</h1><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">char</span>       Magic[<span class="number">4</span>];</span><br><span class="line">    <span class="type">int</span>        FileCount;</span><br><span class="line">    AFS_ENTRY *Entries;</span><br><span class="line">&#125; AFS_HEADER;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span>      <span class="comment">// 紧跟文件头的索引</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> Offset;</span><br><span class="line">    <span class="type">int</span> Length;</span><br><span class="line">&#125; AFS_ENTRY;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span>      <span class="comment">// 封包尾部的索引信息</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">char</span> FileName[<span class="number">32</span>];</span><br><span class="line">    <span class="type">char</span> UnknownBytes[<span class="number">16</span>];</span><br><span class="line">&#125; AFS_INDEX;</span><br></pre></td></tr></table></figure>
+
+
 
 <h1 id="t2p-相关结构"><a href="#t2p-相关结构" class="headerlink" title="t2p 相关结构"></a>t2p 相关结构</h1><p>解压后得到 tim2 文件。<br>tim2 文件结构如下，与 bmp 类似的两个数据结构，32 位色的情况下后面跟随 4 字节的像素信息。</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> &#123; <span class="type">char</span> FileId\[<span class="number">4</span>\]; <span class="comment">// ID of the File (must be &#x27;T&#x27;, &#x27;I&#x27;, &#x27;M&#x27; and &#x27;2&#x27;) unsigned char FormatVersion; // Version number of the format unsigned char FormatId; // ID of the format unsigned short Pictures; // Number of picture data char Reserved\[8\]; // Padding (must be 0x00) &#125; TIM2\_FILEHEADER; typedef struct &#123; unsigned long TotalSize; // Total size of the picture data in unsigned chars unsigned long ClutSize; // CLUT data size in unsigned chars unsigned long ImageSize; // Image data size in unsigned chars unsigned short HeaderSize; // Header size in unsigned chars unsigned short ClutColors; // Total color number in CLUT data unsigned char PictFormat; // ID of the picture format (must be 0) unsigned char MipMapTextures;// Number of MIPMAP texture unsigned char ClutType; // Type of the CLUT data unsigned char ImageType; // Type of the Image data unsigned short ImageWidth; // Width of the picture unsigned short ImageHeight; // Height of the picture unsigned char GsTex0\[8\]; // Data for GS TEX0 register unsigned char GsTex1\[8\]; // Data for GS TEX1 register unsigned long GsRegs; // Data for GS TEXA, FBA, PABE register unsigned long GsTexClut; // Data for GS TEXCLUT register &#125; TIM2\_PICTUREHEADER; // 其中 ClutType 具体取值如下： // 01 16 位直接颜色文件 // 02 24 位直接颜色文件 // 03 32 位直接颜色文件 // 04 4 位索引文件（16色） // 05 8 位索引文件（256色） // ImageType 取值如下： // 00 无调色板 // 索引颜色文件时 // 高四位 // 0 采用 CSM1 调色板 // 1 采用 CSM2 调色板 // 低四位 // 1 16位色调色板 // 2 24位色调色板 // 3 32位色调色板</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">char</span>           FileId[<span class="number">4</span>]; <span class="comment">// ID of the File (must be &#x27;T&#x27;, &#x27;I&#x27;, &#x27;M&#x27; and &#x27;2&#x27;) </span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">char</span>  FormatVersion; <span class="comment">// Version number of the format </span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">char</span>  FormatId; <span class="comment">// ID of the format </span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">short</span> Pictures; <span class="comment">// Number of picture data </span></span><br><span class="line">	<span class="type">char</span>           Reserved[<span class="number">8</span>]; <span class="comment">// Padding (must be 0x00) </span></span><br><span class="line">&#125; TIM2_FILEHEADER;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span>  TotalSize; <span class="comment">// Total size of the picture data in unsigned chars </span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span>  ClutSize; <span class="comment">// CLUT data size in unsigned chars </span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span>  ImageSize; <span class="comment">// Image data size in unsigned chars </span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">short</span> HeaderSize; <span class="comment">// Header size in unsigned chars </span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">short</span> ClutColors; <span class="comment">// Total color number in CLUT data </span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">char</span>  PictFormat; <span class="comment">// ID of the picture format (must be 0) </span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">char</span>  MipMapTextures;<span class="comment">// Number of MIPMAP texture </span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">char</span>  ClutType; <span class="comment">// Type of the CLUT data </span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">char</span>  ImageType; <span class="comment">// Type of the Image data </span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">short</span> ImageWidth; <span class="comment">// Width of the picture </span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">short</span> ImageHeight; <span class="comment">// Height of the picture </span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">char</span>  GsTex0[<span class="number">8</span>]; <span class="comment">// Data for GS TEX0 register </span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">char</span>  GsTex1[<span class="number">8</span>]; <span class="comment">// Data for GS TEX1 register </span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span>  GsRegs; <span class="comment">// Data for GS TEXA, FBA, PABE register </span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span>  GsTexClut; <span class="comment">// Data for GS TEXCLUT register </span></span><br><span class="line">&#125; TIM2_PICTUREHEADER;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 其中 ClutType 具体取值如下：</span></span><br><span class="line"><span class="comment">// 01   16 位直接颜色文件</span></span><br><span class="line"><span class="comment">// 02   24 位直接颜色文件</span></span><br><span class="line"><span class="comment">// 03   32 位直接颜色文件 </span></span><br><span class="line"><span class="comment">// 04   4 位索引文件（16色）</span></span><br><span class="line"><span class="comment">// 05   8 位索引文件（256色）</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// ImageType 取值如下：</span></span><br><span class="line"><span class="comment">// 00 无调色板</span></span><br><span class="line"><span class="comment">// 索引颜色文件时</span></span><br><span class="line"><span class="comment">// 高四位</span></span><br><span class="line"><span class="comment">// 	 	0 采用 CSM1 调色板</span></span><br><span class="line"><span class="comment">//	 	1 采用 CSM2 调色板</span></span><br><span class="line"><span class="comment">// 低四位</span></span><br><span class="line"><span class="comment">// 	 	1 16位色调色板</span></span><br><span class="line"><span class="comment">// 		2 24位色调色板</span></span><br><span class="line"><span class="comment">// 		3 32位色调色板</span></span><br></pre></td></tr></table></figure>
 
-<h1 id="bip-相关结构"><a href="#bip-相关结构" class="headerlink" title="bip 相关结构"></a>bip 相关结构</h1><p>该结构跟随在 “EMUARC__“ 标志之后，之后紧跟 png 图片数据 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> &#123; <span class="type">char</span> Magic\[<span class="number">8</span>\];<span class="comment">// &quot;PNGFILE2&quot; int PartWidth; int PartHeight; short FullWidth; short FullWidthThumb; short FullHeight; short FullHeightThumb; int PartSize;// header + pngfile char FileNameWithDirectory\[64\]; char Unknown\[16\]; int PicOffsetX; int PicOffsetY; int PicWidth; int PicHeight; &#125; PNG\_PACK\_TYPE2;</span></span><br></pre></td></tr></table></figure></p>
+
+
+<h1 id="bip-相关结构"><a href="#bip-相关结构" class="headerlink" title="bip 相关结构"></a>bip 相关结构</h1><p>该结构跟随在 “EMUARC__“ 标志之后，之后紧跟 png 图片数据 </p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">char</span>   Magic[<span class="number">8</span>];		<span class="comment">// &quot;PNGFILE2&quot;</span></span><br><span class="line">	<span class="type">int</span>    PartWidth;</span><br><span class="line">	<span class="type">int</span>    PartHeight;</span><br><span class="line">	<span class="type">short</span>  FullWidth;</span><br><span class="line">	<span class="type">short</span>  FullWidthThumb;</span><br><span class="line">	<span class="type">short</span>  FullHeight;</span><br><span class="line">	<span class="type">short</span>  FullHeightThumb;</span><br><span class="line">	<span class="type">int</span>    PartSize;		<span class="comment">// header + pngfile</span></span><br><span class="line">	<span class="type">char</span>   FileNameWithDirectory[<span class="number">64</span>];</span><br><span class="line">	<span class="type">char</span>   Unknown[<span class="number">16</span>];</span><br><span class="line">	<span class="type">int</span>    PicOffsetX;</span><br><span class="line">	<span class="type">int</span>    PicOffsetY;</span><br><span class="line">	<span class="type">int</span>    PicWidth;</span><br><span class="line">	<span class="type">int</span>    PicHeight;</span><br><span class="line">&#125; PNG_PACK_TYPE2;</span><br></pre></td></tr></table></figure>
+
+
+
 <p>压缩后的 bip 经解压可得到</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> &#123; TIM2\_FILEHEADER Tim2FileHeader; TIM2\_PICTUREHEADER Tim2PicHeader; <span class="type">char</span> Magic\[<span class="number">8</span>\];<span class="comment">// &quot;PNGFILE3&quot; int PartWidth; int PartHeight; short FullWidth; short FullWidthThumb; short FullHeight; short FullHeightThumb; int PartSize;// header from magic + pngfile char FileNameWithDirectory\[64\]; char Unknown\[16\]; int PicOffsetX; int PicOffsetY; int PicWidth; int PicHeight; &#125; PNG\_PACK\_TYPE3;</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span></span><br><span class="line">&#123;</span><br><span class="line">	TIM2_FILEHEADER    Tim2FileHeader;</span><br><span class="line">	TIM2_PICTUREHEADER Tim2PicHeader;</span><br><span class="line">	<span class="type">char</span>               Magic[<span class="number">8</span>];		<span class="comment">// &quot;PNGFILE3&quot;</span></span><br><span class="line">	<span class="type">int</span>                PartWidth;</span><br><span class="line">	<span class="type">int</span>                PartHeight;</span><br><span class="line">	<span class="type">short</span>              FullWidth;</span><br><span class="line">	<span class="type">short</span>              FullWidthThumb;</span><br><span class="line">	<span class="type">short</span>              FullHeight;</span><br><span class="line">	<span class="type">short</span>              FullHeightThumb;</span><br><span class="line">	<span class="type">int</span>                PartSize;		<span class="comment">// header from magic + pngfile</span></span><br><span class="line">	<span class="type">char</span>               FileNameWithDirectory[<span class="number">64</span>];</span><br><span class="line">	<span class="type">char</span>               Unknown[<span class="number">16</span>];</span><br><span class="line">	<span class="type">int</span>                PicOffsetX;</span><br><span class="line">	<span class="type">int</span>                PicOffsetY;</span><br><span class="line">	<span class="type">int</span>                PicWidth;</span><br><span class="line">	<span class="type">int</span>                PicHeight;</span><br><span class="line">&#125; PNG_PACK_TYPE3;</span><br></pre></td></tr></table></figure>
+
+
 
 <p>该结构也是一个跟随一个出现，但是结构的起始地址要对齐16字节的文件偏移。<br>该数据结构之后同样跟随 png 图片数据。</p>
 <p>bip 里 “EMUARC__“ 标志前的文件头结构中还有些字段含义不太清楚，以后样本多了再补充吧hhhh</p>
@@ -265,6 +274,70 @@
     
     
     
+<div class="wp-comments" id="comments">
+  <style>
+    .wp-comments { margin-top: 2em; padding-top: 1em; border-top: 1px solid #ddd; }
+    .wp-comments-title { font-size: 1.15em; margin: 0 0 .4em; }
+    .wp-comments-note { font-size: .875em; color: #888; margin: 0 0 1em; }
+    .wp-comment-list { list-style: none; margin: 0; padding: 0; }
+    .wp-comment { margin: 0 0 1em; padding: .6em .8em; background: rgba(127,127,127,.06); border-radius: 4px; }
+    .wp-comment-reply { margin-left: 2em; }
+    .wp-comment-meta { font-size: .8125em; color: #888; margin-bottom: .3em; }
+    .wp-comment-author { font-weight: 600; color: inherit; }
+    .wp-comment-meta time { margin-left: .6em; }
+    .wp-comment-link { margin-left: .6em; }
+    .wp-comment-content > :first-child { margin-top: 0; }
+    .wp-comment-content > :last-child { margin-bottom: 0; }
+  </style>
+  <h2 class="wp-comments-title">评论（4）</h2>
+  <p class="wp-comments-note">
+    以下评论来自 WordPress 备份，本站仅提供浏览。
+    <a href="https://flandre-scarlet.moe/blog/352/#comments" rel="noopener" target="_blank">前往主站参与讨论</a>
+  </p>
+  <ol class="wp-comment-list">
+    <li class="wp-comment" id="comment-3819">
+      <div class="wp-comment-meta">
+        <span class="wp-comment-author">Akira</span>
+        <time>2025-07-13 00:36:47</time>
+        <a class="wp-comment-link" href="https://flandre-scarlet.moe/blog/352/#comment-3819" rel="noopener" target="_blank">原站</a>
+      </div>
+      <div class="wp-comment-content">不太懂逆向有什么解包BIP和T2P的工具手段吗TT，Google并没有找到相关内容。</div>
+    </li>
+    <li class="wp-comment wp-comment-reply" id="comment-3823">
+      <div class="wp-comment-meta">
+        <span class="wp-comment-author">flandre</span>
+        <time>2025-07-15 00:55:46</time>
+        <a class="wp-comment-link" href="https://flandre-scarlet.moe/blog/352/#comment-3823" rel="noopener" target="_blank">原站</a>
+      </div>
+      <div class="wp-comment-content">可以参考上面的代码编译试试哦</div>
+    </li>
+    <li class="wp-comment" id="comment-4113">
+      <div class="wp-comment-meta">
+        <span class="wp-comment-author">ygbatlxmdr</span>
+        <time>2026-04-17 00:09:24</time>
+        <a class="wp-comment-link" href="https://flandre-scarlet.moe/blog/352/#comment-4113" rel="noopener" target="_blank">原站</a>
+      </div>
+      <div class="wp-comment-content">我通关r11已经有四年多了。
+
+pc版的《chaining-β-》（r11里我最喜欢的bgm！）在游戏内播放时异常（loop起始位置错误），解包（此处及下文中均指使用flandre站长在本文末尾提供的代码）之后用vgmstream-web一看果然ogg（在下文中的bgmpc文件夹中）的loop起始位置也错误。
+
+但是以上问题在ps2版和psp版中均不存在（你知道pc版的移植有多粗糙）。
+
+pc版解包后有一个bgm文件夹和一个bgmpc文件夹，那个bgm文件夹里看来就是ps2版的bgm文件了，但是无法解包。同样地psp版和ps2版的bgm文件夹也无法解包。不知道flandre大人是否考虑做这种场合的解包呢？
+
+另：代码用vs2022已经不能编译了，用vs2015倒是成功了。winapi的锅？</div>
+    </li>
+    <li class="wp-comment wp-comment-reply" id="comment-4114">
+      <div class="wp-comment-meta">
+        <span class="wp-comment-author">flandre</span>
+        <time>2026-04-17 23:42:31</time>
+        <a class="wp-comment-link" href="https://flandre-scarlet.moe/blog/352/#comment-4114" rel="noopener" target="_blank">原站</a>
+      </div>
+      <div class="wp-comment-content">哈哈哈哈，隔着屏幕都想起了又冷又饿的感觉^ ^  当时解包主要考虑怎么取 cg 了，bgm 倒没太关注，或许你用 ps2 的解包工具尝试下？至于编译问题，可能是有些函数现在弃用了吧，可以看看报了什么错误</div>
+    </li>
+  </ol>
+</div>
+
         
 
 <div>
@@ -378,20 +451,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">112</span>
+          <span class="site-state-item-count">117</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-count">13</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">281</span>
+        <span class="site-state-item-count">298</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -422,19 +495,19 @@
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">flandre</span>
+  <span class="author" itemprop="copyrightHolder">flandre · <a href="https://flandre-scarlet.moe/blog/" rel="noopener" target="_blank">主站</a></span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">389k</span>
+    <span title="站点总字数">414k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">5:54</span>
+    <span title="站点阅读时长">6:16</span>
 </div>
   <div class="powered-by">Powered by love
   </div>
@@ -485,6 +558,8 @@
 
 
 
+
+  
 
   
 

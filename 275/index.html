@@ -10,7 +10,6 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
   <link rel="mask-icon" href="/images/logo.svg" color="#222">
-  <meta name="google-site-verification" content="n4HzIaQ2ebAeP_VrwiqS7s6qfe8RKXwGfnHiPjz3Z20">
 
 <link rel="stylesheet" href="/css/main.css">
 
@@ -25,7 +24,7 @@
   <meta name="description" content="总结一下Linux(样例为 centos)上 apache 为多台虚拟主机启用 ssl 连接的设置。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Apache 虚拟主机配置 SSL">
-<meta property="og:url" content="https://kerisa.github.io/275/index.html">
+<meta property="og:url" content="https://flandre-scarlet.moe/blog/275/">
 <meta property="og:site_name" content="Re: Memory (mirror)">
 <meta property="og:description" content="总结一下Linux(样例为 centos)上 apache 为多台虚拟主机启用 ssl 连接的设置。">
 <meta property="og:locale" content="zh_CN">
@@ -205,7 +204,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Programs/" itemprop="url" rel="index"><span itemprop="name">Programs</span></a>
+                  <a href="/categories/programs/" itemprop="url" rel="index"><span itemprop="name">程序</span></a>
                 </span>
             </span>
 
@@ -215,7 +214,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>2.6k</span>
+              <span>2.7k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -237,7 +236,10 @@
         <p>总结一下Linux(样例为 centos)上 apache 为多台虚拟主机启用 ssl 连接的设置。</p>
 <span id="more"></span>
 <h1 id="生成-SSL-证书"><a href="#生成-SSL-证书" class="headerlink" title="生成 SSL 证书"></a>生成 SSL 证书</h1><p>我选择的是 Let’s Encrypt 的免费 ssl 证书。贴个<a target="_blank" rel="noopener" href="https://github.com/xdtianyu/scripts/tree/master/">Let’s Encrypt 的说明。</a></p>
-<p>首先使用<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget https://raw.githubusercontent.com/xdtianyu/scripts/master/lets-encrypt/letsencrypt.conf wget https://raw.githubusercontent.com/xdtianyu/scripts/master/lets-encrypt/letsencrypt.sh <span class="built_in">chmod</span> +x letsencrypt.sh</span><br></pre></td></tr></table></figure>将两个文件下载到本地并设置执行权限。</p>
+<p>首先使用</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">wget https://raw.githubusercontent.com/xdtianyu/scripts/master/lets-encrypt/letsencrypt.conf</span><br><span class="line">wget https://raw.githubusercontent.com/xdtianyu/scripts/master/lets-encrypt/letsencrypt.sh</span><br><span class="line"><span class="built_in">chmod</span> +x letsencrypt.sh</span><br></pre></td></tr></table></figure>
+
+<p>将两个文件下载到本地并设置执行权限。</p>
 <p>修改 letsencrypt.conf 文件中的 DOMAIN_KEY、DOMAIN_DIR 和 DOMAINS 字段值为自己的域名和域名目录。修改完毕后执行 “.&#x2F;letsencrypt.sh letsencrypt.conf” 来生成证书文件，执行需要 python 的运行环境，如果有提示有包缺失的话升级 python 或直接复制一份放到 python 的 lib 目录即可。一般域名目录设置正确，且有权限访问域名子目录下的文件的话基本会成功生成证书。成功后得到下列文件：</p>
 <ul>
 <li>example.crt</li>
@@ -250,12 +252,21 @@
 <p>其中 example.crt example.chained.crt 和 example.com.key 是需要写到 apache 的配置中去的。</p>
 <h1 id="设置-Apache-配置"><a href="#设置-Apache-配置" class="headerlink" title="设置 Apache 配置"></a>设置 Apache 配置</h1><p>假设在主机上已经完成了 VirtualHost 的配置。</p>
 <p>首先如果 apache 的 lib 中没有 mod_ssl.so 的话使用 “yum install mod_ssl” 进行下载。随后在配置文件 httpd.conf 中加入 “LoadModule ssl_module &#x2F;usr&#x2F;lib&#x2F;httpd&#x2F;modules&#x2F;mod_ssl.so” 即可。</p>
-<p>如果你的主机没有像 httpd-ssl.conf 这样的文件的话，在配置文件中加入如下的配置内容： <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">AddType application/x-x509-ca-cert .crt AddType application/x-pkcs7-crl .crl SSLCipherSuite HIGH:MEDIUM:!MD5:!RC4 SSLProxyCipherSuite HIGH:MEDIUM:!MD5:!RC4 SSLProtocol all -SSLv2 -SSLv3 SSLProxyProtocol all -SSLv2 -SSLv3 SSLSessionCache &quot;shmcb:/path/to/apache/logs/ssl\_scache(512000)&quot; SSLSessionCacheTimeout 300 SSLPassPhraseDialog builtin SSLMutex default Listen 443 NameVirtualHost \*:443 <span class="tag">&lt;<span class="name">VirtualHost</span> \*<span class="attr">:443</span>&gt;</span> ServerAdmin webmaster@example.com DocumentRoot “/path/to/example.com” ServerName example.com:443 <span class="tag">&lt;<span class="name">Directory</span> “/<span class="attr">path</span>/<span class="attr">to</span>/<span class="attr">example.com</span>”&gt;</span> SetOutputFilter DEFLATE Options FollowSymLinks AllowOverride All Order allow,deny Allow from all DirectoryIndex index.html index.php <span class="tag">&lt;/<span class="name">Directory</span>&gt;</span> SSLEngine on SSLCertificateFile /path/to/example.crt SSLCertificateKeyFile /path/to/example.com.key SSLCertificateChainFile /path/to/example.chained.crt <span class="tag">&lt;/<span class="name">VirtualHost</span>&gt;</span></span><br></pre></td></tr></table></figure> 以上路径自行替换成正确的路径，这样就完成了基本的 ssl 设置了。</p>
+<p>如果你的主机没有像 httpd-ssl.conf 这样的文件的话，在配置文件中加入如下的配置内容： </p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">AddType application/x-x509-ca-cert .crt</span><br><span class="line">AddType application/x-pkcs7-crl    .crl</span><br><span class="line">SSLCipherSuite HIGH:MEDIUM:!MD5:!RC4</span><br><span class="line">SSLProxyCipherSuite HIGH:MEDIUM:!MD5:!RC4</span><br><span class="line">SSLProtocol all -SSLv2 -SSLv3</span><br><span class="line">SSLProxyProtocol all -SSLv2 -SSLv3</span><br><span class="line">SSLSessionCache        &quot;shmcb:/path/to/apache/logs/ssl_scache(512000)&quot;</span><br><span class="line">SSLSessionCacheTimeout  300</span><br><span class="line">SSLPassPhraseDialog  builtin</span><br><span class="line">SSLMutex  default</span><br><span class="line"></span><br><span class="line">Listen 443</span><br><span class="line">NameVirtualHost *:443</span><br><span class="line"><span class="tag">&lt;<span class="name">VirtualHost</span> *<span class="attr">:443</span>&gt;</span></span><br><span class="line">    ServerAdmin webmaster@example.com</span><br><span class="line">    DocumentRoot “/path/to/example.com”</span><br><span class="line">    ServerName example.com:443</span><br><span class="line">    <span class="tag">&lt;<span class="name">Directory</span> “/<span class="attr">path</span>/<span class="attr">to</span>/<span class="attr">example.com</span>”&gt;</span></span><br><span class="line">        SetOutputFilter DEFLATE</span><br><span class="line">        Options FollowSymLinks</span><br><span class="line">        AllowOverride All</span><br><span class="line">        Order allow,deny</span><br><span class="line">        Allow from all</span><br><span class="line">        DirectoryIndex index.html index.php</span><br><span class="line">    <span class="tag">&lt;/<span class="name">Directory</span>&gt;</span></span><br><span class="line">    SSLEngine on</span><br><span class="line">    SSLCertificateFile /path/to/example.crt</span><br><span class="line">    SSLCertificateKeyFile /path/to/example.com.key</span><br><span class="line">    SSLCertificateChainFile /path/to/example.chained.crt</span><br><span class="line"><span class="tag">&lt;/<span class="name">VirtualHost</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p> 以上路径自行替换成正确的路径，这样就完成了基本的 ssl 设置了。</p>
 <p>如果你的主机存在上述文件（httpd-ssl.conf）的话，一般只要在主配置文件中去掉 “Include conf&#x2F;extra&#x2F;httpd-ssl.conf” 前的注释符号即可，同时也要去掉 “LoadModule ssl_module modules&#x2F;mod_ssl.so” 前的注释。并将其中的默认虚拟主机配置修改为自己的配置，或者就这样将所有路径设为不可访问后留作默认响应的主机。</p>
-<h1 id="设置-htaccess-转发"><a href="#设置-htaccess-转发" class="headerlink" title="设置 .htaccess 转发"></a>设置 .htaccess 转发</h1><p>在 .htaccess 中添加转发规则 <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">RewriteCond %&#123;HTTPS&#125; !=on RewriteRule ^(.\*) https://%&#123;SERVER\_NAME&#125;/$1 \[R,L\]</span><br></pre></td></tr></table></figure></p>
+<h1 id="设置-htaccess-转发"><a href="#设置-htaccess-转发" class="headerlink" title="设置 .htaccess 转发"></a>设置 .htaccess 转发</h1><p>在 .htaccess 中添加转发规则 </p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">RewriteCond %&#123;HTTPS&#125; !=on</span><br><span class="line">RewriteRule ^(.*) https://%&#123;SERVER_NAME&#125;/$1 [R,L]</span><br></pre></td></tr></table></figure>
+
+
+
 <p>最后重启 apache 服务。</p>
 <p>可以加个cron 定时任务，每个月自动更新一次证书，可以在脚本最后加入 &#x2F;etc&#x2F;init.d&#x2F;httpd restart 等重新加载服务。  </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0 0 1 \* \* /etc/nginx/certs/letsencrypt.sh /etc/nginx/certs/letsencrypt.conf &gt;&gt; /var/log/lets-encrypt.log 2&gt;&amp;1</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0 0 1 * * /etc/nginx/certs/letsencrypt.sh /etc/nginx/certs/letsencrypt.conf &gt;&gt; /var/log/lets-encrypt.log 2&gt;&amp;1</span><br></pre></td></tr></table></figure>
+
+
 
 <p>-——————————<br>贴一个 apache 虚拟主机匹配的参考：<a target="_blank" rel="noopener" href="http://man.chinaunix.net/newsoft/ApacheManual/vhosts/details.html">深入研究虚拟主机的匹配</a></p>
 
@@ -264,6 +275,7 @@
     
     
     
+
         
 
 <div>
@@ -378,20 +390,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">112</span>
+          <span class="site-state-item-count">117</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-count">13</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">281</span>
+        <span class="site-state-item-count">298</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -422,19 +434,19 @@
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">flandre</span>
+  <span class="author" itemprop="copyrightHolder">flandre · <a href="https://flandre-scarlet.moe/blog/" rel="noopener" target="_blank">主站</a></span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">389k</span>
+    <span title="站点总字数">414k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">5:54</span>
+    <span title="站点阅读时长">6:16</span>
 </div>
   <div class="powered-by">Powered by love
   </div>
@@ -485,6 +497,8 @@
 
 
 
+
+  
 
   
 

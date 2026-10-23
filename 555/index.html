@@ -10,7 +10,6 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
   <link rel="mask-icon" href="/images/logo.svg" color="#222">
-  <meta name="google-site-verification" content="n4HzIaQ2ebAeP_VrwiqS7s6qfe8RKXwGfnHiPjz3Z20">
 
 <link rel="stylesheet" href="/css/main.css">
 
@@ -25,10 +24,11 @@
   <meta name="description" content="封包的结构比较清晰，只是其中的图像是经过压缩编码的。 图像分为两种，一种是文件标识为 “GE” 的单图文件，另一种则是文件标识为 “PGD3” 的差分文件。差分文件中含有一个单图文件的文件名，当引擎读取差分文件时会同时读取单图文件，解码后将两者进行混合。代码里还备有 “PGD2” 的分支，是 “PGD3” 的一个子集。不过这个游戏里似乎并没有该类型的文件，所以先不管了。 两种图像格式的结构">
 <meta property="og:type" content="article">
 <meta property="og:title" content="ナツイロココロログ封包分析">
-<meta property="og:url" content="https://kerisa.github.io/555/index.html">
+<meta property="og:url" content="https://flandre-scarlet.moe/blog/555/">
 <meta property="og:site_name" content="Re: Memory (mirror)">
 <meta property="og:description" content="封包的结构比较清晰，只是其中的图像是经过压缩编码的。 图像分为两种，一种是文件标识为 “GE” 的单图文件，另一种则是文件标识为 “PGD3” 的差分文件。差分文件中含有一个单图文件的文件名，当引擎读取差分文件时会同时读取单图文件，解码后将两者进行混合。代码里还备有 “PGD2” 的分支，是 “PGD3” 的一个子集。不过这个游戏里似乎并没有该类型的文件，所以先不管了。 两种图像格式的结构">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kerisa.github.io/assets/imgs/2018/08/pal%E8%A7%A3%E5%8C%853.png">
 <meta property="og:image" content="https://kerisa.github.io/assets/imgs/2018/08/pal%E8%A7%A3%E5%8C%852.png">
 <meta property="og:image" content="https://kerisa.github.io/assets/imgs/2018/08/pal%E8%A7%A3%E5%8C%851.png">
 <meta property="article:published_time" content="2018-08-30T14:48:13.000Z">
@@ -39,7 +39,7 @@
 <meta property="article:tag" content="PAL">
 <meta property="article:tag" content="ナツイロココロログ">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://kerisa.github.io/assets/imgs/2018/08/pal%E8%A7%A3%E5%8C%852.png">
+<meta name="twitter:image" content="https://kerisa.github.io/assets/imgs/2018/08/pal%E8%A7%A3%E5%8C%853.png">
 
 <link rel="canonical" href="https://flandre-scarlet.moe/blog/555/">
 
@@ -207,15 +207,15 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Programs/" itemprop="url" rel="index"><span itemprop="name">Programs</span></a>
+                  <a href="/categories/programs/" itemprop="url" rel="index"><span itemprop="name">程序</span></a>
                 </span>
                   ，
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Programs/Reverse-engineering/" itemprop="url" rel="index"><span itemprop="name">Reverse-engineering</span></a>
+                  <a href="/categories/programs/reverse-engineering/" itemprop="url" rel="index"><span itemprop="name">逆向</span></a>
                 </span>
                   ，
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Programs/Reverse-engineering/Unpacking/" itemprop="url" rel="index"><span itemprop="name">Unpacking</span></a>
+                  <a href="/categories/programs/reverse-engineering/unpacking/" itemprop="url" rel="index"><span itemprop="name">解包</span></a>
                 </span>
             </span>
 
@@ -225,7 +225,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>1.1k</span>
+              <span>1.2k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -247,8 +247,10 @@
         <p>封包的结构比较清晰，只是其中的图像是经过压缩编码的。 图像分为两种，一种是文件标识为 “GE” 的单图文件，另一种则是文件标识为 “PGD3” 的差分文件。差分文件中含有一个单图文件的文件名，当引擎读取差分文件时会同时读取单图文件，解码后将两者进行混合。代码里还备有 “PGD2” 的分支，是 “PGD3” 的一个子集。不过这个游戏里似乎并没有该类型的文件，所以先不管了。</p>
 <p>两种图像格式的结构</p>
 <span id="more"></span>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">GEHeader</span> &#123; <span class="type">char</span> magic\[<span class="number">2</span>\]; <span class="comment">// &quot;GE&quot; uint16\_t size; uint32\_t x; uint32\_t y; uint32\_t width; uint32\_t height; uint32\_t display\_width; uint32\_t display\_height; uint8\_t comparess; uint8\_t zero\[3\]; &#125;; struct PGD3Header &#123; char magic\[4\]; // &quot;PGD3&quot; uint16\_t offset\_x; uint16\_t offset\_y; uint16\_t width; uint16\_t height; uint16\_t component; char name\[34\]; &#125;</span></span><br></pre></td></tr></table></figure> ![](assets/imgs/2018/08/pal解包3.png)  
-<p><img src="/assets/imgs/2018/08/pal%E8%A7%A3%E5%8C%852.png"></p>
+
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">GEHeader</span> &#123;</span><br><span class="line">    <span class="type">char</span>     magic[<span class="number">2</span>];  <span class="comment">// &quot;GE&quot;</span></span><br><span class="line">    <span class="type">uint16_t</span> size;</span><br><span class="line">    <span class="type">uint32_t</span> x;</span><br><span class="line">    <span class="type">uint32_t</span> y;</span><br><span class="line">    <span class="type">uint32_t</span> width;</span><br><span class="line">    <span class="type">uint32_t</span> height;</span><br><span class="line">    <span class="type">uint32_t</span> display_width;</span><br><span class="line">    <span class="type">uint32_t</span> display_height;</span><br><span class="line">    <span class="type">uint8_t</span>  comparess;</span><br><span class="line">    <span class="type">uint8_t</span>  zero[<span class="number">3</span>];</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">PGD3Header</span> &#123;</span><br><span class="line">    <span class="type">char</span>     magic[<span class="number">4</span>];  <span class="comment">// &quot;PGD3&quot;</span></span><br><span class="line">    <span class="type">uint16_t</span> offset_x;</span><br><span class="line">    <span class="type">uint16_t</span> offset_y;</span><br><span class="line">    <span class="type">uint16_t</span> width;</span><br><span class="line">    <span class="type">uint16_t</span> height;</span><br><span class="line">    <span class="type">uint16_t</span> component;</span><br><span class="line">    <span class="type">char</span>     name[<span class="number">34</span>];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p> <img src="/assets/imgs/2018/08/pal%E8%A7%A3%E5%8C%853.png"><br><img src="/assets/imgs/2018/08/pal%E8%A7%A3%E5%8C%852.png"></p>
 <p>根据 GE 文件头中的压缩指示字段的不同有 3 种不同的压缩方式，该游戏中的图像对应压缩的字段都是 3，而后根据解码出来图像的颜色深度不同，也对应着不同的处理方式。当然在内存中两者最终都会解码为 32 位 BGRA 的格式，而且会将图像的宽度向上对齐到 2^n。以上就是这个解码过程的概况了，步骤还是比较多的，而且代码也散落在好几个子函数里。虽然我觉得应该把算法全逆出来才算完整，不过我还是没法理解算法本身的内容。。。就算是逆估计也就是对着代码翻译或是直接 F5，这就是纯体力活了，所以还是算了(((((((・・;)</p>
 <p>于是愉快地决定直接去内存里 dump 现成数据。而引擎解码对应的图片是调用了导出的 PalSpriteLoad，传递的关键参数就是资源文件名了，这使得处理变的更加简单。根据前面的分析，在解封包的时候就可以同时判断图片的类型（是不是差分），以及 GE 文件的压缩方式等，这些数据可以记录下来，随后传递给调试器即可根据文件类型自动收取对应文件的数据了。</p>
 <p>另外脚本文件还有一小段的解密过程<img src="/assets/imgs/2018/08/pal%E8%A7%A3%E5%8C%851.png"></p>
@@ -259,6 +261,7 @@
     
     
     
+
         
 
 <div>
@@ -371,20 +374,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">112</span>
+          <span class="site-state-item-count">117</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-count">13</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">281</span>
+        <span class="site-state-item-count">298</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -415,19 +418,19 @@
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">flandre</span>
+  <span class="author" itemprop="copyrightHolder">flandre · <a href="https://flandre-scarlet.moe/blog/" rel="noopener" target="_blank">主站</a></span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">389k</span>
+    <span title="站点总字数">414k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">5:54</span>
+    <span title="站点阅读时长">6:16</span>
 </div>
   <div class="powered-by">Powered by love
   </div>
@@ -478,6 +481,8 @@
 
 
 
+
+  
 
   
 

@@ -10,7 +10,6 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
   <link rel="mask-icon" href="/images/logo.svg" color="#222">
-  <meta name="google-site-verification" content="n4HzIaQ2ebAeP_VrwiqS7s6qfe8RKXwGfnHiPjz3Z20">
 
 <link rel="stylesheet" href="/css/main.css">
 
@@ -25,7 +24,7 @@
   <meta name="description" content="在 vultr 买了新的主机，准备把网站迁过去。机房选在洛杉矶，果然西海岸的稳定性还是最好啊，丢包也少，东京在晚上高峰丢包太高了，受不了。说来在 V 家之前还试了试 IOZoom 的机子，然而到手时分到个被墙的 ip，ssh 都连不上，然后提工单换了；买了个亚洲优化，也就是 CN2 路线的 ip，又是被墙的我去……来来回回折腾几下相当失望，换完 ip 后高峰期丢包还是高得不行，基本在 10%(CN">
 <meta property="og:type" content="article">
 <meta property="og:title" content="服务器迁移到 vultr">
-<meta property="og:url" content="https://kerisa.github.io/695/index.html">
+<meta property="og:url" content="https://flandre-scarlet.moe/blog/695/">
 <meta property="og:site_name" content="Re: Memory (mirror)">
 <meta property="og:description" content="在 vultr 买了新的主机，准备把网站迁过去。机房选在洛杉矶，果然西海岸的稳定性还是最好啊，丢包也少，东京在晚上高峰丢包太高了，受不了。说来在 V 家之前还试了试 IOZoom 的机子，然而到手时分到个被墙的 ip，ssh 都连不上，然后提工单换了；买了个亚洲优化，也就是 CN2 路线的 ip，又是被墙的我去……来来回回折腾几下相当失望，换完 ip 后高峰期丢包还是高得不行，基本在 10%(CN">
 <meta property="og:locale" content="zh_CN">
@@ -210,7 +209,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Programs/" itemprop="url" rel="index"><span itemprop="name">Programs</span></a>
+                  <a href="/categories/programs/" itemprop="url" rel="index"><span itemprop="name">程序</span></a>
                 </span>
             </span>
 
@@ -220,7 +219,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>8.4k</span>
+              <span>8.9k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -243,108 +242,213 @@
 <p>现在记录一下从头搭建的过程吧。专为 centos 7 x64 量身打造。</p>
 <span id="more"></span>
 <h1 id="SSH"><a href="#SSH" class="headerlink" title="SSH"></a>SSH</h1><ol>
-<li><p>首先设置 ssh 公钥访问、更换默认端口和取消密码访问</p>
-</li>
-<li><p>使用<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh-keygen -t rsa</span><br></pre></td></tr></table></figure>生成一对 rsa 密钥对存放在 &#x2F;root&#x2F;.ssh&#x2F; 目录下，带 .pub 后缀的是公钥</p>
-</li>
-<li><p>使用<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> <span class="built_in">id</span>\_rsa.pub &gt; authorized\_keys</span><br></pre></td></tr></table></figure> 导入。</p>
-</li>
-<li><p>sftp 下载公私钥到本地，先保存好，怎么用下面会说，现在接着配服务器。</p>
-</li>
-<li><p>修改配置文件（&#x2F;etc&#x2F;ssh&#x2F;sshd_config）</p>
-<ul>
-<li>去掉<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">PubkeyAuthentication <span class="built_in">yes</span> AuthorizedKeysFile .ssh/authorized\_keys</span><br></pre></td></tr></table></figure>前的 # 注释。</li>
-<li>将 <em>#Port 22</em> 的注释去掉，并改为一个任意的空闲高位端口。</li>
-<li>将 <em>PasswordAuthentication yes</em> 改为 _PasswordAuthentication no_。保存退出后使用<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl restart sshd</span><br></pre></td></tr></table></figure>重启 ssh。</li>
-</ul>
-</li>
-<li><p>配置 centos7 防火墙</p>
-<ol>
-<li>添加新的端口 A，就是刚刚在 ssh 配置里填的那个，比如下面的命令添加了 tcp 的 7777 端口（顺便一提把命令中的 “add” 换成 “remove” 即可删除；把 “7777” 换成 “7777-8888” 即可添加范围端口）。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">firewall-cmd --permanent --zone=public --add-port=7777/tcp</span><br></pre></td></tr></table></figure></li>
-<li>重新加载规则<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">firewall-cmd --reload</span><br></pre></td></tr></table></figure></li>
-<li>添加自启动<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl <span class="built_in">enable</span> firewalld</span><br></pre></td></tr></table></figure></li>
-<li>※ 这里添加一条就结束了，其他端口的添加如法炮制即可。</li>
-<li>※ 添加 http(s) 等类似常用端口可以直接添加现有服务来完成<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">firewall-cmd --permanent --zone=public --add-service=http firewall-cmd --permanent --zone=public --add-service=https</span><br></pre></td></tr></table></figure></li>
-<li>※未尽的说明可参考 vultr 的文档 <a target="_blank" rel="noopener" href="https://www.vultr.com/docs/using-firewalld-to-manage-your-firewall-on-centos-7">Using FirewallD to Manage Your Firewall on CentOS 7</a></li>
+<li>首先设置 ssh 公钥访问、更换默认端口和取消密码访问</li>
+<li>使用</li>
 </ol>
-<ul>
-<li>防火墙有各种 “zone”，其实就是不同的规则集，默认是 “public” zone，可用 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">firewall-cmd --get-default-zone firewall-cmd --set-default-zone=home</span><br></pre></td></tr></table></figure>查看和修改。</li>
-<li>查看某个 zone 下的现有规则 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">firewall-cmd --zone=public --list-ports firewall-cmd --zone=public --list-services</span><br></pre></td></tr></table></figure></li>
-</ul>
-</li>
-<li><p>※ 如果在 vultr 的 web 面板中配置了防火墙规则，则在那里也要进行相应的端口添加。</p>
-</li>
-<li><p>以上配置完成后在 <a target="_blank" rel="noopener" href="http://port.ping.pe/">port.ping.pe</a> 中检测相应端口的结果应该是可以成功连接的。没成功前千万别退出现有的 ssh 连接哦，因为没有后路了(o???)<br>（配置 sshd_config 时不删除 _Port 22_，直接补充一行如 <em>Port 7777</em> 即可同时监听两个端口，全部配完再删掉 22 端口。）</p>
-</li>
-<li><p>（本地电脑上）用 puttygen.exe 打开下载的私钥（软件界面上的 “Load” 按钮），完成后再点 “Save private key” 另存为 ppk 文件，这样在 putty 中就能使用该私钥登录了（在 Connection-SSH-Auth 中填入 ppk 文件路径，在 Connection-Data 中的 “Auto login username” 中填入你的用户名）。</p>
-</li>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh-keygen -t rsa</span><br></pre></td></tr></table></figure>
+
+<p>生成一对 rsa 密钥对存放在 &#x2F;root&#x2F;.ssh&#x2F; 目录下，带 .pub 后缀的是公钥<br>3.  使用</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> id_rsa.pub &gt; authorized_keys</span><br></pre></td></tr></table></figure>
+
+<p> 导入。<br>4.  sftp 下载公私钥到本地，先保存好，怎么用下面会说，现在接着配服务器。<br>5.  修改配置文件（&#x2F;etc&#x2F;ssh&#x2F;sshd_config）<br>    *   去掉</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">PubkeyAuthentication <span class="built_in">yes</span></span><br><span class="line">AuthorizedKeysFile      .ssh/authorized_keys</span><br></pre></td></tr></table></figure>
+
+<p>前的 # 注释。<br>    *   将 <em>#Port 22</em> 的注释去掉，并改为一个任意的空闲高位端口。<br>    *   将 <em>PasswordAuthentication yes</em> 改为 _PasswordAuthentication no_。保存退出后使用</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl restart sshd</span><br></pre></td></tr></table></figure>
+
+<p>重启 ssh。<br>6.  配置 centos7 防火墙</p>
+<pre><code>1.  添加新的端口 A，就是刚刚在 ssh 配置里填的那个，比如下面的命令添加了 tcp 的 7777 端口（顺便一提把命令中的 &quot;add&quot; 换成 &quot;remove&quot; 即可删除；把 &quot;7777&quot; 换成 &quot;7777-8888&quot; 即可添加范围端口）。
+</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">firewall-cmd --permanent --zone=public --add-port=7777/tcp</span><br></pre></td></tr></table></figure>
+
+
+<pre><code>2.  重新加载规则
+</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">firewall-cmd --reload</span><br></pre></td></tr></table></figure>
+
+
+<pre><code>3.  添加自启动
+</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl <span class="built_in">enable</span> firewalld</span><br></pre></td></tr></table></figure>
+
+
+<pre><code>4.  ※ 这里添加一条就结束了，其他端口的添加如法炮制即可。
+5.  ※ 添加 http(s) 等类似常用端口可以直接添加现有服务来完成
+</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">firewall-cmd --permanent --zone=public --add-service=http</span><br><span class="line">firewall-cmd --permanent --zone=public --add-service=https</span><br></pre></td></tr></table></figure>
+
+
+<pre><code>6.  ※未尽的说明可参考 vultr 的文档 [Using FirewallD to Manage Your Firewall on CentOS 7](https://www.vultr.com/docs/using-firewalld-to-manage-your-firewall-on-centos-7)
+
+*   防火墙有各种 &quot;zone&quot;，其实就是不同的规则集，默认是 &quot;public&quot; zone，可用 
+</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">firewall-cmd --get-default-zone</span><br><span class="line">firewall-cmd --set-default-zone=home</span><br></pre></td></tr></table></figure>
+
+<p>查看和修改。<br>    *   查看某个 zone 下的现有规则 </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">firewall-cmd --zone=public --list-ports</span><br><span class="line">firewall-cmd --zone=public --list-services</span><br></pre></td></tr></table></figure>
+
+
+<ol start="7">
+<li>※ 如果在 vultr 的 web 面板中配置了防火墙规则，则在那里也要进行相应的端口添加。</li>
+<li>以上配置完成后在 <a target="_blank" rel="noopener" href="http://port.ping.pe/">port.ping.pe</a> 中检测相应端口的结果应该是可以成功连接的。没成功前千万别退出现有的 ssh 连接哦，因为没有后路了(o???)<br>（配置 sshd_config 时不删除 _Port 22_，直接补充一行如 <em>Port 7777</em> 即可同时监听两个端口，全部配完再删掉 22 端口。）</li>
+<li>（本地电脑上）用 puttygen.exe 打开下载的私钥（软件界面上的 “Load” 按钮），完成后再点 “Save private key” 另存为 ppk 文件，这样在 putty 中就能使用该私钥登录了（在 Connection-SSH-Auth 中填入 ppk 文件路径，在 Connection-Data 中的 “Auto login username” 中填入你的用户名）。</li>
 </ol>
 <h1 id="BBR"><a href="#BBR" class="headerlink" title="BBR"></a>BBR</h1><ol>
-<li>添加 ELRepo 源<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-2.el7.elrepo.noarch.rpm</span><br></pre></td></tr></table></figure></li>
-<li>安装最新内核<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum --enablerepo=elrepo-kernel install kernel-ml -y</span><br></pre></td></tr></table></figure></li>
-<li>成功后用<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rpm -qa grep kernel</span><br></pre></td></tr></table></figure>列出已安装的内核，其中应含有形如 “kernel-ml-5.0.6-1.el7.elrepo.x86_64” 的输出。</li>
-<li>列出 grub2 启动菜单<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">egrep ^menuentry /etc/grub2.cfg <span class="built_in">cut</span> -f 2 -d \\&#x27;</span><br></pre></td></tr></table></figure></li>
-<li>按顺序从上往下找到 5.0.6 内核的行数，第一行序号是 0，记住序号，输入<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">grub2-set-default &lt;你的序号&gt;</span><br></pre></td></tr></table></figure></li>
-<li>重启<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">shutdown -r now</span><br></pre></td></tr></table></figure></li>
-<li>重启后查看<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">uname</span> -r</span><br></pre></td></tr></table></figure>应显示 5.0.6 内核。</li>
-<li>启用 BBR。逐行执行<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;net.core.default\_qdisc=fq&#x27;</span> <span class="built_in">sudo</span> <span class="built_in">tee</span> -a /etc/sysctl.conf <span class="built_in">echo</span> <span class="string">&#x27;net.ipv4.tcp\_congestion\_control=bbr&#x27;</span> <span class="built_in">sudo</span> <span class="built_in">tee</span> -a /etc/sysctl.conf sysctl -p // 确认：sysctl net.ipv4.tcp\_available\_congestion\_control 输出应类似 <span class="string">&quot;reno cubic bbr&quot;</span> // 确认：sysctl -n net.ipv4.tcp\_congestion\_control 输出应为 <span class="string">&quot;bbr&quot;</span> // 确认：lsmod grep bbr 输出含有 <span class="string">&quot;tcp\_bbr&quot;</span></span><br></pre></td></tr></table></figure>完成</li>
-<li>※ Ex: <a target="_blank" rel="noopener" href="https://github.com/kuoruan/shell-scripts">OpenVZ 用的 BBR 一键脚本</a>。</li>
+<li>添加 ELRepo 源</li>
 </ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org</span><br><span class="line">rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-2.el7.elrepo.noarch.rpm</span><br></pre></td></tr></table></figure>
+
+
+<ol start="2">
+<li>安装最新内核</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum --enablerepo=elrepo-kernel install kernel-ml -y</span><br></pre></td></tr></table></figure>
+
+
+<ol start="3">
+<li>成功后用</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rpm -qa | grep kernel</span><br></pre></td></tr></table></figure>
+
+<p>列出已安装的内核，其中应含有形如 “kernel-ml-5.0.6-1.el7.elrepo.x86_64” 的输出。<br>4.  列出 grub2 启动菜单</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">egrep ^menuentry /etc/grub2.cfg | <span class="built_in">cut</span> -f 2 -d \&#x27;</span><br></pre></td></tr></table></figure>
+
+
+<ol start="5">
+<li>按顺序从上往下找到 5.0.6 内核的行数，第一行序号是 0，记住序号，输入</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">grub2-set-default &lt;你的序号&gt;</span><br></pre></td></tr></table></figure>
+
+
+<ol start="6">
+<li>重启</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">shutdown -r now</span><br></pre></td></tr></table></figure>
+
+
+<ol start="7">
+<li>重启后查看</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">uname</span> -r</span><br></pre></td></tr></table></figure>
+
+<p>应显示 5.0.6 内核。<br>8.  启用 BBR。逐行执行</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;net.core.default_qdisc=fq&#x27;</span> | <span class="built_in">sudo</span> <span class="built_in">tee</span> -a /etc/sysctl.conf</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;net.ipv4.tcp_congestion_control=bbr&#x27;</span> | <span class="built_in">sudo</span> <span class="built_in">tee</span> -a /etc/sysctl.conf</span><br><span class="line">sysctl -p</span><br><span class="line">// 确认：sysctl net.ipv4.tcp_available_congestion_control 输出应类似 <span class="string">&quot;reno cubic bbr&quot;</span></span><br><span class="line">// 确认：sysctl -n net.ipv4.tcp_congestion_control 输出应为 <span class="string">&quot;bbr&quot;</span></span><br><span class="line">// 确认：lsmod | grep bbr 输出含有 <span class="string">&quot;tcp_bbr&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>完成<br>9.  ※ Ex: <a target="_blank" rel="noopener" href="https://github.com/kuoruan/shell-scripts">OpenVZ 用的 BBR 一键脚本</a>。</p>
 <h1 id="LNMP"><a href="#LNMP" class="headerlink" title="LNMP"></a>LNMP</h1><ol>
-<li>安装 nginx <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install nginx -y systemctl <span class="built_in">enable</span> nginx systemctl start nginx</span><br></pre></td></tr></table></figure>现在通过 ip 直接访问应该可以看过欢迎页（防火墙已开，参照 ssh 处设置防火墙）。</li>
-<li>可在配置文件的 http 块中添加一行 <em>server_tokens off;</em> 来隐藏 nginx 的版本。</li>
-<li>安装 php7<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">// yum list installed grep php // 新机肯定没装 php，装过的要先卸掉。看一眼 rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm // 更新 rpm 源 yum install php70w php70w-fpm php70w-mysql -y systemctl <span class="built_in">enable</span> php-fpm systemctl start php-fpm</span><br></pre></td></tr></table></figure></li>
-<li>配置 nginx。php-fpm 的默认端口为 9000，现在将它加入 nginx 的配置中（此处不用开防火墙，内部使用）。打开 nginx 配置文件 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vi /etc/nginx/nginx.conf</span><br></pre></td></tr></table></figure>在 “server” 块的末尾加上<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">location ~ \\.php$ &#123; fastcgi\_pass 127.0.0.1:9000; fastcgi\_index index.php; fastcgi\_param SCRIPT\_FILENAME <span class="variable">$document</span>\_root<span class="variable">$fastcgi</span>\_script\_name; include fastcgi\_params; &#125;</span><br></pre></td></tr></table></figure>保存退出并<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl restart nginx</span><br></pre></td></tr></table></figure>重启 nginx。</li>
-<li>安装 MariaDB。有疑问可直接看 <a target="_blank" rel="noopener" href="https://www.vultr.com/docs/how-to-install-mariadb-10-1-on-centos-7">How to Install MariaDB 10.1 on CentOS 7</a>。<ol>
-<li>创建 yum repo ：粘贴以下全部后一次执行<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> &amp;lt;&amp;lt; EOF <span class="built_in">sudo</span> <span class="built_in">tee</span> -a /etc/yum.repos.d/MariaDB.repo <span class="comment"># MariaDB 10.1 CentOS repository list # http://downloads.mariadb.org/mariadb/repositories/ \[mariadb\] name = MariaDB baseurl = http://yum.mariadb.org/10.1/centos7-amd64 gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB gpgcheck=1 EOF</span></span><br></pre></td></tr></table></figure></li>
-<li>yum 安装<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install MariaDB-server MariaDB-client -y</span><br></pre></td></tr></table></figure></li>
-<li>启动并加入自启动<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl start mariadb.service systemctl <span class="built_in">enable</span> mariadb.service</span><br></pre></td></tr></table></figure></li>
-<li>安全化配置<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/usr/bin/mysql\_secure\_installation</span><br></pre></td></tr></table></figure>当前数据库 root 密码为空直接回车，然后设置新的 root 密码，脚本中所有 yes&#x2F;no 的选项都选 yes 即可，不放心的也可每个看一遍，都很直白的选项。</li>
+<li>安装 nginx</li>
 </ol>
-</li>
-<li>※ php-fpm进程过多，内存耗尽<ol>
-<li>打开 &#x2F;etc&#x2F;php-fpm.conf，翻到最后的 <em>Pool Definitions</em> 节，里面包含了 &#x2F;etc&#x2F;php-fpm.d&#x2F; 目录下的 .conf 文件</li>
-<li>打开 &#x2F;etc&#x2F;php-fpm.d&#x2F;<a target="_blank" rel="noopener" href="http://www.conf(只有这一个),修改/">www.conf（只有这一个），修改</a><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># 另一种模式 ondemand 工作方式是直接杀死空闲了 pm.process\_idle\_timeout 秒的闲置进程 pm = dynamic # 最大数根据内存情况设置，也不能太小 pm.max\_children = 10 pm.start\_servers = 3 # 最小和最大的闲置进程数，dynamic 模式只会杀死超过最大闲置进程数的进程 pm.min\_spare\_servers = 1 pm.max\_spare\_servers = 3 pm.max\_requests = 2048 request\_terminate\_timeout = 1200</span><br></pre></td></tr></table></figure></li>
-<li>重启 php-fpm <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl restart php-fpm</span><br></pre></td></tr></table></figure></li>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">yum install nginx -y</span><br><span class="line">systemctl <span class="built_in">enable</span> nginx</span><br><span class="line">systemctl start nginx</span><br></pre></td></tr></table></figure>
+
+<p>现在通过 ip 直接访问应该可以看过欢迎页（防火墙已开，参照 ssh 处设置防火墙）。<br>2.  可在配置文件的 http 块中添加一行 <em>server_tokens off;</em> 来隐藏 nginx 的版本。<br>3.  安装 php7</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">// yum list installed | grep php    // 新机肯定没装 php，装过的要先卸掉。看一眼</span><br><span class="line">rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm    // 更新 rpm 源</span><br><span class="line">yum install php70w php70w-fpm php70w-mysql -y</span><br><span class="line">systemctl <span class="built_in">enable</span> php-fpm</span><br><span class="line">systemctl start php-fpm</span><br></pre></td></tr></table></figure>
+
+
+<ol start="4">
+<li>配置 nginx。php-fpm 的默认端口为 9000，现在将它加入 nginx 的配置中（此处不用开防火墙，内部使用）。打开 nginx 配置文件</li>
 </ol>
-</li>
-</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vi /etc/nginx/nginx.conf</span><br></pre></td></tr></table></figure>
+
+<p>在 “server” 块的末尾加上</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">location ~ \.php$ &#123;</span><br><span class="line">      fastcgi_pass   127.0.0.1:9000;</span><br><span class="line">      fastcgi_index   index.php;</span><br><span class="line">      fastcgi_param  SCRIPT_FILENAME  $document_root<span class="variable">$fastcgi_script_name</span>;</span><br><span class="line">      include        fastcgi_params;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<p>保存退出并</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl restart nginx</span><br></pre></td></tr></table></figure>
+
+<p>重启 nginx。<br>5.  安装 MariaDB。有疑问可直接看 <a target="_blank" rel="noopener" href="https://www.vultr.com/docs/how-to-install-mariadb-10-1-on-centos-7">How to Install MariaDB 10.1 on CentOS 7</a>。<br>    1.  创建 yum repo ：粘贴以下全部后一次执行</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> &lt;&lt; <span class="string">EOF | sudo tee -a /etc/yum.repos.d/MariaDB.repo</span></span><br><span class="line"><span class="string"># MariaDB 10.1 CentOS repository list</span></span><br><span class="line"><span class="string"># http://downloads.mariadb.org/mariadb/repositories/</span></span><br><span class="line"><span class="string">[mariadb]</span></span><br><span class="line"><span class="string">name = MariaDB</span></span><br><span class="line"><span class="string">baseurl = http://yum.mariadb.org/10.1/centos7-amd64</span></span><br><span class="line"><span class="string">gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB</span></span><br><span class="line"><span class="string">gpgcheck=1</span></span><br><span class="line"><span class="string">EOF</span></span><br></pre></td></tr></table></figure>
+
+
+<pre><code>2.  yum 安装
+</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install MariaDB-server MariaDB-client -y</span><br></pre></td></tr></table></figure>
+
+
+<pre><code>3.  启动并加入自启动
+</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">systemctl start mariadb.service</span><br><span class="line">systemctl <span class="built_in">enable</span> mariadb.service</span><br></pre></td></tr></table></figure>
+
+
+<pre><code>4.  安全化配置
+</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/usr/bin/mysql_secure_installation</span><br></pre></td></tr></table></figure>
+
+<p>当前数据库 root 密码为空直接回车，然后设置新的 root 密码，脚本中所有 yes&#x2F;no 的选项都选 yes 即可，不放心的也可每个看一遍，都很直白的选项。<br>6.  ※ php-fpm进程过多，内存耗尽<br>    1.  打开 &#x2F;etc&#x2F;php-fpm.conf，翻到最后的 <em>Pool Definitions</em> 节，里面包含了 &#x2F;etc&#x2F;php-fpm.d&#x2F; 目录下的 .conf 文件<br>    2.  打开 &#x2F;etc&#x2F;php-fpm.d&#x2F;<a target="_blank" rel="noopener" href="http://www.conf(只有这一个),修改/">www.conf（只有这一个），修改</a></p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"># 另一种模式 ondemand 工作方式是直接杀死空闲了 pm.process_idle_timeout 秒的闲置进程</span><br><span class="line">pm = dynamic</span><br><span class="line"># 最大数根据内存情况设置，也不能太小</span><br><span class="line">pm.max_children = 10</span><br><span class="line">pm.start_servers = 3</span><br><span class="line"># 最小和最大的闲置进程数，dynamic 模式只会杀死超过最大闲置进程数的进程</span><br><span class="line">pm.min_spare_servers = 1</span><br><span class="line">pm.max_spare_servers = 3</span><br><span class="line">pm.max_requests = 2048</span><br><span class="line">request_terminate_timeout = 1200</span><br></pre></td></tr></table></figure>
+
+
+<pre><code>3.  重启 php-fpm 
+</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl restart php-fpm</span><br></pre></td></tr></table></figure>
+
+
+
 <h1 id="ss"><a href="#ss" class="headerlink" title="ss"></a>ss</h1><p>秋水逸冰一键脚本四合一版：<a target="_blank" rel="noopener" href="https://teddysun.com/486.html">Shadowsocks 一键安装脚本（四合一）</a></p>
 <h1 id="kcptun"><a href="#kcptun" class="headerlink" title="kcptun"></a>kcptun</h1><p>焕发第二春</p>
 <ol>
-<li>下载一键脚本进行安装<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget --no-check-certificate https://github.com/kuoruan/shell-scripts/raw/master/kcptun/kcptun.sh <span class="built_in">chmod</span> +x ./kcptun.sh ./kcptun.sh</span><br></pre></td></tr></table></figure></li>
+<li>下载一键脚本进行安装</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">wget --no-check-certificate https://github.com/kuoruan/shell-scripts/raw/master/kcptun/kcptun.sh</span><br><span class="line"><span class="built_in">chmod</span> +x ./kcptun.sh</span><br><span class="line">./kcptun.sh</span><br></pre></td></tr></table></figure>
+
+
+<ol start="2">
 <li>设置 kcptun 服务器端口，默认为 29900，有防火墙的话注意打开。</li>
 <li>设置加速地址，一般 ss 监听的端口都是形如 0.0.0.0:7777，所以 kcptun 的地址和加速端口分别填 127.0.0.1 和 &lt;你的ss端口&gt; 即可。</li>
 <li>设置 kcptun 用的密钥用于客户端和服务器认证，注意和 ss 的密码是两回事。</li>
 <li>剩下的可直接用脚本的默认设置。</li>
 <li>到 <a target="_blank" rel="noopener" href="https://github.com/xtaci/kcptun/releases">kcptun Release</a> 下载合适的客户端。</li>
-<li>以 windows 为例，可以<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">client\_windows\_amd64.exe -c config.json</span><br></pre></td></tr></table></figure>启动客户端， json 来自安装服务器时的输出，或是直接在命令行中一个个指定参数<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">client\_windows\_amd64.exe -r &lt;ip&gt;:&lt;port&gt; --key &lt;kcptun 的密码&gt; --sndwnd 512</span><br></pre></td></tr></table></figure>因为我的服务器 sndwnd 设为 512，和默认的 128 不同，所以重新指定，其他参数因为和默认值一样所以不用特地在命令行中指出了。</li>
-<li>这样就能顺利连接了。</li>
-<li>手机端<ol>
-<li>下载用于 ss 客户端的 <a target="_blank" rel="noopener" href="https://github.com/shadowsocks/kcptun-android/releases/">kcptun-Android</a> 插件：</li>
-<li>在 ss 的配置界面里选择插件为 kcptun。</li>
-<li>在插件下面的配置编辑框中填入服务器的配置内容（来自安装服务器时的输出，当然自己指定也是一样的）。</li>
-<li>在插件配置中补充<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">remoteaddr=&lt;你的服务器ip&gt;:&lt;你的 kcptun 端口&gt;</span><br></pre></td></tr></table></figure>。</li>
-<li>保持其他 ss 配置不变就能顺利连接了。</li>
-<li>如有不能连接的情况首先确保禁用 kcptun 插件时能正常使用 ss；然后再校对 kcptun 的各个参数。要是还没用的话把插件中的 UDP Fallback 打开，选另一个 ss 节点就能连上了。</li>
+<li>以 windows 为例，可以</li>
 </ol>
-</li>
-<li>※ 有疑难可以看<a target="_blank" rel="noopener" href="https://blog.kuoruan.com/110.html">作者的博客</a>。</li>
-</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">client_windows_amd64.exe -c config.json</span><br></pre></td></tr></table></figure>
+
+<p>启动客户端， json 来自安装服务器时的输出，或是直接在命令行中一个个指定参数</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">client_windows_amd64.exe -r &lt;ip&gt;:&lt;port&gt; --key &lt;kcptun 的密码&gt; --sndwnd 512</span><br></pre></td></tr></table></figure>
+
+<p>因为我的服务器 sndwnd 设为 512，和默认的 128 不同，所以重新指定，其他参数因为和默认值一样所以不用特地在命令行中指出了。<br>8.  这样就能顺利连接了。<br>9.  手机端<br>    1.  下载用于 ss 客户端的 <a target="_blank" rel="noopener" href="https://github.com/shadowsocks/kcptun-android/releases/">kcptun-Android</a> 插件：<br>    2.  在 ss 的配置界面里选择插件为 kcptun。<br>    3.  在插件下面的配置编辑框中填入服务器的配置内容（来自安装服务器时的输出，当然自己指定也是一样的）。<br>    4.  在插件配置中补充</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">remoteaddr=&lt;你的服务器ip&gt;:&lt;你的 kcptun 端口&gt;</span><br></pre></td></tr></table></figure>
+
+<p>。<br>    5.  保持其他 ss 配置不变就能顺利连接了。<br>    6.  如有不能连接的情况首先确保禁用 kcptun 插件时能正常使用 ss；然后再校对 kcptun 的各个参数。要是还没用的话把插件中的 UDP Fallback 打开，选另一个 ss 节点就能连上了。<br>10.  ※ 有疑难可以看<a target="_blank" rel="noopener" href="https://blog.kuoruan.com/110.html">作者的博客</a>。</p>
 <h1 id="docker"><a href="#docker" class="headerlink" title="docker"></a>docker</h1><p>这个其实是个可选项，一起塞在这里吧。</p>
 <p>docker 前置条件是 kernel 大于等于 3.10，centos 7 没问题。</p>
 <ol>
-<li>yum 安装<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum upgrade -y yum install docker -y systemctl start docker</span><br></pre></td></tr></table></figure></li>
-<li>设置镜像。打开 &#x2F;etc&#x2F;docker&#x2F;daemon.json，添加成<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123; <span class="string">&quot;registry-mirrors&quot;</span>: \[<span class="string">&quot;https://aj2rgad5.mirror.aliyuncs.com&quot;</span>\] &#125;</span><br></pre></td></tr></table></figure>保存退出。</li>
-<li>重启docker<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl daemon-reload systemctl restart docker.service</span><br></pre></td></tr></table></figure></li>
-<li>测试docker<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run hello-world</span><br></pre></td></tr></table></figure>应该有 “Hello from Docker!” 的输出。</li>
+<li>yum 安装</li>
 </ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">yum upgrade -y</span><br><span class="line">yum install docker -y</span><br><span class="line">systemctl start docker</span><br></pre></td></tr></table></figure>
+
+
+<ol start="2">
+<li>设置镜像。打开 &#x2F;etc&#x2F;docker&#x2F;daemon.json，添加成</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="string">&quot;registry-mirrors&quot;</span>: [<span class="string">&quot;https://aj2rgad5.mirror.aliyuncs.com&quot;</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>保存退出。<br>3.  重启docker</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">systemctl daemon-reload</span><br><span class="line">systemctl restart docker.service</span><br></pre></td></tr></table></figure>
+
+
+<ol start="4">
+<li>测试docker</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run hello-world</span><br></pre></td></tr></table></figure>
+
+<p>应该有 “Hello from Docker!” 的输出。</p>
 <p>到这里基本的部署就结束了，下面就把 wordpress 整个搬过来就好了。</p>
 <h1 id="迁移-wordpress"><a href="#迁移-wordpress" class="headerlink" title="迁移 wordpress"></a>迁移 wordpress</h1><p>一开始想尝试直接修改 wp 的站点链接后复制整个目录和数据库，结果失败了，页面样式一直没法正常显示，浪费了不少时间搞来搞去。于是走常规路线，将插件 UpdraftPlus Backup 备份的数据进行还原。</p>
 <ol>
-<li><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget http://wordpress.org/latest.tar.gz tar -xzf latest.tar.gz</span><br></pre></td></tr></table></figure>下载最新版 wp 并解压到安装目录。</li>
-<li>创建和原来相同的数据库和数据库用户。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">// 以数据库名=wordpress，用户名=wp@localhost 为例，原密码 <span class="built_in">pwd</span> 也保持一致 CREATE DATABASE wordpress; CREATE USER wp@localhost; SET PASSWORD FOR wp@localhost=PASSWORD(<span class="string">&quot;pwd&quot;</span>); GRANT ALL PRIVILEGES ON wordpress.\* TO wp@localhost IDENTIFIED BY <span class="string">&#x27;pwd&#x27;</span>; FLUSH PRIVILEGES;</span><br></pre></td></tr></table></figure></li>
-<li>设置 wp 目录下的 wp-config.php 文件。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/\*\* 数据库名 \*/ define(<span class="string">&#x27;DB\_NAME&#x27;</span>,<span class="string">&#x27;wordpress&#x27;</span>); /\*\* 数据库用户 \*/ define(<span class="string">&#x27;DB\_USER&#x27;</span>,<span class="string">&#x27;wordpress&#x27;</span>); /\*\* 数据库密码 \*/ define(<span class="string">&#x27;DB\_PASSWORD&#x27;</span>,<span class="string">&#x27;pwd&#x27;</span>);</span><br></pre></td></tr></table></figure></li>
+<li></li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">wget http://wordpress.org/latest.tar.gz</span><br><span class="line">tar -xzf latest.tar.gz</span><br></pre></td></tr></table></figure>
+
+<p>下载最新版 wp 并解压到安装目录。<br>2.  创建和原来相同的数据库和数据库用户。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">// 以数据库名=wordpress，用户名=wp@localhost 为例，原密码 <span class="built_in">pwd</span> 也保持一致</span><br><span class="line">CREATE DATABASE wordpress;</span><br><span class="line">CREATE USER wp@localhost;</span><br><span class="line">SET PASSWORD FOR wp@localhost=PASSWORD(<span class="string">&quot;pwd&quot;</span>);</span><br><span class="line">GRANT ALL PRIVILEGES ON wordpress.* TO wp@localhost IDENTIFIED BY <span class="string">&#x27;pwd&#x27;</span>;</span><br><span class="line">FLUSH PRIVILEGES;</span><br></pre></td></tr></table></figure>
+
+
+<ol start="3">
+<li>设置 wp 目录下的 wp-config.php 文件。</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">/** 数据库名 */</span><br><span class="line">define(<span class="string">&#x27;DB_NAME&#x27;</span>,<span class="string">&#x27;wordpress&#x27;</span>);</span><br><span class="line">/** 数据库用户 */</span><br><span class="line">define(<span class="string">&#x27;DB_USER&#x27;</span>,<span class="string">&#x27;wordpress&#x27;</span>);</span><br><span class="line">/** 数据库密码 */</span><br><span class="line">define(<span class="string">&#x27;DB_PASSWORD&#x27;</span>,<span class="string">&#x27;pwd&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+
+<ol start="4">
 <li>将 wp 所在整个目录的所有权转移给 apache 用户。以便 wp 能正常运行。</li>
 <li>访问 <yoursite>&#x2F;wp-admin&#x2F;install.php 进行安装。</li>
 <li>安装 UpdraftPlus Backup 插件并连接原来进行备份的云端账号（如果是用其他方式备份的保持相同即可），导入账号中的备份数据。</li>
@@ -353,15 +457,28 @@
 <p>做 wp 的修改的时候要注意 wp-content&#x2F;cache 目录下的缓存，会导致改动的效果不会立刻展现。</p>
 <p>最后强烈推荐安装 Classic Editor 插件回复经典编辑器界面，md 辣鸡 Gutenberg 浪费我时间。</p>
 <h1 id="Ex-frp-with-nginx"><a href="#Ex-frp-with-nginx" class="headerlink" title="Ex: frp with nginx"></a>Ex: frp with nginx</h1><p>让 nginx 把 443 的 https 连接转发到 frps 做内网穿透。</p>
-<p><a target="_blank" rel="noopener" href="https://github.com/fatedier/frp/releases">下载</a>最新版 frp。注意服务器和客户端的软件版本要保持一致。现在的版本加入了 systemd 的服务脚本，使用更方便了。以服务器为例，将解压后的 <em>systemd&#x2F;frps.service</em> 复制到 <em>&#x2F;etc&#x2F;systemd&#x2F;system</em> 下，<em>frps</em> 复制到 <em>&#x2F;usr&#x2F;bin&#x2F;</em> 下，<em>frps.ini</em> 复制到 <em>&#x2F;etc&#x2F;frp&#x2F;</em> 下，最后 <em>systemctl enable frps_、_systemctl start frps</em> 即可。<br>基本的配置就跳过了，就说下 nginx 转发的事。首先在 frps 配置中修改设置<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vhost\_https\_port = 9100</span><br></pre></td></tr></table></figure>随后在 nginx 配置中添加这么一个 server 块。<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">server &#123; listen 443 ssl http2; listen \[::\]:443 ssl http2; server\_name &lt;你要映射的外网域名&gt;; ssl\_certificate &quot;&lt;tls 证书&gt;.crt&quot;; ssl\_certificate\_key &quot;&lt;tls 证书&gt;.key&quot;; ssl\_session\_cache shared:SSL:1m; ssl\_session\_timeout 10m; ssl\_ciphers HIGH:!aNULL:!MD5; ssl\_prefer\_server\_ciphers on; location / &#123; resolver 8.8.8.8; proxy\_ssl\_server\_name on; proxy\_set\_header X-Real-IP $remote\_addr; proxy\_set\_header X-Forwarded-For $proxy\_add\_x\_forwarded\_for; proxy\_set\_header X-Forwarded-Proto $scheme; proxy\_set\_header Host $host; proxy\_pass https://$host:9100; # 与 frps 中的端口保持一致即可 &#125; &#125;</span><br></pre></td></tr></table></figure>最后在 frpc（客户端）配置中加入<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">\[https1\] type = https local\_port = 443 ; 客户端本地服务使用的端口 custom\_domains = &lt;你要映射的外网域名&gt;</span><br></pre></td></tr></table></figure>就可以顺利连接了。</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/fatedier/frp/releases">下载</a>最新版 frp。注意服务器和客户端的软件版本要保持一致。现在的版本加入了 systemd 的服务脚本，使用更方便了。以服务器为例，将解压后的 <em>systemd&#x2F;frps.service</em> 复制到 <em>&#x2F;etc&#x2F;systemd&#x2F;system</em> 下，<em>frps</em> 复制到 <em>&#x2F;usr&#x2F;bin&#x2F;</em> 下，<em>frps.ini</em> 复制到 <em>&#x2F;etc&#x2F;frp&#x2F;</em> 下，最后 <em>systemctl enable frps_、_systemctl start frps</em> 即可。<br>基本的配置就跳过了，就说下 nginx 转发的事。首先在 frps 配置中修改设置</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vhost_https_port = 9100</span><br></pre></td></tr></table></figure>
+
+<p>随后在 nginx 配置中添加这么一个 server 块。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">    listen       443 ssl http2;</span><br><span class="line">    listen       [::]:443 ssl http2;</span><br><span class="line">    server_name &lt;你要映射的外网域名&gt;;</span><br><span class="line">    ssl_certificate &quot;&lt;tls 证书&gt;.crt&quot;;</span><br><span class="line">    ssl_certificate_key &quot;&lt;tls 证书&gt;.key&quot;;</span><br><span class="line">    ssl_session_cache shared:SSL:1m;</span><br><span class="line">    ssl_session_timeout  10m;</span><br><span class="line">    ssl_ciphers HIGH:!aNULL:!MD5;</span><br><span class="line">    ssl_prefer_server_ciphers on;</span><br><span class="line">    location / &#123;</span><br><span class="line">        resolver 8.8.8.8;</span><br><span class="line">        proxy_ssl_server_name on;</span><br><span class="line">        proxy_set_header X-Real-IP $remote_addr;</span><br><span class="line">        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;</span><br><span class="line">        proxy_set_header X-Forwarded-Proto $scheme;</span><br><span class="line">        proxy_set_header Host $host;</span><br><span class="line">        proxy_pass https://$host:9100;    # 与 frps 中的端口保持一致即可</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>最后在 frpc（客户端）配置中加入</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[https1]</span><br><span class="line">type = https</span><br><span class="line">local_port = 443    ; 客户端本地服务使用的端口</span><br><span class="line">custom_domains = &lt;你要映射的外网域名&gt;</span><br></pre></td></tr></table></figure>
+
+<p>就可以顺利连接了。</p>
 <p>这里省略了基本的配置过程，所以在配置 nginx 转发前应确保正常的比如 tcp 转发能够进行，最后加入上面的配置就没问题了。</p>
-<p>更新：一开始连接都是正常的，第二天才出现了 502 bad gateway 的错误，原因在于 frp 客户端和 nginx 上使用的证书不是同一份，导致 ssl 握手失败，换掉证书就正常了。还有一个方法就是将 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">proxy\_set\_header Host $host</span><br></pre></td></tr></table></figure>的 $host 改为 frp 客户端上证书对应的域名。</p>
+<p>更新：一开始连接都是正常的，第二天才出现了 502 bad gateway 的错误，原因在于 frp 客户端和 nginx 上使用的证书不是同一份，导致 ssl 握手失败，换掉证书就正常了。还有一个方法就是将 </p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">proxy_set_header Host $host</span><br></pre></td></tr></table></figure>
+
+<p>的 $host 改为 frp 客户端上证书对应的域名。</p>
 
     </div>
 
     
     
     
+
         
 
 <div>
@@ -404,8 +521,8 @@
       <i class="fa fa-chevron-left"></i> pixivspider – P 站爬虫工具
     </a></div>
       <div class="post-nav-item">
-    <a href="/722/" rel="next" title="[ 注册 vultr 赠送 $300 ]">
-      [ 注册 vultr 赠送 $300 ] <i class="fa fa-chevron-right"></i>
+    <a href="/723/" rel="next" title="使用 CMake 编译 vc90 版 libphonenumber">
+      使用 CMake 编译 vc90 版 libphonenumber <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>
@@ -481,20 +598,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">112</span>
+          <span class="site-state-item-count">117</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-count">13</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">281</span>
+        <span class="site-state-item-count">298</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -525,19 +642,19 @@
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">flandre</span>
+  <span class="author" itemprop="copyrightHolder">flandre · <a href="https://flandre-scarlet.moe/blog/" rel="noopener" target="_blank">主站</a></span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">389k</span>
+    <span title="站点总字数">414k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">5:54</span>
+    <span title="站点阅读时长">6:16</span>
 </div>
   <div class="powered-by">Powered by love
   </div>
@@ -588,6 +705,8 @@
 
 
 
+
+  
 
   
 

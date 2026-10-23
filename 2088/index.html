@@ -10,7 +10,6 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
   <link rel="mask-icon" href="/images/logo.svg" color="#222">
-  <meta name="google-site-verification" content="n4HzIaQ2ebAeP_VrwiqS7s6qfe8RKXwGfnHiPjz3Z20">
 
 <link rel="stylesheet" href="/css/main.css">
 
@@ -25,7 +24,7 @@
   <meta name="description" content="想着记录一下平时分析过的 crash dump，作为一个总结和参考。不过因为涉及到公司代码，所以一些细节没法描述太明白，crash 堆栈和对应的源代码也不方便贴出来了。这里先整理了几个比较有代表性的，其他一眼就能看出问题的就不写到这里了。 2023.Q3 ui 代码没有清理 framework api 指针当用户开启计算机锁屏时自动切断 channel 的策略并触发了锁屏行为后，UI 会调用 ap">
 <meta property="og:type" content="article">
 <meta property="og:title" content="部分 Crash 分析记录">
-<meta property="og:url" content="https://kerisa.github.io/2088/index.html">
+<meta property="og:url" content="https://flandre-scarlet.moe/blog/2088/">
 <meta property="og:site_name" content="Re: Memory (mirror)">
 <meta property="og:description" content="想着记录一下平时分析过的 crash dump，作为一个总结和参考。不过因为涉及到公司代码，所以一些细节没法描述太明白，crash 堆栈和对应的源代码也不方便贴出来了。这里先整理了几个比较有代表性的，其他一眼就能看出问题的就不写到这里了。 2023.Q3 ui 代码没有清理 framework api 指针当用户开启计算机锁屏时自动切断 channel 的策略并触发了锁屏行为后，UI 会调用 ap">
 <meta property="og:locale" content="zh_CN">
@@ -204,11 +203,11 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Programs/" itemprop="url" rel="index"><span itemprop="name">Programs</span></a>
+                  <a href="/categories/programs/" itemprop="url" rel="index"><span itemprop="name">程序</span></a>
                 </span>
                   ，
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Programs/Debug/" itemprop="url" rel="index"><span itemprop="name">Debug</span></a>
+                  <a href="/categories/programs/debug/" itemprop="url" rel="index"><span itemprop="name">Debug</span></a>
                 </span>
             </span>
 
@@ -218,7 +217,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>5.3k</span>
+              <span>5.4k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -241,7 +240,10 @@
 <h3 id="2023-Q3-ui-代码没有清理-framework-api-指针"><a href="#2023-Q3-ui-代码没有清理-framework-api-指针" class="headerlink" title="2023.Q3 ui 代码没有清理 framework api 指针"></a>2023.Q3 ui 代码没有清理 framework api 指针</h3><p>当用户开启计算机锁屏时自动切断 channel 的策略并触发了锁屏行为后，UI 会调用 api 切断所有 channel，并且立即清理上层保存的数据，但问题就在这个清理上。 原本调用触发切断的 api 后会有一个回调通知，上层是在回调里做清理动作的。但是现在代码中主动调用了一个 _channel_mgr.Clear();_，这个 <em>Clear()</em> 函数里清理的不完全，相比之下另一个成员函数 <em>Delete(channel_id)</em> 才是做到了彻底清理。同时回调函数里还做了许多额外的清理操作，这里一个 <em>Clear()</em> 把其他操作也都忽略掉了。 其实究其原因就是外部保存了 ChannelItem 的裸指针，但是又存在这样一个 corner case 没有将它清理掉，等 ChannelItem 实例析构后这个指针就野了。关键在于怎么发现这个代码路径。 因为 framework 层在释放前总是会通过回调函数通知 UI 清理，费好大劲排除 framework 没有漏掉的地方后把目标放到了 UI 上。来来回回翻代码后才发现这个地方。</p>
 <span id="more"></span>
 <h3 id="2024-Q2-释放对象后没有通知导致其他类持有野指针"><a href="#2024-Q2-释放对象后没有通知导致其他类持有野指针" class="headerlink" title="2024.Q2 释放对象后没有通知导致其他类持有野指针"></a>2024.Q2 释放对象后没有通知导致其他类持有野指针</h3><p>某个产品在 web 上有个 move division 操作，move 后 client 就会收到用户被删除的通知，随后 client 会反初始化该产品使用到的相关组件和资源。之后只要用户退出到登录界面，再重新登录时 client 就会 crash。 查看堆栈发现跟 ipc 对象有关，ipc 资源也是上面 client 清理操作的一部分。代码中这个类是 ipc 消息的一个 handler，保存新的 ipc 指针前会将 this 指针从当前 ipcserver 的 handlers 里面移除，而堆栈就是挂在这里，可见是前一个 ipcserver 指针野掉了但是没通知这个类去清理。 自从 framework 代码重构后到处都在设置 ipcserver，一时间很难从日志或者代码中看出哪一个操作忘记通知到这个类做清除操作。好在问题容易复现，调试几次后发现是在 client 收到删用户的通知后做退出清理时，ipc 实例终止并释放后没有通知相应的回调做指针的清理，导致这个 module 对象中持有的 ipcserver 指针失效。真是灯下黑了。这个问题同上一个一样，原因是挺直白的，但是要从众多代码里找到触发条件需要耐心和仔细去分析。 修改只要加上指针清理的通知即可。 指针设置的地方多了之后就很难管理和一一通知更新，可以考虑用 shared_ptr + weal_ptr 组合避免指针失效。也可以使 ipcserver 指针成为一个创建后就不变的变量，它内部实际的 ipc 连接再根据需要创建或断开即可。或者就一直保持着这个通道，没有业务就不发数据，直到下次重启 client。总之避免需要通知所有对象更新指针的操作。</p>
-<h3 id="2024-Q2-容器访问越界"><a href="#2024-Q2-容器访问越界" class="headerlink" title="2024.Q2 容器访问越界"></a>2024.Q2 容器访问越界</h3><p>这个问题在三个月前的版本上线后就出现了，不过 iOS 平台我这边关注的少，平时看 windows 比较多，毕竟用户量大。然后公司 QA team 也没有发现这种问题，所以最近才从 iOS team 那边了解到情况。但是和同事探讨后发现，这个问题应该是早在大半年前就出现了，但是那个时候数量很少也就没有引起关注，三个月前 iOS 那边做了一些优化后 crash 的数量增加了很多，这才引起关注。而且优化后 crash 堆栈有所变化，一下子还认不出来。 其实怀疑是不是跟上面 Mac 那个野指针 crash 一个原因，只不过 iOS 的堆栈跟它不太一样。看了汇编后发现是挂在访问容器元素的虚表，准备做虚函数调用的地方——所以我才这样想了，然后花了不少时间找是不是 ipc_server 的 handler 注册后但是自身析构时又忘记清除了。找来找去并没有头绪，半放弃状态了。最后还是找领导一起研究了一会然后点醒了我：有可能是 ipc_server 类自己析构了，然后通过 vector.end() 作为终止条件的 for 循环就会越界，越界后那迭代器拿着的可不就是一个“野指针”么。看来我的思维还是不够开阔，有些僵化了。 不过 iOS 上相应功能还在开发，所以很可惜跟上面 Mac 那个析构并不是同一个原因。 ipc 通常有一个 ipc_server 和 ipc_client，使用的结构就是常见的生产者消费者模型，各自会有一个 HeartBeat() 定期从队列里取出数据处理。但 iOS 上有个问题，它们会立即触发一次 HeartBeat() 以加速消息的处理，因为实际上是同一个进程，这样可以避免等待下一次心跳而立即处理消息。比如有这样一个 Flush() 函数，里面先后调用一次 ipc_client 和 ipc_server 的 HeartBeat() 函数 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">T::HeartBeat</span><span class="params">()</span> </span>&#123; <span class="comment">// ... other codes for (auto it = handers.begin(); it != handers.end(); ++it) &#123; if (\*it) (\*it)-&gt;HandleXXX(...); &#125; &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Flush</span><span class="params">()</span> </span>&#123; <span class="keyword">if</span> (ipc\_client) ipc\_client-&gt;<span class="built_in">HeartBeat</span>(); <span class="keyword">if</span> (ipc\_server) ipc\_server-&gt;<span class="built_in">HeartBeat</span>(); &#125;</span><br></pre></td></tr></table></figure> 考虑这种场景：</p>
+<h3 id="2024-Q2-容器访问越界"><a href="#2024-Q2-容器访问越界" class="headerlink" title="2024.Q2 容器访问越界"></a>2024.Q2 容器访问越界</h3><p>这个问题在三个月前的版本上线后就出现了，不过 iOS 平台我这边关注的少，平时看 windows 比较多，毕竟用户量大。然后公司 QA team 也没有发现这种问题，所以最近才从 iOS team 那边了解到情况。但是和同事探讨后发现，这个问题应该是早在大半年前就出现了，但是那个时候数量很少也就没有引起关注，三个月前 iOS 那边做了一些优化后 crash 的数量增加了很多，这才引起关注。而且优化后 crash 堆栈有所变化，一下子还认不出来。 其实怀疑是不是跟上面 Mac 那个野指针 crash 一个原因，只不过 iOS 的堆栈跟它不太一样。看了汇编后发现是挂在访问容器元素的虚表，准备做虚函数调用的地方——所以我才这样想了，然后花了不少时间找是不是 ipc_server 的 handler 注册后但是自身析构时又忘记清除了。找来找去并没有头绪，半放弃状态了。最后还是找领导一起研究了一会然后点醒了我：有可能是 ipc_server 类自己析构了，然后通过 vector.end() 作为终止条件的 for 循环就会越界，越界后那迭代器拿着的可不就是一个“野指针”么。看来我的思维还是不够开阔，有些僵化了。 不过 iOS 上相应功能还在开发，所以很可惜跟上面 Mac 那个析构并不是同一个原因。 ipc 通常有一个 ipc_server 和 ipc_client，使用的结构就是常见的生产者消费者模型，各自会有一个 HeartBeat() 定期从队列里取出数据处理。但 iOS 上有个问题，它们会立即触发一次 HeartBeat() 以加速消息的处理，因为实际上是同一个进程，这样可以避免等待下一次心跳而立即处理消息。比如有这样一个 Flush() 函数，里面先后调用一次 ipc_client 和 ipc_server 的 HeartBeat() 函数 </p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">T::HeartBeat</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="comment">// ... other codes</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">auto</span> it = handers.<span class="built_in">begin</span>(); it != handers.<span class="built_in">end</span>(); ++it) &#123;</span><br><span class="line">    <span class="keyword">if</span> (*it) (*it)-&gt;<span class="built_in">HandleXXX</span>(...);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Flush</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (ipc_client) ipc_client-&gt;<span class="built_in">HeartBeat</span>();</span><br><span class="line">  <span class="keyword">if</span> (ipc_server) ipc_server-&gt;<span class="built_in">HeartBeat</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p> 考虑这种场景：</p>
 <ol>
 <li>有消息从 ipc_client 发到 ipc_server</li>
 <li>常规触发（比如通过 idle 循环或定时器等） ipc_server 的 HeartBeat() 函数，处理队列里的消息</li>
@@ -254,13 +256,23 @@
 </ol>
 <p>从第 4 步开始就有 HeartBeat() 重入的情况了。 HeartBeat() 代码中处理 ipc 消息就是 for 循环遍历 handler 的 vector，实际使用中 handler 会在某一些回调函数里继续增加删除其他 handlers，而我们又知道 vector 的 push_back 可能会造成迭代器失效，那么当前 handler 返回后迭代器 ++ 时就可能会挂掉。 之前为了避免这个问题我们简单地将 vector reverse 了相对大的数量，同时移除 handler 时只把指针置空，不从 vector 里 erase。erase 操作延迟到 HeartBeat() 函数返回之前进行。 而现在 iOS 上通过 Flush() 函数让 HeartBeat() 里也嵌套调用了 HeartBeat()，那么当后一个 HeartBeat() 中满足条件 erase 指针减小了 vector 的 size，之后函数返回，前面一个循环中的迭代器偏移可能就超出了 end() 的位置，也就会访问越界，里面的数据自然就是一个“野指针”了。 比如 vector 里有 10 个元素，当前循环到第 6 个，中途触发 erase 把元素删到剩 3 个，然后 it !&#x3D; vec.end() 判断无法终止循环，因为 it 已经大于 end() 了。 <img src="/assets/imgs/2024/07/%E9%83%A8%E5%88%86Crash%E5%88%86%E6%9E%90%E8%AE%B0%E5%BD%95-1.png" alt="crash-poc"></p>
 <p>framework 做回调通知时还是需要留意，谁也不知道其他模块会在这些回调函数里写了什么代码，甚至在回调里删除 framework 对象的也有。</p>
-<h3 id="2024-Q3-模板定义不同导致访问偏移错误"><a href="#2024-Q3-模板定义不同导致访问偏移错误" class="headerlink" title="2024.Q3 模板定义不同导致访问偏移错误"></a>2024.Q3 模板定义不同导致访问偏移错误</h3><p>某一天发现 app 的新包启动就 crash，分析 dump 发现挂了给某个类设置 callback 指针的地方。但是却很奇怪，汇编里看到设置指针的目标地址偏移却是错的。代码中设置的偏移是 this+234 byte，但是用 dt 命令查看该类的 callback 成员实际上是位于 this+264 byte。因为这个 callback 是自带引用计数的，那么当 234 byte 位置上数据是非 0，设置不同指针时就会自动对“原指针”减引用计数，而实际 234 byte 上的数据根本不是合法的指针，那么自然也就会导致 crash 了。 接下来主要就看为什么会编译出来会有偏移错误的情况了。这个其实跟跨模块访问对象的情况挺像，举例说模块 A 的工厂函数生产对象 A，它用了如下的新定义， <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">SA</span> &#123; <span class="type">int</span> i1\[<span class="number">10</span>\]; <span class="type">int</span> i2; <span class="type">int</span> i3; &#125;</span><br></pre></td></tr></table></figure> 而模块 B 包含了模块 A 老版本的头文件，里面的定义是 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">SA</span> &#123; <span class="type">int</span> i1\[<span class="number">6</span>\]; <span class="type">int</span> i2; <span class="type">int</span> i3; &#125;</span><br></pre></td></tr></table></figure> 那么当 B 和新版本的 A 一起运行，B 访问的 i3 实际上是 i1[7]，那自然就会有问题。 而这次不仅仅是跨模块，在同一模块内部也会发生这种现象，下面来看这段代码，它们各自写在不同的 .cpp 和 .h 里。 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// vvv header1.h vvv #ifndef HEADER\_H\_ #define HEADER\_H\_ #include &lt;string&gt; template&lt;typename... Args&gt; struct TestTemplate &#123; int i1&#123;1&#125;; int i2&#123;2&#125;; std::string s1; int i3&#123;3&#125;; &#125;; #endif // ^^^ header1.h ^^^</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// vvv header2.h vvv #ifndef HEADER\_H\_ #define HEADER\_H\_ template&lt;typename... Args&gt; struct TestTemplate &#123; char i1&#123;1&#125;; char i2&#123;2&#125;; &#125;; #endif // ^^^ header2.h ^^^</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// vvv src2.h vvv #pragma once #include &quot;header2.h&quot; struct Wrap &#123; TestTemplate&lt;int&gt; member; &#125;; Wrap\* CreateTestTemplate(); // ^^^ src2.h ^^^</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// vvv src2.cpp vvv #include &quot;src2.h&quot; Wrap\* CreateTestTemplate() &#123; return new Wrap(); &#125; // ^^^ src2.cpp ^^^</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// vvv src1.cpp vvv #include &quot;header1.h&quot; #include &quot;src2.h&quot; int main() &#123; TestTemplate&lt;std::string&gt; s1; Wrap\* s2 = CreateTestTemplate(); s2-&gt;member.i3 = 33; // memory corruption return 0; &#125; // ^^^ src1.cpp ^^^</span></span><br></pre></td></tr></table></figure> 关键就在它们用了相同的 include guard，因为 main 函数中的 s2 是在 src2.cpp 中以 header2 的定义创建，而在 main 函数里却按照 header1 的方式去访问，那就会导致访问到错误的地址。 <img src="/assets/imgs/2024/09/%E9%83%A8%E5%88%86Crash%E5%88%86%E6%9E%90%E8%AE%B0%E5%BD%95-2.png"> 这个问题实际上是我们代码仓库里在另一个路径中藏了一份老版本的实现一直没有删，然后其他同事在改代码过程中偶然使其他 cpp 包含到了这个头文件，最后形成了示例代码中的局面，好在问题很容易复现，所以查起来还是省力的。 其实不写这个 include guard，直接用 #pragma once 就行，编译器编译时就会直接报符号重定义了。</p>
+<h3 id="2024-Q3-模板定义不同导致访问偏移错误"><a href="#2024-Q3-模板定义不同导致访问偏移错误" class="headerlink" title="2024.Q3 模板定义不同导致访问偏移错误"></a>2024.Q3 模板定义不同导致访问偏移错误</h3><p>某一天发现 app 的新包启动就 crash，分析 dump 发现挂了给某个类设置 callback 指针的地方。但是却很奇怪，汇编里看到设置指针的目标地址偏移却是错的。代码中设置的偏移是 this+234 byte，但是用 dt 命令查看该类的 callback 成员实际上是位于 this+264 byte。因为这个 callback 是自带引用计数的，那么当 234 byte 位置上数据是非 0，设置不同指针时就会自动对“原指针”减引用计数，而实际 234 byte 上的数据根本不是合法的指针，那么自然也就会导致 crash 了。 接下来主要就看为什么会编译出来会有偏移错误的情况了。这个其实跟跨模块访问对象的情况挺像，举例说模块 A 的工厂函数生产对象 A，它用了如下的新定义， </p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">SA</span> &#123;</span><br><span class="line">  <span class="type">int</span> i1[<span class="number">10</span>];</span><br><span class="line">  <span class="type">int</span> i2;</span><br><span class="line">  <span class="type">int</span> i3;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p> 而模块 B 包含了模块 A 老版本的头文件，里面的定义是 </p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">SA</span> &#123;</span><br><span class="line">  <span class="type">int</span> i1[<span class="number">6</span>];</span><br><span class="line">  <span class="type">int</span> i2;</span><br><span class="line">  <span class="type">int</span> i3;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p> 那么当 B 和新版本的 A 一起运行，B 访问的 i3 实际上是 i1[7]，那自然就会有问题。 而这次不仅仅是跨模块，在同一模块内部也会发生这种现象，下面来看这段代码，它们各自写在不同的 .cpp 和 .h 里。 </p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// vvv header1.h vvv</span></span><br><span class="line"><span class="meta">#<span class="keyword">ifndef</span> HEADER_H_</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> HEADER_H_</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string&gt;</span></span></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span>... Args&gt;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">TestTemplate</span> &#123;</span><br><span class="line">  <span class="type">int</span> i1&#123;<span class="number">1</span>&#125;;</span><br><span class="line">  <span class="type">int</span> i2&#123;<span class="number">2</span>&#125;;</span><br><span class="line">  std::string s1;</span><br><span class="line">  <span class="type">int</span> i3&#123;<span class="number">3</span>&#125;;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"><span class="comment">// ^^^ header1.h ^^^</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// vvv header2.h vvv</span></span><br><span class="line"><span class="meta">#<span class="keyword">ifndef</span> HEADER_H_</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> HEADER_H_</span></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span>... Args&gt;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">TestTemplate</span> &#123;</span><br><span class="line">  <span class="type">char</span> i1&#123;<span class="number">1</span>&#125;;</span><br><span class="line">  <span class="type">char</span> i2&#123;<span class="number">2</span>&#125;;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"><span class="comment">// ^^^ header2.h ^^^</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// vvv src2.h vvv</span></span><br><span class="line"><span class="meta">#<span class="keyword">pragma</span> once</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;header2.h&quot;</span></span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Wrap</span> &#123;</span><br><span class="line">  TestTemplate&lt;<span class="type">int</span>&gt; member;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="function">Wrap* <span class="title">CreateTestTemplate</span><span class="params">()</span></span>;</span><br><span class="line"><span class="comment">// ^^^ src2.h ^^^</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// vvv src2.cpp vvv</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;src2.h&quot;</span></span></span><br><span class="line"><span class="function">Wrap* <span class="title">CreateTestTemplate</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Wrap</span>();</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// ^^^ src2.cpp ^^^</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// vvv src1.cpp vvv</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;header1.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;src2.h&quot;</span></span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  TestTemplate&lt;std::string&gt; s1;</span><br><span class="line">  Wrap* s2 = <span class="built_in">CreateTestTemplate</span>();</span><br><span class="line">  s2-&gt;member.i3 = <span class="number">33</span>;  <span class="comment">// memory corruption</span></span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// ^^^ src1.cpp ^^^</span></span><br></pre></td></tr></table></figure>
+
+<p> 关键就在它们用了相同的 include guard，因为 main 函数中的 s2 是在 src2.cpp 中以 header2 的定义创建，而在 main 函数里却按照 header1 的方式去访问，那就会导致访问到错误的地址。 <img src="/assets/imgs/2024/09/%E9%83%A8%E5%88%86Crash%E5%88%86%E6%9E%90%E8%AE%B0%E5%BD%95-2.png"> 这个问题实际上是我们代码仓库里在另一个路径中藏了一份老版本的实现一直没有删，然后其他同事在改代码过程中偶然使其他 cpp 包含到了这个头文件，最后形成了示例代码中的局面，好在问题很容易复现，所以查起来还是省力的。 其实不写这个 include guard，直接用 #pragma once 就行，编译器编译时就会直接报符号重定义了。</p>
 
     </div>
 
     
     
     
+
         
 
 <div>
@@ -371,20 +383,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">112</span>
+          <span class="site-state-item-count">117</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-count">13</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">281</span>
+        <span class="site-state-item-count">298</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -415,19 +427,19 @@
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">flandre</span>
+  <span class="author" itemprop="copyrightHolder">flandre · <a href="https://flandre-scarlet.moe/blog/" rel="noopener" target="_blank">主站</a></span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">389k</span>
+    <span title="站点总字数">414k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">5:54</span>
+    <span title="站点阅读时长">6:16</span>
 </div>
   <div class="powered-by">Powered by love
   </div>
@@ -478,6 +490,8 @@
 
 
 
+
+  
 
   
 

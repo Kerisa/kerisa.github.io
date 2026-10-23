@@ -10,7 +10,6 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
   <link rel="mask-icon" href="/images/logo.svg" color="#222">
-  <meta name="google-site-verification" content="n4HzIaQ2ebAeP_VrwiqS7s6qfe8RKXwGfnHiPjz3Z20">
 
 <link rel="stylesheet" href="/css/main.css">
 
@@ -25,7 +24,7 @@
   <meta name="description" content="第6章 修改代码的技术新生方法:*   将新增代码形成一个新的方法，并在修改点对其进行调用。  类的依赖关系太恶劣时，可考虑将新方法作为公有静态方法，并将this作为参数传递（便于测试）  新生类:*   确定修改点后在修改点生成新的类，需要将原来的局部变量传递时则将其传递给构造函数，同时有需要返回结果则构建对应的方法并进行调用来获得结果。  优点在于进行侵入型较强的修改时能有更大的自信继续进行，">
 <meta property="og:type" content="article">
 <meta property="og:title" content="《修改代码的艺术》读书笔记">
-<meta property="og:url" content="https://kerisa.github.io/1760/index.html">
+<meta property="og:url" content="https://flandre-scarlet.moe/blog/1760/">
 <meta property="og:site_name" content="Re: Memory (mirror)">
 <meta property="og:description" content="第6章 修改代码的技术新生方法:*   将新增代码形成一个新的方法，并在修改点对其进行调用。  类的依赖关系太恶劣时，可考虑将新方法作为公有静态方法，并将this作为参数传递（便于测试）  新生类:*   确定修改点后在修改点生成新的类，需要将原来的局部变量传递时则将其传递给构造函数，同时有需要返回结果则构建对应的方法并进行调用来获得结果。  优点在于进行侵入型较强的修改时能有更大的自信继续进行，">
 <meta property="og:locale" content="zh_CN">
@@ -202,7 +201,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Book-notes/" itemprop="url" rel="index"><span itemprop="name">Book-notes</span></a>
+                  <a href="/categories/book-notes/" itemprop="url" rel="index"><span itemprop="name">读书笔记</span></a>
                 </span>
             </span>
 
@@ -487,8 +486,12 @@
 <p>替换实例变量</p>
 <ol>
 <li>C++不支持构造函数中转发虚函数，故不支持“提取并重写工厂方法”</li>
-<li>改用单独写一个函数来销毁原先创建出的变量并直接换入新的变量。<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">Blendingpen::supersedeParameter</span><span class="params">(Parameter \*newParameter)</span> </span>&#123; <span class="keyword">delete</span> m\_param; m\_param = newParameter; &#125;</span><br></pre></td></tr></table></figure></li>
+<li>改用单独写一个函数来销毁原先创建出的变量并直接换入新的变量。</li>
 </ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">Blendingpen::supersedeParameter</span><span class="params">(Parameter *newParameter)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">delete</span> m_param;</span><br><span class="line">  m_param = newParameter;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
 <p>模板重定义</p>
 <ol>
 <li>在测试类中找出想替换的特性</li>
@@ -511,6 +514,7 @@
     
     
     
+
         
 
 <div>
@@ -622,20 +626,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">112</span>
+          <span class="site-state-item-count">117</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-count">13</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">281</span>
+        <span class="site-state-item-count">298</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -666,19 +670,19 @@
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">flandre</span>
+  <span class="author" itemprop="copyrightHolder">flandre · <a href="https://flandre-scarlet.moe/blog/" rel="noopener" target="_blank">主站</a></span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">389k</span>
+    <span title="站点总字数">414k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">5:54</span>
+    <span title="站点阅读时长">6:16</span>
 </div>
   <div class="powered-by">Powered by love
   </div>
@@ -729,6 +733,8 @@
 
 
 
+
+  
 
   
 

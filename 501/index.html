@@ -10,7 +10,6 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
   <link rel="mask-icon" href="/images/logo.svg" color="#222">
-  <meta name="google-site-verification" content="n4HzIaQ2ebAeP_VrwiqS7s6qfe8RKXwGfnHiPjz3Z20">
 
 <link rel="stylesheet" href="/css/main.css">
 
@@ -25,7 +24,7 @@
   <meta name="description" content="作为练手的 160 个 CrackMe 系列整理分析">
 <meta property="og:type" content="article">
 <meta property="og:title" content="CrackMe 反汇编练习之 024、026">
-<meta property="og:url" content="https://kerisa.github.io/501/index.html">
+<meta property="og:url" content="https://flandre-scarlet.moe/blog/501/">
 <meta property="og:site_name" content="Re: Memory (mirror)">
 <meta property="og:description" content="作为练手的 160 个 CrackMe 系列整理分析">
 <meta property="og:locale" content="zh_CN">
@@ -39,7 +38,7 @@
 <meta property="og:image" content="https://kerisa.github.io/assets/imgs/2018/07/crackme-26-5.png">
 <meta property="og:image" content="https://kerisa.github.io/assets/imgs/2018/07/crackme-26-6.png">
 <meta property="article:published_time" content="2018-07-15T12:01:23.000Z">
-<meta property="article:modified_time" content="2026-03-01T12:20:03.712Z">
+<meta property="article:modified_time" content="2019-05-13T16:53:22.000Z">
 <meta property="article:author" content="flandre">
 <meta property="article:tag" content="CrackMe">
 <meta property="article:tag" content="反汇编">
@@ -204,7 +203,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-03-01 20:20:03" itemprop="dateModified" datetime="2026-03-01T20:20:03+08:00">2026-03-01</time>
+                <time title="修改时间：2019-05-14 00:53:22" itemprop="dateModified" datetime="2019-05-14T00:53:22+08:00">2019-05-14</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -212,11 +211,11 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Programs/" itemprop="url" rel="index"><span itemprop="name">Programs</span></a>
+                  <a href="/categories/programs/" itemprop="url" rel="index"><span itemprop="name">程序</span></a>
                 </span>
                   ，
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Programs/Reverse-engineering/" itemprop="url" rel="index"><span itemprop="name">Reverse-engineering</span></a>
+                  <a href="/categories/programs/reverse-engineering/" itemprop="url" rel="index"><span itemprop="name">逆向</span></a>
                 </span>
             </span>
 
@@ -256,7 +255,7 @@
 <p>还原得到 [4012D9] &#x3D; 0x585426EB。</p>
 <p>当填入正确的机器码时，流程便会跳转到正确提示处</p>
 <p><img src="/assets/imgs/2018/07/crackme-24-2.png" alt="正确执行流程">  </p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">004012BB 3105 D9124000 xor dword ptr ds:\[4012D9\],eax ; eax 视为 X 004012C1 C1E8 10 shr eax,10 004012C4 66:2905 D9124000 sub word ptr ds:\[4012D9\],ax ; 这里高 16 位可单独推算</span><br></pre></td></tr></table></figure>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">004012BB    3105 D9124000        xor dword ptr ds:[4012D9],eax      ; eax 视为 X</span><br><span class="line">004012C1    C1E8 10              shr eax,10</span><br><span class="line">004012C4    66:2905 D9124000     sub word ptr ds:[4012D9],ax        ; 这里高 16 位可单独推算</span><br></pre></td></tr></table></figure>
 
 <p>根据上面的代码有公式 [4012D9] &#x3D; ([初始4012D9] ^ X) - (X &gt;&gt; 16) &#x3D; 0x585426EB, 代入 [4012D9] 初值 0x584554,<br>得出 X &#x3D; 580C????，剩下的写个循环算一下得到 3BA3，所以 X &#x3D; 580C3BA3</p>
 <p>而 X 由</p>
@@ -288,6 +287,7 @@
     
     
     
+
         
 
 <div>
@@ -399,20 +399,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">112</span>
+          <span class="site-state-item-count">117</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-count">13</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">281</span>
+        <span class="site-state-item-count">298</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -443,19 +443,19 @@
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">flandre</span>
+  <span class="author" itemprop="copyrightHolder">flandre · <a href="https://flandre-scarlet.moe/blog/" rel="noopener" target="_blank">主站</a></span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">389k</span>
+    <span title="站点总字数">414k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">5:54</span>
+    <span title="站点阅读时长">6:16</span>
 </div>
   <div class="powered-by">Powered by love
   </div>
@@ -506,6 +506,8 @@
 
 
 
+
+  
 
   
 

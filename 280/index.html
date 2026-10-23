@@ -10,7 +10,6 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
   <link rel="mask-icon" href="/images/logo.svg" color="#222">
-  <meta name="google-site-verification" content="n4HzIaQ2ebAeP_VrwiqS7s6qfe8RKXwGfnHiPjz3Z20">
 
 <link rel="stylesheet" href="/css/main.css">
 
@@ -25,7 +24,7 @@
   <meta name="description" content="游戏里需要一个背景，直接贴 2d 图片的话显得有些单调了，打算做个动态的背景。用水面的话视野比较广阔，感觉比较合适。因为游戏是直接用 dx 写的，所以水面的实现也自然是写 shader 来完成了。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="水面效果的2D实现">
-<meta property="og:url" content="https://kerisa.github.io/280/index.html">
+<meta property="og:url" content="https://flandre-scarlet.moe/blog/280/">
 <meta property="og:site_name" content="Re: Memory (mirror)">
 <meta property="og:description" content="游戏里需要一个背景，直接贴 2d 图片的话显得有些单调了，打算做个动态的背景。用水面的话视野比较广阔，感觉比较合适。因为游戏是直接用 dx 写的，所以水面的实现也自然是写 shader 来完成了。">
 <meta property="og:locale" content="zh_CN">
@@ -208,11 +207,11 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Programs/" itemprop="url" rel="index"><span itemprop="name">Programs</span></a>
+                  <a href="/categories/programs/" itemprop="url" rel="index"><span itemprop="name">程序</span></a>
                 </span>
                   ，
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Programs/DirectX/" itemprop="url" rel="index"><span itemprop="name">DirectX</span></a>
+                  <a href="/categories/programs/directx/" itemprop="url" rel="index"><span itemprop="name">DirectX</span></a>
                 </span>
             </span>
 
@@ -222,7 +221,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>1.4k</span>
+              <span>1.5k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -246,12 +245,13 @@
 <p>基本的原理就是通过 PSshader 来做 uv 动画，改变像素和贴图间的映射，从而模拟出水面波动的效果。因为也没做光照之类的处理，效果就差了些。</p>
 <p><img src="/assets/imgs/2017/12/uvwater.gif" alt="水面"></p>
 <p>直接附上 shader 代码，核心就是两条三角函数变换的语句了。</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cbuffer ConstantBuffer : <span class="built_in">register</span>(b0) &#123; matrix World; matrix View; matrix Projection; float4 vMeshColor; float2 param; &#125; Texture2D txDiffuse : <span class="built_in">register</span>(t0); Texture2D txAnother : <span class="built_in">register</span>(t1); Texture2D txMask : <span class="built_in">register</span>(t2); SamplerState samLinear : <span class="built_in">register</span>(s0); <span class="keyword">struct</span> <span class="title class_">VS</span>\_INPUT &#123; float4 Pos : POSITION; float2 Tex : TEXCOORD0; &#125;; <span class="keyword">struct</span> <span class="title class_">PS</span>\_INPUT &#123; float4 Pos : SV\_POSITION; float2 Tex : TEXCOORD0; &#125;; PS\<span class="function">_INPUT <span class="title">VS</span><span class="params">(VS\_INPUT input)</span> </span>&#123; PS\_INPUT output = (PS\_INPUT)<span class="number">0</span>; output.Pos = <span class="built_in">mul</span>(input.Pos, World); output.Pos = <span class="built_in">mul</span>(output.Pos, View); output.Pos = <span class="built_in">mul</span>(output.Pos, Projection); output.Tex = input.Tex; <span class="keyword">return</span> output; &#125; <span class="function">float4 <span class="title">PS</span><span class="params">(PS\_INPUT input)</span> : SV\_Target &#123;</span> float4 another = txAnother.<span class="built_in">Sample</span>(samLinear, input.Tex); float4 alpha = txMask.<span class="built_in">Sample</span>(samLinear, input.Tex); <span class="comment">// 更新像素点的 uv 偏移，相当于点在做圆周运动 // param.x 是以秒为单位的时间 float2 bg = input.Tex; bg.x += sin(param.x + bg.x \* 15) \* 0.01; bg.y += cos(param.x + 0.003 + bg.y \* 15) \* 0.01; float4 color = txDiffuse.Sample(samLinear, bg) \* vMeshColor; float4 finanl = color \* (1.0f - alpha) + alpha \* another; float4 blend = saturate(finanl); return color; &#125;</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">cbuffer ConstantBuffer : <span class="built_in">register</span>(b0)</span><br><span class="line">&#123;</span><br><span class="line">    matrix World;</span><br><span class="line">    matrix View;</span><br><span class="line">    matrix Projection;</span><br><span class="line">    float4 vMeshColor;</span><br><span class="line">    float2 param;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">Texture2D txDiffuse    : <span class="built_in">register</span>(t0);</span><br><span class="line">Texture2D txAnother    : <span class="built_in">register</span>(t1);</span><br><span class="line">Texture2D txMask       : <span class="built_in">register</span>(t2);</span><br><span class="line">SamplerState samLinear : <span class="built_in">register</span>(s0);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">VS_INPUT</span></span><br><span class="line">&#123;</span><br><span class="line">    float4 Pos : POSITION;</span><br><span class="line">    float2 Tex : TEXCOORD0;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">PS_INPUT</span></span><br><span class="line">&#123;</span><br><span class="line">    float4 Pos : SV_POSITION;</span><br><span class="line">    float2 Tex : TEXCOORD0;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function">PS_INPUT <span class="title">VS</span><span class="params">(VS_INPUT input)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    PS_INPUT output = (PS_INPUT)<span class="number">0</span>;</span><br><span class="line">    output.Pos = <span class="built_in">mul</span>(input.Pos, World);</span><br><span class="line">    output.Pos = <span class="built_in">mul</span>(output.Pos, View);</span><br><span class="line">    output.Pos = <span class="built_in">mul</span>(output.Pos, Projection);    </span><br><span class="line">    output.Tex = input.Tex;</span><br><span class="line">    <span class="keyword">return</span> output;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">float4 <span class="title">PS</span><span class="params">(PS_INPUT input)</span> : SV_Target</span></span><br><span class="line"><span class="function">&#123;</span></span><br><span class="line">    float4 another = txAnother.<span class="built_in">Sample</span>(samLinear, input.Tex);</span><br><span class="line">    float4 alpha = txMask.<span class="built_in">Sample</span>(samLinear, input.Tex);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 更新像素点的 uv 偏移，相当于点在做圆周运动</span></span><br><span class="line">    <span class="comment">// param.x 是以秒为单位的时间</span></span><br><span class="line">    float2 bg = input.Tex;</span><br><span class="line">    bg.x += <span class="built_in">sin</span>(param.x + bg.x * <span class="number">15</span>) * <span class="number">0.01</span>;</span><br><span class="line">    bg.y += <span class="built_in">cos</span>(param.x + <span class="number">0.003</span> + bg.y * <span class="number">15</span>) * <span class="number">0.01</span>;</span><br><span class="line"></span><br><span class="line">    float4 color = txDiffuse.<span class="built_in">Sample</span>(samLinear, bg) * vMeshColor;</span><br><span class="line">    float4 finanl = color * (<span class="number">1.0f</span> - alpha) + alpha * another;</span><br><span class="line">    float4 blend = <span class="built_in">saturate</span>(finanl);</span><br><span class="line">    <span class="keyword">return</span> color;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
     </div>
 
     
     
     
+
         
 
 <div>
@@ -366,20 +366,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">112</span>
+          <span class="site-state-item-count">117</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-count">13</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">281</span>
+        <span class="site-state-item-count">298</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -410,19 +410,19 @@
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">flandre</span>
+  <span class="author" itemprop="copyrightHolder">flandre · <a href="https://flandre-scarlet.moe/blog/" rel="noopener" target="_blank">主站</a></span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">389k</span>
+    <span title="站点总字数">414k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">5:54</span>
+    <span title="站点阅读时长">6:16</span>
 </div>
   <div class="powered-by">Powered by love
   </div>
@@ -473,6 +473,8 @@
 
 
 
+
+  
 
   
 
